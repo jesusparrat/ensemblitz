@@ -16,7 +16,7 @@ from ensemblitz import pipeline as P
 from ensemblitz.features.build import feature_columns
 from ensemblitz.models import gbm
 from ensemblitz.models.ensemble import Ensemble
-from ensemblitz.models.market import margin_to_prob
+from ensemblitz.models.market import implied_spread, margin_to_prob
 from ensemblitz.sim import SimParams, likely_score, simulate_games, summarize_sim
 
 log = logging.getLogger(__name__)
@@ -31,10 +31,29 @@ def next_weeks(feats: pd.DataFrame, season: int, n: int = 1) -> list[int]:
     return [int(w) for w in sorted(s["week"].unique())[:n]]
 
 
+def fill_missing_spread(feats: pd.DataFrame) -> pd.DataFrame:
+    """Unplayed games with moneylines but no spread get the spread those moneylines imply.
+
+    nflverse sometimes publishes the moneylines and total of an upcoming game before (or without)
+    the spread. Without a spread the stack silently fell back to the no-market model, so the pick
+    could sit 16 points away from a market that was right there in the same row (2026 week 12,
+    NYJ at MIA). The market components only need a margin, and the moneyline gives one.
+    """
+    missing = (~feats["played"]) & feats["spread_line"].isna()
+    implied = implied_spread(feats["home_moneyline"], feats["away_moneyline"])
+    fill = missing & pd.Series(implied, index=feats.index).notna()
+    if fill.any():
+        feats = feats.copy()
+        feats.loc[fill, "spread_line"] = np.round(implied[fill.to_numpy()] * 2) / 2
+        log.info("spread implied from moneylines for %d game(s)", int(fill.sum()))
+    return feats
+
+
 def build_frame(season: int) -> pd.DataFrame:
     """Features + every component for all games up to ``season`` (future games included)."""
     feats = P.make_features()
     feats = feats[feats["season"] <= season]
+    feats = fill_missing_spread(feats)
     feats, _ = P.add_kf(feats, season, stored=P.load_kf_params())
     feats = P.add_components_static(feats)
     return P.add_gbm_components(feats)
@@ -165,8 +184,9 @@ def game_record(
             "home_rest": int(r["h_rest"]),
             "away_rest": int(r["a_rest"]),
             "dome": int(r["dome"]),
-            "temp": _f(r["temp"], 0),
-            "wind": _f(r["wind"], 0),
+            "weather_known": int(r["weather_known"]),
+            "temp": _f(r["temp"], 0) if r["weather_known"] else None,
+            "wind": _f(r["wind"], 0) if r["weather_known"] else None,
             "home_out_lag": int(r["h_out_lag"]),
             "away_out_lag": int(r["a_out_lag"]),
         },

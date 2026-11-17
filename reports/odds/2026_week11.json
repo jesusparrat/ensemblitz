@@ -2,7 +2,7 @@
  "season": 2026,
  "week": 11,
  "odds_fetched_at": "2026-11-17T20:54:38Z",
- "predictions_generated_at": "2026-11-17T21:22:46Z",
+ "predictions_generated_at": "2026-11-17T22:07:57Z",
  "games": [
   {
    "game_id": "2026_11_IND_HOU",
@@ -13,6 +13,8 @@
    "consensus_home_prob_shin": 0.8577,
    "consensus_home_prob_mult": 0.8407,
    "edge": -0.0119,
+   "model_only_home_prob": 0.7452,
+   "gap_model_only": -0.1125,
    "n_books": 42,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -27,7 +29,7 @@
     "away": 0.0177
    },
    "best_side": "away",
-   "flag_large_disagreement": false,
+   "flag_large_disagreement": true,
    "books": {
     "betano_uk": {
      "p_home_shin": 0.8555,
@@ -327,7 +329,10 @@
    "book_spread_home": -12.5,
    "book_total": 44.5,
    "our_margin_minus_book": 0.0,
-   "our_cover_prob_home": 0.5
+   "our_cover_prob_home": 0.5,
+   "likely_reasons": [
+    "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
+   ]
   },
   {
    "game_id": "2026_11_ARI_KC",
@@ -338,6 +343,8 @@
    "consensus_home_prob_shin": 0.9182,
    "consensus_home_prob_mult": 0.8984,
    "edge": -0.0106,
+   "model_only_home_prob": 0.8371,
+   "gap_model_only": -0.0811,
    "n_books": 41,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -352,7 +359,7 @@
     "away": 0.1088
    },
    "best_side": "away",
-   "flag_large_disagreement": false,
+   "flag_large_disagreement": true,
    "books": {
     "betano_uk": {
      "p_home_shin": 0.9129,
@@ -645,7 +652,10 @@
    "book_spread_home": -16.0,
    "book_total": 41.5,
    "our_margin_minus_book": 0.5,
-   "our_cover_prob_home": 0.5153
+   "our_cover_prob_home": 0.5153,
+   "likely_reasons": [
+    "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
+   ]
   },
   {
    "game_id": "2026_11_BAL_CAR",
@@ -656,6 +666,8 @@
    "consensus_home_prob_shin": 0.5654,
    "consensus_home_prob_mult": 0.5622,
    "edge": -0.0096,
+   "model_only_home_prob": 0.552,
+   "gap_model_only": -0.0134,
    "n_books": 42,
    "best_home_price": {
     "book": "matchbook",
@@ -981,6 +993,8 @@
    "consensus_home_prob_shin": 0.2948,
    "consensus_home_prob_mult": 0.3046,
    "edge": -0.009,
+   "model_only_home_prob": 0.2741,
+   "gap_model_only": -0.0207,
    "n_books": 40,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -1292,6 +1306,8 @@
    "consensus_home_prob_shin": 0.9204,
    "consensus_home_prob_mult": 0.9018,
    "edge": -0.0163,
+   "model_only_home_prob": 0.8896,
+   "gap_model_only": -0.0308,
    "n_books": 41,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -1610,6 +1626,8 @@
    "consensus_home_prob_shin": 0.8474,
    "consensus_home_prob_mult": 0.8304,
    "edge": -0.0022,
+   "model_only_home_prob": 0.806,
+   "gap_model_only": -0.0414,
    "n_books": 41,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -1928,6 +1946,8 @@
    "consensus_home_prob_shin": 0.7167,
    "consensus_home_prob_mult": 0.7064,
    "edge": -0.0107,
+   "model_only_home_prob": 0.7018,
+   "gap_model_only": -0.0149,
    "n_books": 42,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -2253,6 +2273,8 @@
    "consensus_home_prob_shin": 0.7846,
    "consensus_home_prob_mult": 0.7705,
    "edge": -0.0053,
+   "model_only_home_prob": 0.7611,
+   "gap_model_only": -0.0235,
    "n_books": 42,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -2578,6 +2600,8 @@
    "consensus_home_prob_shin": 0.6221,
    "consensus_home_prob_mult": 0.6161,
    "edge": -0.0181,
+   "model_only_home_prob": 0.5965,
+   "gap_model_only": -0.0256,
    "n_books": 42,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -2903,6 +2927,8 @@
    "consensus_home_prob_shin": 0.8287,
    "consensus_home_prob_mult": 0.8126,
    "edge": -0.0073,
+   "model_only_home_prob": 0.8247,
+   "gap_model_only": -0.004,
    "n_books": 41,
    "best_home_price": {
     "book": "betfair_ex_eu",
@@ -3221,6 +3247,8 @@
    "consensus_home_prob_shin": 0.3366,
    "consensus_home_prob_mult": 0.3445,
    "edge": -0.0247,
+   "model_only_home_prob": 0.33,
+   "gap_model_only": -0.0066,
    "n_books": 42,
    "best_home_price": {
     "book": "matchbook",
@@ -3546,6 +3574,8 @@
    "consensus_home_prob_shin": 0.6012,
    "consensus_home_prob_mult": 0.5966,
    "edge": -0.0015,
+   "model_only_home_prob": 0.5916,
+   "gap_model_only": -0.0096,
    "n_books": 39,
    "best_home_price": {
     "book": "matchbook",
@@ -3850,6 +3880,8 @@
    "consensus_home_prob_shin": 0.2826,
    "consensus_home_prob_mult": 0.2935,
    "edge": -0.0302,
+   "model_only_home_prob": 0.3067,
+   "gap_model_only": 0.0241,
    "n_books": 39,
    "best_home_price": {
     "book": "marathonbet",

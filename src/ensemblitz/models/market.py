@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from scipy.special import ndtr
+from scipy.special import ndtr, ndtri
 
 MARGIN_SD = 13.5  # NFL final margin standard deviation around the closing spread
 
@@ -27,3 +27,10 @@ def market_prob(df: pd.DataFrame) -> np.ndarray:
     novig = ph / (ph + pa)
     spread = margin_to_prob(df["spread_line"])
     return np.where(np.isnan(novig), spread, novig)
+
+
+def implied_spread(home_ml: pd.Series | np.ndarray, away_ml: pd.Series | np.ndarray) -> np.ndarray:
+    """Home margin whose normal win probability matches the no-vig moneyline probability."""
+    ph = ml_to_prob(home_ml)
+    pa = ml_to_prob(away_ml)
+    return MARGIN_SD * ndtri(ph / (ph + pa))

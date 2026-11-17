@@ -1,0 +1,20 @@
+---
+description: Reglas antislop del proyecto: UI, texto, móvil y comentarios. Siempre activas.
+globs: **/*
+alwaysApply: true
+---
+
+Este proyecto usa antislop (https://github.com/miqdadbadjuber/anti-slop, licencia MIT,
+Copyright (c) 2026 Miqdad Badjuber; copia y licencia en `third_party/antislop/`).
+Es un filtro contra lo genérico, no una guía de estilo. La estética del proyecto está fijada en `DESIGN.md`.
+
+Antes de tocar interfaz, texto, maquetación móvil o comentarios, lee el SKILL.md que corresponda:
+- Núcleo, siempre: `third_party/antislop/skills/antislop/SKILL.md`
+- UI y visual: `third_party/antislop/skills/antislop-ui/SKILL.md`
+- Texto y copy: `third_party/antislop/skills/antislop-copywriting/SKILL.md`
+- Personas y accesibilidad: `third_party/antislop/skills/antislop-human/SKILL.md`
+- Móvil y responsive: `third_party/antislop/skills/antislop-layoutmobile/SKILL.md`
+- Comentarios de código: `third_party/antislop/skills/antislop-code/SKILL.md`
+
+Modo de uso fijado por el proyecto: `during` (aplicar las reglas mientras se escribe y pasar el Delivery Gate al final). No preguntar el modo.
+Reglas que más pesan aquí: R-02 sin raya larga, R-03 y R-06 móvil y tipografía, R-17 ninguna cifra sin fuente, R-37 la dirección visual es de Jesús y está en `DESIGN.md`.

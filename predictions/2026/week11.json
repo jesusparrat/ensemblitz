@@ -111,10 +111,11 @@
     "home_rest": 4,
     "away_rest": 4,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 5,
-    "away_out_lag": 6
+    "away_out_lag": 6,
+    "weather_known": 0
    }
   },
   {
@@ -180,10 +181,11 @@
     "home_rest": 7,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 3,
-    "away_out_lag": 3
+    "away_out_lag": 3,
+    "weather_known": 0
    }
   },
   {
@@ -249,10 +251,11 @@
     "home_rest": 7,
     "away_rest": 6,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 3,
-    "away_out_lag": 1
+    "away_out_lag": 1,
+    "weather_known": 0
    }
   },
   {
@@ -318,10 +321,11 @@
     "home_rest": 10,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 1,
-    "away_out_lag": 3
+    "away_out_lag": 3,
+    "weather_known": 0
    }
   },
   {
@@ -387,10 +391,11 @@
     "home_rest": 7,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 1,
-    "away_out_lag": 3
+    "away_out_lag": 3,
+    "weather_known": 0
    }
   },
   {
@@ -456,10 +461,11 @@
     "home_rest": 14,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 0,
-    "away_out_lag": 4
+    "away_out_lag": 4,
+    "weather_known": 0
    }
   },
   {
@@ -525,10 +531,11 @@
     "home_rest": 7,
     "away_rest": 14,
     "dome": 1,
-    "temp": 70.0,
-    "wind": 0.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 3,
-    "away_out_lag": 1
+    "away_out_lag": 1,
+    "weather_known": 0
    }
   },
   {
@@ -594,10 +601,11 @@
     "home_rest": 7,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 6,
-    "away_out_lag": 5
+    "away_out_lag": 5,
+    "weather_known": 0
    }
   },
   {
@@ -663,10 +671,11 @@
     "home_rest": 6,
     "away_rest": 7,
     "dome": 1,
-    "temp": 70.0,
-    "wind": 0.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 4,
-    "away_out_lag": 1
+    "away_out_lag": 1,
+    "weather_known": 0
    }
   },
   {
@@ -732,10 +741,11 @@
     "home_rest": 14,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 3,
-    "away_out_lag": 1
+    "away_out_lag": 1,
+    "weather_known": 0
    }
   },
   {
@@ -801,10 +811,11 @@
     "home_rest": 14,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 6,
-    "away_out_lag": 0
+    "away_out_lag": 0,
+    "weather_known": 0
    }
   },
   {
@@ -870,10 +881,11 @@
     "home_rest": 7,
     "away_rest": 7,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 1,
-    "away_out_lag": 5
+    "away_out_lag": 5,
+    "weather_known": 0
    }
   },
   {
@@ -939,10 +951,11 @@
     "home_rest": 11,
     "away_rest": 8,
     "dome": 0,
-    "temp": 58.0,
-    "wind": 7.0,
+    "temp": null,
+    "wind": null,
     "home_out_lag": 2,
-    "away_out_lag": 4
+    "away_out_lag": 4,
+    "weather_known": 0
    }
   }
  ]

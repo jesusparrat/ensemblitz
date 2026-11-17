@@ -17,12 +17,17 @@ from ensemblitz import news as N
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
 from ensemblitz.sim import SimParams, simulate_games
 from ensemblitz.site import charts
-from ensemblitz.site.names import full, nick
+from ensemblitz.site.names import book_name, full, nick
 
 HERE = Path(__file__).parent
 MADRID = ZoneInfo("Europe/Madrid")
 REPO_URL = "https://github.com/jesusparrat/ensemblitz"
 DAYS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
+DAYS_FULL = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+US_NIGHT = {3: "jueves", 0: "lunes"}  # NFL standalone prime-time nights, US Eastern
+EASTERN = ZoneInfo("America/New_York")
+FLAG_PP = 0.05  # gap between the models alone and the bookmaker consensus that raises a flag
+NA = "n/d"
 MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
 COMP_LABELS = [
     ("elo", "Elo con margen de victoria"),
@@ -57,22 +62,39 @@ STATUS_ES = {
 # ---------------------------------------------------------------- formatting helpers
 def fnum(x: float | None, nd: int = 1) -> str:
     if x is None:
-        return "—"
-    return f"{x:.{nd}f}".replace("-", "−").replace(".", ",")
+        return NA
+    return f"{x:.{nd}f}".replace("-", "\u2212").replace(".", ",")
 
 
 def fsigned(x: float | None, nd: int = 1) -> str:
     if x is None:
-        return "—"
+        return NA
     return ("+" if x > 0 else "") + fnum(x, nd)
 
 
 def fpct(x: float | None, nd: int = 0) -> str:
-    return "—" if x is None else f"{fnum(x * 100, nd)}\u202f%"
+    return NA if x is None else f"{fnum(x * 100, nd)}\u202f%"
 
 
 def fpp(x: float | None) -> str:
-    return "—" if x is None else f"{fsigned(x * 100, 1)}\u202fpp"
+    return NA if x is None else f"{fsigned(x * 100, 0 if abs(x) >= 0.095 else 1)}\u202fpp"
+
+
+def fav(home: str, away: str, margin_home: float | None, nd: int = 1) -> str:
+    """One margin convention everywhere: the favourite, minus the points it gives ('HOU \u221212,5')."""
+    if margin_home is None:
+        return NA
+    if abs(margin_home) < 0.05:
+        return "igualado"
+    return f"{home if margin_home > 0 else away} \u2212{fnum(abs(margin_home), nd)}"
+
+
+def c_temp(f: float | None) -> str:
+    return NA if f is None else f"{fnum((f - 32) / 1.8, 0)}\u202f\u00b0C"
+
+
+def kmh(mph: float | None) -> str:
+    return NA if mph is None else f"{fnum(mph * 1.609, 0)}\u202fkm/h"
 
 
 def parse_utc(s: str) -> datetime:
@@ -82,16 +104,24 @@ def parse_utc(s: str) -> datetime:
 def stamp(s: str | None) -> str:
     """ISO UTC string -> '17 nov 2026, 21:45 (Madrid)'."""
     if not s:
-        return "—"
+        return NA
     d = parse_utc(s).astimezone(MADRID)
     return f"{d.day} {MONTHS[d.month - 1]} {d.year}, {d:%H:%M} (Madrid)"
 
 
 def madrid_label(s: str) -> dict[str, str]:
     d = parse_utc(s).astimezone(MADRID)
+    e = parse_utc(s).astimezone(EASTERN)
+    night = US_NIGHT.get(e.weekday()) if e.hour >= 18 else None
+    if e.weekday() == 6 and e.hour >= 19:
+        night = "domingo"
     return {
         "day": f"{DAYS[d.weekday()]} {d.day} {MONTHS[d.month - 1]}",
+        "day_full": f"{DAYS_FULL[d.weekday()]} {d.day}",
+        "short": f"{d.day} {MONTHS[d.month - 1]}",
+        "date": d.strftime("%Y-%m-%d"),
         "time": d.strftime("%H:%M"),
+        "us_night": night,
     }
 
 
@@ -142,17 +172,18 @@ def _game(
         mkt_home = probs.get("market")
         mkt_src = "línea de cierre"
     mkt_pick = None if mkt_home is None else (mkt_home if pick_home else 1 - mkt_home)
+    pure_home = probs.get("ensemble_model_only")
+    pure_pick = None if pure_home is None else (pure_home if pick_home else 1 - pure_home)
+    # Flag: our models on their own against the market. The published ensemble leans on the
+    # market, so its own distance to it says little.
+    gap = None if pure_pick is None or mkt_pick is None else pure_pick - mkt_pick
     best = None
     if odds_game:
         side = "best_home_price" if pick_home else "best_away_price"
-        best = {
-            **odds_game[side],
-            "ev": odds_game["ev_per_unit_best"]["home" if pick_home else "away"],
-        }
+        best = {**odds_game[side], "name": book_name(odds_game[side]["book"])}
         best["ev"] = p_pick * best["price"] - 1
     margin_pick = g["predicted_margin"] if pick_home else -g["predicted_margin"]
     ml = g["most_likely_score"]
-    factors = _factors(g)
     adj = g.get("news_adjustment") or {"applied": False}
     news = [x for x in (news_items or []) if x["team"] in (home, away)]
     final = None
@@ -160,6 +191,8 @@ def _game(
         tot, mar = result["total"], result["result"]
         hs, as_ = int(round((tot + mar) / 2)), int(round((tot - mar) / 2))
         final = {"home": hs, "away": as_, "ok": bool(result.get("ensemble_correct"))}
+    flag = gap is not None and abs(gap) >= FLAG_PP
+    notes = _notes(g, adj, pick_home)
     return {
         "id": g["game_id"],
         "home": home,
@@ -176,22 +209,28 @@ def _game(
         "p_pick": p_pick,
         "margin": g["predicted_margin"],
         "margin_pick": margin_pick,
+        "margin_txt": fav(home, away, g["predicted_margin"]),
         "total": g["predicted_total"],
         "score_away": ml["away"],
         "score_home": ml["home"],
         "score_prob": ml["prob"],
         "mkt_pick": mkt_pick,
         "mkt_src": mkt_src,
+        "pure_pick": pure_pick,
+        "gap": gap,
         "edge": None if mkt_pick is None else p_pick - mkt_pick,
         "best": best,
         "comps": comps,
         "market": g["market"],
+        "spread_txt": fav(home, away, g["market"]["spread_line"]),
         "sim": g["sim"],
         "model_only_margin": g.get("model_only_margin"),
-        "factors": factors,
+        "model_only_margin_txt": fav(home, away, g.get("model_only_margin")),
+        "factors": _factors(g),
         "reasons": (odds_game or {}).get("likely_reasons", []),
-        "flag": bool(odds_game and odds_game["flag_large_disagreement"]),
-        "books": _books(odds_game, home, away) if odds_game else [],
+        "flag": flag,
+        "flag_text": _flag_text(pick, p_pick, pure_pick, mkt_pick, odds_game),
+        "books": _books(odds_game) if odds_game else [],
         "odds_meta": odds_meta,
         "book_spread": (odds_game or {}).get("book_spread_home"),
         "book_total": (odds_game or {}).get("book_total"),
@@ -200,7 +239,9 @@ def _game(
         "news": news,
         "adj": adj,
         "adj_text": _adj_text(adj, home, pick_home),
-        "blurb": blurb(g, odds_game, adj, p_pick, pick, pick_home),
+        "note": notes[0] if notes else None,
+        "notes": notes,
+        "summary": _summary(g, pick, p_pick),
         "score_method": ml.get("method"),
     }
 
@@ -217,47 +258,94 @@ def _adj_text(adj: dict, home: str, pick_home: bool) -> str | None:
     return f"Con {names}, la probabilidad de {home} {verb} del {fnum(a * 100, 0)}\u202f% al {fnum(b * 100, 0)}\u202f%."
 
 
-def blurb(g: dict, og: dict | None, adj: dict, p_pick: float, pick: str, pick_home: bool) -> str:
-    """One sentence built only from fields we hold: the factor that matters most for this game."""
+def _flag_text(
+    pick: str, p_pick: float, pure: float | None, mkt: float | None, og: dict | None
+) -> str | None:
+    if pure is None or mkt is None:
+        return None
+    n = f"las {og['n_books']} casas" if og else "la línea de cierre"
+    return (
+        f"Sin mirar al mercado, el modelo da a {pick} un {fnum(pure * 100, 0)}\u202f%; {n}, "
+        f"un {fnum(mkt * 100, 0)}\u202f%. Nuestro pronóstico final ({fnum(p_pick * 100, 0)}\u202f%) "
+        "se apoya sobre todo en el mercado. Cuando ambas lecturas se separan tanto, una de las dos "
+        "deja algo fuera."
+    )
+
+
+def _summary(g: dict, pick: str, p_pick: float) -> str:
+    """Plain restatement of the numbers; never a claim about how close we are to the market."""
+    return (
+        f"El ensemble da un {fnum(p_pick * 100, 0)}\u202f% a {nick(pick)}, con un margen previsto "
+        f"de {fav(g['home_team'], g['away_team'], g['predicted_margin'])} y {fnum(g['predicted_total'])} "
+        "puntos en total."
+    )
+
+
+def _notes(g: dict, adj: dict, pick_home: bool) -> list[dict]:
+    """Facts worth a line for this game, most important first. Empty when nothing stands out."""
     c = g["context"]
     home, away = g["home_team"], g["away_team"]
-    lead = f"{nick(pick)} parten como favoritos ({fnum(p_pick * 100, 0)}\u202f%)"
+    out: list[dict] = []
     if adj.get("applied") and abs(adj["prob_home_after"] - adj["prob_home_before"]) >= 0.01:
         top = max(adj["items"], key=lambda i: i["points"])
-        who = f"{top['player']} ({top['team']})"
-        return f"{lead}; lo que más mueve el pronóstico es la ausencia de {who}."
+        out.append(
+            {
+                "icon": "flag",
+                "text": f"La ausencia de {top['player']} ({top['team']}) es lo que más mueve el pronóstico.",
+            }
+        )
     chg = [t for t, k in ((home, "home_qb_change"), (away, "away_qb_change")) if c[k]]
     if chg:
-        return f"{lead}; {' y '.join(nick(t) for t in chg)} cambian de QB titular respecto a su último partido."
-    if og and og.get("flag_large_disagreement"):
-        mk = og["consensus_home_prob_shin"] if pick_home else 1 - og["consensus_home_prob_shin"]
-        return (
-            f"{lead}; discrepamos con el mercado, que le da {fnum(mk * 100, 0)}\u202f% "
-            f"según {og['n_books']} casas."
+        who = " y ".join(nick(t) for t in chg)
+        out.append(
+            {
+                "icon": "flag",
+                "text": f"{who}: cambio de quarterback titular desde su último partido.",
+            }
         )
-    if abs(c["home_rest"] - c["away_rest"]) >= 3:
-        more = home if c["home_rest"] > c["away_rest"] else away
-        return (
-            f"{lead}; {nick(more)} llegan con {max(c['home_rest'], c['away_rest'])} días de "
-            f"descanso frente a {min(c['home_rest'], c['away_rest'])} de su rival."
+    hr, ar = c["home_rest"], c["away_rest"]
+    if hr <= 5 and ar <= 5:
+        out.append(
+            {"icon": "rest", "text": f"Semana corta para los dos: {hr} y {ar} días de descanso."}
+        )
+    elif abs(hr - ar) >= 3:
+        more, n, m = (home, hr, ar) if hr > ar else (away, ar, hr)
+        out.append(
+            {"icon": "rest", "text": f"{more} llega con {n} días de descanso y su rival con {m}."}
         )
     km = haversine_km(*HOME_STADIUMS[away], *HOME_STADIUMS[home])
     if km >= 3000:
-        return f"{lead}; {nick(away)} viajan {fnum(km, 0)} km hasta {full(home)}."
-    if not c["dome"] and (c["wind"] or 0) >= 15:
-        return f"{lead}; con {fnum(c['wind'], 0)} mph de viento se espera menos juego aéreo."
-    if not c["dome"] and (c["temp"] if c["temp"] is not None else 60) <= 32:
-        return f"{lead}; el frío ({fnum(c['temp'], 0)} °F) es el dato diferencial."
+        out.append({"icon": "trip", "text": f"{away} viaja {fnum(km, 0)} km hasta {home}."})
+    if c["dome"]:
+        out.append({"icon": "dome", "text": "Se juega a cubierto, sin viento ni lluvia."})
+    elif c.get("weather_known"):
+        if (c["wind"] or 0) * 1.609 >= 30:
+            out.append(
+                {
+                    "icon": "wind",
+                    "text": f"Viento de {kmh(c['wind'])}: se espera menos juego aéreo.",
+                }
+            )
+        if c["temp"] is not None and c["temp"] <= 32:
+            out.append({"icon": "cold", "text": f"Hace {c_temp(c['temp'])}: el frío cuenta."})
     if abs(c["home_out_lag"] - c["away_out_lag"]) >= 3:
         more = home if c["home_out_lag"] > c["away_out_lag"] else away
-        return f"{lead}; {nick(more)} llegan con más bajas en el último parte ({max(c['home_out_lag'], c['away_out_lag'])})."
-    return f"{lead}; sin factores fuera de lo normal, el pronóstico sigue de cerca al mercado."
+        n, m = max(c["home_out_lag"], c["away_out_lag"]), min(c["home_out_lag"], c["away_out_lag"])
+        out.append(
+            {
+                "icon": "flag",
+                "text": f"{more} llega con más bajas en el último parte: {n} frente a {m}.",
+            }
+        )
+    return out
 
 
-def _books(og: dict, home: str, away: str) -> list[dict]:
+def _books(og: dict) -> list[dict]:
+    names = [book_name(k) for k in og["books"]]
     rows = [
         {
             "book": k,
+            "name": book_name(k, with_region=names.count(book_name(k)) > 1),
             "p_home": v["p_home_shin"],
             "home_price": v["home_price"],
             "away_price": v["away_price"],
@@ -265,30 +353,30 @@ def _books(og: dict, home: str, away: str) -> list[dict]:
         }
         for k, v in og["books"].items()
     ]
-    return sorted(rows, key=lambda r: r["book"])
+    return sorted(rows, key=lambda r: r["name"].lower())
 
 
 def _factors(g: dict) -> list[tuple[str, str]]:
     c = g["context"]
     home, away = g["home_team"], g["away_team"]
     km = haversine_km(*HOME_STADIUMS[away], *HOME_STADIUMS[home])
-    f = [
-        ("Descanso", f"{home} {c['home_rest']} días · {away} {c['away_rest']} días"),
+    if c["dome"]:
+        venue = "Cubierto o con techo cerrado"
+    elif c.get("weather_known"):
+        venue = f"Aire libre, {c_temp(c['temp'])}, viento {kmh(c['wind'])}"
+    else:
+        venue = "Aire libre. El tiempo previsto todavía no entra en el modelo"
+    return [
+        ("Descanso", f"{home} {c['home_rest']} días, {away} {c['away_rest']} días"),
         ("Viaje del visitante", f"{fnum(km, 0)} km"),
         ("QB titular", _qb(c, home, away)),
         (
             "Bajas en el último parte",
-            f"{home} {c['home_out_lag']} · {away} {c['away_out_lag']} "
-            "(Out/Doubtful, semana anterior)",
+            f"{home} {c['home_out_lag']}, {away} {c['away_out_lag']} "
+            "(Out o Doubtful de la semana anterior)",
         ),
-        (
-            "Estadio",
-            "cubierto / techo cerrado"
-            if c["dome"]
-            else f"aire libre · {fnum(c['temp'], 0)} °F · viento {fnum(c['wind'], 0)} mph",
-        ),
+        ("Estadio", venue),
     ]
-    return f
 
 
 def _qb(c: dict, home: str, away: str) -> str:
@@ -397,17 +485,18 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
     if out.exists():
         shutil.rmtree(out)
     (out / "assets").mkdir(parents=True)
-    for f in (HERE / "static").iterdir():
-        shutil.copy(f, out / "assets" / f.name)
+    shutil.copytree(HERE / "static", out / "assets", dirs_exist_ok=True)
 
     env = Environment(
         loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
     )
     env.filters.update(num=fnum, signed=fsigned, pct=fpct, pp=fpp, stamp=stamp)
+    env.globals["fav"] = fav
     env.globals["status_es"] = STATUS_ES
     now = datetime.now(UTC)
     base_ctx = {
-        "generated_at": now.strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_at": stamp(now.strftime("%Y-%m-%dT%H:%M:%SZ")),
+        "flag_pp": int(FLAG_PP * 100),
         "repo": REPO_URL,
         "full": full,
         "nick": nick,
@@ -444,7 +533,12 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
             "meta": pred,
             "odds_meta": inputs["odds"].get(key),
             "is_current": key == current,
-            "flagged": [g for g in games if g["flag"]],
+            "flagged": sorted((g for g in games if g["flag"]), key=lambda g: -abs(g["gap"] or 0)),
+            "days": _days(games),
+            "strip": news_by_week[key],
+            "nxt": _next_game(games, now),
+            "n_books": max((len(g["books"]) for g in games), default=0),
+            "graded": [g for g in games if g["final"]],
         }
         render("week.html", f"jornada/{key[1]}.html", "../", **ctx)
         if key == current:
@@ -477,11 +571,37 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
     return out
 
 
+def _days(games: list[dict]) -> list[dict]:
+    """Group games by Madrid calendar day (a Sunday-night game belongs to Monday there)."""
+    days: dict[str, dict] = {}
+    for g in games:
+        d = days.setdefault(
+            g["kick"]["date"],
+            {"key": g["kick"]["date"], "label": g["kick"]["day_full"], "games": []},
+        )
+        d["games"].append(g)
+    for d in days.values():
+        n = len(d["games"])
+        sub = f"{n} partido" + ("s" if n > 1 else "")
+        night = d["games"][0]["kick"]["us_night"]
+        if n == 1 and night:
+            sub += f", {night} noche en EE.\u202fUU."
+        d["sub"] = sub
+        d["id"] = "d" + d["key"].replace("-", "")
+    return list(days.values())
+
+
+def _next_game(games: list[dict], now: datetime) -> dict | None:
+    iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    up = [g for g in games if g["kickoff_utc"] > iso]
+    return up[0] if up else None
+
+
 def _clean_clv(clv: dict | None) -> dict | None:
     """The backtest verdict is written in markdown with dot decimals; adapt it for HTML."""
     if not clv:
         return clv
-    v = re.sub(r"(\d)\.(\d)", r"\1,\2", clv["verdict"].replace("**", ""))
+    v = re.sub(r"(\d)\.(\d)", r"\1,\2", clv["verdict"].replace("**", "").replace(" \u2014 ", ", "))
     return {**clv, "verdict": v[:1].upper() + v[1:]}
 
 

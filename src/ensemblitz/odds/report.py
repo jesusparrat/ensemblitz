@@ -69,12 +69,16 @@ def explain(g: dict, edge: float) -> list[str]:
         )
     if abs(c["home_rest"] - c["away_rest"]) >= 3:
         why.append(f"descanso desigual ({c['home_rest']} vs {c['away_rest']} días)")
-    if not c["dome"] and (c["wind"] or 0) >= 15:
+    if not c["dome"] and c.get("weather_known", 1) and (c["wind"] or 0) >= 15:
         why.append(
-            f"viento fuerte ({c['wind']:.0f} mph): baja el total y favorece al equipo que corre"
+            f"viento fuerte ({c['wind'] * 1.609:.0f} km/h): baja el total y favorece al equipo que corre"
         )
-    if not c["dome"] and (c["temp"] if c["temp"] is not None else 60) <= 32:
-        why.append(f"frío extremo ({c['temp']:.0f} °F)")
+    if (
+        not c["dome"]
+        and c.get("weather_known", 1)
+        and (c["temp"] if c["temp"] is not None else 60) <= 32
+    ):
+        why.append(f"frío extremo ({(c['temp'] - 32) / 1.8:.0f} °C)")
     if abs(c["home_out_lag"] - c["away_out_lag"]) >= 3:
         why.append(
             f"bajas distintas en el último parte (local {c['home_out_lag']}, visitante {c['away_out_lag']})"
@@ -115,6 +119,11 @@ def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
         ev_away = (1 - ours) * best_a["away_price"] - 1
         side = "home" if ev_home >= ev_away else "away"
         edge = ours - cons
+        # The published ensemble leans on the market, so its distance to the market is small by
+        # construction. The informative gap is the one between the market and our models alone.
+        pure = g["home_win_prob"].get("ensemble_model_only")
+        gap = None if pure is None else pure - cons
+        flagged = abs(edge if gap is None else gap) >= BIG_EDGE
         rec = {
             "game_id": g["game_id"],
             "home": g["home_team"],
@@ -124,6 +133,8 @@ def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
             "consensus_home_prob_shin": round(cons, 4),
             "consensus_home_prob_mult": round(float(m["p_home_mult"].mean()), 4),
             "edge": round(edge, 4),
+            "model_only_home_prob": None if pure is None else round(pure, 4),
+            "gap_model_only": None if gap is None else round(gap, 4),
             "n_books": int(len(m)),
             "best_home_price": {"book": best_h["bookmaker"], "price": float(best_h["home_price"])},
             "best_away_price": {"book": best_a["bookmaker"], "price": float(best_a["away_price"])},
@@ -132,7 +143,7 @@ def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
                 "away": round(float(ev_away), 4),
             },
             "best_side": side,
-            "flag_large_disagreement": bool(abs(edge) >= BIG_EDGE),
+            "flag_large_disagreement": flagged,
             "books": books,
         }
         if not ln_g.empty:
@@ -183,10 +194,13 @@ def to_markdown(rep: dict) -> str:
         )
     flagged = [g for g in rep["games"] if g["flag_large_disagreement"]]
     if flagged:
-        L += ["", "## Desacuerdos grandes (≥ 5 pp)", ""]
+        L += ["", "## Banderas: solo modelos frente al consenso (≥ 5 pp)", ""]
         for g in flagged:
+            gap = g.get("gap_model_only")
+            if gap is None:
+                gap = g["edge"]
             L.append(
-                f"- **{g['away']} @ {g['home']}**: edge {g['edge'] * 100:+.1f} pp. "
+                f"- **{g['away']} @ {g['home']}**: brecha {gap * 100:+.1f} pp (local). "
                 + "; ".join(g["likely_reasons"])
                 + "."
             )
@@ -198,16 +212,28 @@ def to_markdown(rep: dict) -> str:
     return "\n".join(L) + "\n"
 
 
+def _weeks_to_report(season: int, week: int | None, now: str) -> list[int]:
+    """The requested week, or every predicted week that still has a game to play."""
+    files = sorted((C.PRED_DIR / str(season)).glob("week*.json"))
+    if week is not None:
+        return [week]
+    out = []
+    for f in files:
+        d = json.loads(f.read_text())
+        if any(g["kickoff_utc"] > now for g in d["games"]):
+            out.append(int(d["week"]))
+    return out
+
+
 def run_odds(season: int, week: int | None, fetch: bool = True) -> str:
-    if week is None:
-        files = sorted((C.PRED_DIR / str(season)).glob("week*.json"))
-        if not files:
-            return "No predictions found: run `ensemblitz predict` first."
-        week = json.loads(files[0].read_text())["week"]
-    path = pred_path(season, week)
-    if not path.exists():
-        return f"No predictions for {season} week {week}: run `ensemblitz predict` first."
-    pred = json.loads(path.read_text())
+    """One download feeds a report for every upcoming predicted week (the feed spans ~10 days)."""
+    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    weeks = _weeks_to_report(season, week, now)
+    if not weeks:
+        return "No predictions found: run `ensemblitz predict` first."
+    missing = [w for w in weeks if not pred_path(season, w).exists()]
+    if missing:
+        return f"No predictions for {season} week {missing[0]}: run `ensemblitz predict` first."
     if fetch:
         odds, status = client.fetch_odds()
     else:
@@ -215,10 +241,16 @@ def run_odds(season: int, week: int | None, fetch: bool = True) -> str:
     if odds is None or odds.empty:
         return f"Odds report skipped: {status}."
     fetched = str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds else None
-    rep = build(pred, odds, fetched)
     out = C.REPORTS_DIR / "odds"
     out.mkdir(parents=True, exist_ok=True)
-    stem = out / f"{season}_week{week:02d}"
-    stem.with_suffix(".json").write_text(json.dumps(rep, indent=1))
-    stem.with_suffix(".md").write_text(to_markdown(rep))
-    return f"{status}. Wrote {stem}.md/.json ({len(rep['games'])} games matched at {datetime.now(UTC):%H:%M}Z)"
+    msgs = []
+    for w in weeks:
+        pred = json.loads(pred_path(season, w).read_text())
+        rep = build(pred, odds, fetched)
+        if not rep["games"]:
+            continue
+        stem = out / f"{season}_week{w:02d}"
+        stem.with_suffix(".json").write_text(json.dumps(rep, indent=1))
+        stem.with_suffix(".md").write_text(to_markdown(rep))
+        msgs.append(f"week {w}: {len(rep['games'])} games")
+    return f"{status}. Wrote {C.REPORTS_DIR / 'odds'} ({'; '.join(msgs) or 'no games matched'})"

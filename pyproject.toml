@@ -35,6 +35,7 @@ packages = ["src/ensemblitz"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
+extend-exclude = ["third_party"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "NPY"]

@@ -1,0 +1,27 @@
+{% macro icon(name) -%}
+{%- if name == 'flag' -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M3.5 14.5V1.5M3.5 2.5h9l-2.5 3.2 2.5 3.3h-9"/></svg>
+{%- elif name == 'dome' -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M1.5 13.5h13M2.5 13.5a5.5 5.5 0 0 1 11 0"/></svg>
+{%- elif name == 'rest' -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+{%- elif name == 'trip' -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M1.5 8h13M10.5 4l4 4-4 4"/></svg>
+{%- elif name == 'wind' -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M1.5 5h8a2 2 0 1 0-2-2M1.5 8.5h11M1.5 12h7a2 2 0 1 1-2 2"/></svg>
+{%- else -%}<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M8 1.5v13M2.4 4.7l11.2 6.6M2.4 11.3l11.2-6.6"/></svg>
+{%- endif -%}
+{%- endmacro %}
+
+{# Barra de probabilidad: casillas = ensemble, línea = mercado, rombo = solo modelo, banda amarilla = brecha. #}
+{% macro pbar(g, cells=20) -%}
+{% set n = (g.p_pick * cells)|round|int %}
+<div class="bar{% if g.flag %} has-gap{% endif %}" role="img" aria-label="{{ g.pick }}: {{ g.p_pick|pct }} según el ensemble{% if g.mkt_pick is not none %}, {{ g.mkt_pick|pct }} según el mercado{% endif %}{% if g.pure_pick is not none %}, {{ g.pure_pick|pct }} solo con el modelo{% endif %}">
+  <div class="cells" aria-hidden="true">{% for i in range(cells) %}<s{% if i < n %} class="on" style="--i:{{ i }}"{% endif %}></s>{% endfor %}</div>
+  {% if g.flag %}{% set lo = [g.pure_pick, g.mkt_pick]|min %}{% set hi = [g.pure_pick, g.mkt_pick]|max %}<span class="gap" style="left:{{ (lo * 100)|round(1) }}%;width:{{ ((hi - lo) * 100)|round(1) }}%"></span>{% endif %}
+  {% if g.mkt_pick is not none %}<span class="mk" style="left:{{ (g.mkt_pick * 100)|round(1) }}%"></span>{% endif %}
+  {% if g.pure_pick is not none %}<span class="md" style="left:{{ (g.pure_pick * 100)|round(1) }}%"></span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro key() -%}
+<div class="key" aria-label="Leyenda de las barras"><span><i class="k-cells"></i>Ensemble</span><span><i class="k-mkt"></i>Mercado</span><span><i class="k-mod"></i>Solo modelo</span><span><i class="k-gap"></i>Brecha de {{ flag_pp }} pp o más</span></div>
+{%- endmacro %}
+
+{% macro scroll_start(label) -%}<div class="scroll" role="region" aria-label="{{ label }}" tabindex="0">{%- endmacro %}
+{% macro scroll_end() -%}</div><p class="hint">Desliza la tabla hacia los lados para ver todas las columnas.</p>{%- endmacro %}
