@@ -12,8 +12,6 @@ jobs:
   predict:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}   # optional; the odds step skips without it
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -25,6 +23,8 @@ jobs:
       - name: Grade finished games
         run: uv run ensemblitz grade
       - name: Odds comparison (skipped without ODDS_API_KEY)
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: uv run ensemblitz odds
       - name: Commit predictions and results
         run: |
