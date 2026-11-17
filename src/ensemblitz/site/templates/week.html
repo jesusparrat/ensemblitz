@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set nav = 'home' %}
+{% block title %}Jornada {{ week }}{% endblock %}
+{% block content %}
+<div class="kicker">Temporada {{ season }} · {{ games|length }} partidos</div>
+<h1>Jornada {{ week }}</h1>
+<p class="dek">Probabilidad de victoria, margen y marcador más probable de cada partido, contrastados con lo que pagan las casas de apuestas. Horas en Madrid.</p>
+{% if weeks|length > 1 %}
+<div class="weeknav"><span class="sc">Jornadas</span>
+{% for s, w in weeks if s == season %}<a href="{{ rel }}{{ 'index.html' if (w == week and is_current) else 'jornada/%d.html' % w }}" {% if w == week %}aria-current="page"{% endif %}>{{ w }}</a>{% endfor %}
+</div>
+{% endif %}
+<div class="note"><b>Con honestidad:</b> en la simulación histórica de 2018 a 2025 este sistema <b>empata con la línea de cierre; no la supera</b>. Lo útil aquí son probabilidades bien calibradas y rangos realistas, no una apuesta segura. <a href="{{ rel }}metodo.html">Cómo medimos eso</a>.</div>
+
+<section class="games" aria-label="Partidos de la jornada {{ week }}">
+  <div class="games-head" role="presentation">
+    <span class="sc">Hora</span><span class="sc">Partido</span><span class="sc">Nuestra prob. (pick)</span>
+    <span class="sc">Margen</span><span class="sc">Marcador</span><span class="sc">Mercado</span><span class="sc">Dif.</span><span class="sc">Mejor cuota</span>
+  </div>
+  {% for g in games %}
+  <article class="game" id="{{ g.id }}">
+    <div class="g-when"><span class="day">{{ g.kick.day }}</span><span class="time">{{ g.kick.time }}</span></div>
+    <h3 class="g-match"><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }}<span class="at">@</span>{{ g.home }}</a><small>{{ g.away_name }} en {{ g.home_name }}</small></h3>
+    <div class="g-prob"><div class="pbar" title="Probabilidad de que gane {{ g.pick }}"><i style="width:{{ (g.p_pick*100)|round(1) }}%"></i></div><span class="num">{{ g.pick }} {{ g.p_pick|pct }}</span>{% if g.flag %}<span class="lbl edge-big">DESACUERDO</span>{% endif %}</div>
+    <div class="g-stat"><small>Margen</small>{{ g.pick }} {{ (-g.margin_pick)|signed }}</div>
+    <div class="g-stat"><small>Marcador</small>{{ g.score_away }}–{{ g.score_home }}</div>
+    <div class="g-stat"><small>Mercado</small>{{ g.mkt_pick|pct }}</div>
+    <div class="g-stat {% if g.edge is not none and g.edge|abs >= 0.05 %}edge-big{% endif %}"><small>Dif.</small>{{ g.edge|pp }}</div>
+    <div class="best">{% if g.best %}<small class="k">Mejor cuota {{ g.pick }}</small>{{ g.best.price|num(2) }}<small>{{ g.best.book }}</small>{% else %}<small class="k">Mejor cuota</small><span class="dim">sin cuotas</span>{% endif %}</div>
+    {% if g.final %}<div class="final">Final: {{ g.away }} {{ g.final.away }} – {{ g.home }} {{ g.final.home }} · pick {{ '<b>acertado</b>'|safe if g.final.ok else 'fallado' }}</div>{% endif %}
+  </article>
+  {% endfor %}
+</section>
+<p class="small" style="margin-top:12px">Marcador en orden visitante–local; es el resultado exacto más frecuente en 20&nbsp;000 simulaciones y por eso su probabilidad individual es baja (en torno al 1&nbsp;%). «Mercado» es {{ games[0].mkt_src if games else '' }} para el lado del pick; «Dif.» es nuestra probabilidad menos la del mercado. Picks generados el {{ meta.generated_at|stamp }}.{% if odds_meta %} Cuotas descargadas el {{ odds_meta.odds_fetched_at|stamp }}.{% else %} Todavía no hay cuotas de casas para esta jornada: se muestra la línea de cierre de nflverse.{% endif %}</p>
+
+{% if flagged %}
+<h2>Dónde discrepamos del mercado</h2>
+<p class="small">Diferencias de 5 puntos porcentuales o más frente al consenso de las casas. Son hipótesis del modelo, no consejos.</p>
+{% for g in flagged %}
+<p><b><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }} @ {{ g.home }}</a></b>: nosotros {{ g.p_pick|pct }} para {{ g.pick }}, mercado {{ g.mkt_pick|pct }}. {{ g.reasons|join('; ') }}.</p>
+{% endfor %}
+{% endif %}
+{% endblock %}

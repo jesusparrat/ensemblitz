@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set nav = 'home' %}
+{% block title %}{{ g.away }} @ {{ g.home }}{% endblock %}
+{% block content %}
+<div class="kicker"><a href="{{ rel }}jornada/{{ week }}.html" style="text-decoration:none">Jornada {{ week }}</a> · {{ g.kick.day }} · {{ g.kick.time }} (hora de Madrid)</div>
+<h1>{{ g.away_name }} en {{ g.home_name }}</h1>
+<p class="dek">Pick: <b>{{ g.pick }}</b> con {{ g.p_pick|pct }} de probabilidad. {{ g.home }} es el local.{% if g.final %} Resultado final: {{ g.away }} {{ g.final.away }} – {{ g.home }} {{ g.final.home }}.{% endif %}</p>
+
+<div class="hero-nums">
+  <div><div class="v acc">{{ g.p_pick|pct }}</div><div class="sc l">Gana {{ g.pick }}</div></div>
+  <div><div class="v">{{ g.pick }} {{ (-g.margin_pick)|signed }}</div><div class="sc l">Margen previsto</div></div>
+  <div><div class="v">{{ g.score_away }}–{{ g.score_home }}</div><div class="sc l">Marcador más probable ({{ g.away }}–{{ g.home }})</div></div>
+  <div><div class="v">{{ g.total|num(1) }}</div><div class="sc l">Total previsto{% if g.market.total_line is not none %} · línea {{ g.market.total_line|num(1) }}{% endif %}</div></div>
+</div>
+<p class="small">El marcador exacto más probable solo ocurre en torno al {{ (g.score_prob*100)|num(1) }}&nbsp;% de las simulaciones: lo informativo es la forma de las distribuciones de abajo. Pick congelado el {{ g.generated_at|stamp }}.</p>
+
+<h2>Cómo se reparten los resultados</h2>
+<p class="small">20&nbsp;000 partidos simulados posesión a posesión con los puntos esperados de cada equipo. En rojo, el lado del pick; la línea discontinua es la del mercado.</p>
+<div class="charts">
+  <div><div class="sc" style="margin-bottom:6px">Margen (local menos visitante)</div>{{ charts.margin|safe }}</div>
+  <div><div class="sc" style="margin-bottom:6px">Puntos totales</div>{{ charts.total|safe }}</div>
+</div>
+<p class="small">Rango del 80&nbsp;% del margen: {{ g.sim.margin_q10|num(0) }} a {{ g.sim.margin_q90|num(0) }} · del total: {{ g.sim.total_q10|num(0) }} a {{ g.sim.total_q90|num(0) }}. Que el rango sea tan ancho es la realidad de la NFL, no un defecto del gráfico.</p>
+
+<h2>Probabilidad de que gane {{ g.home }}, por modelo</h2>
+<table>
+  <thead><tr><th>Modelo</th><th class="bar-cell"></th><th>{{ g.home }}</th><th>{{ g.away }}</th></tr></thead>
+  <tbody>
+  {% for key, label in comp_labels %}{% set v = g.comps.get(key) %}{% if v is not none %}
+  <tr {% if key == 'ensemble' %}class="hl"{% endif %}><td>{{ label }}</td>
+    <td class="bar-cell"><span class="mini {% if key == 'ensemble' %}acc{% endif %}"><i style="width:{{ (v*100)|round(1) }}%"></i></span></td>
+    <td>{{ v|pct(1) }}</td><td>{{ (1-v)|pct(1) }}</td></tr>
+  {% endif %}{% endfor %}
+  </tbody>
+</table>
+<p class="small">El ensemble combina los modelos con pesos aprendidos en partidos anteriores; hoy casi todo el peso lo lleva el mercado porque es lo más informativo que tenemos.</p>
+
+<h2>Factores del partido</h2>
+<dl class="facts">
+  {% for k, v in g.factors %}<dt>{{ k }}</dt><dd>{{ v }}</dd>{% endfor %}
+  <dt>Línea de cierre</dt><dd>{% if g.market.spread_line is not none %}{{ g.home }} {{ (-g.market.spread_line)|signed }} · total {{ g.market.total_line|num(1) }}{% else %}sin línea todavía{% endif %}</dd>
+  {% if g.model_only_margin is not none %}<dt>Margen solo con modelos</dt><dd>{{ g.home }} {{ g.model_only_margin|signed }}</dd>{% endif %}
+</dl>
+<p class="small">Las bajas se cuentan con el parte de la semana anterior: el de esta semana no existe cuando se generan los picks.</p>
+
+{% if g.books %}
+<h2>Cuotas por casa</h2>
+<p>Consenso sin comisión (Shin): {{ g.home }} <b class="num">{{ (g.books|map(attribute='p_home')|sum / g.books|length)|pct(1) }}</b>, {{ g.books|length }} casas. Nosotros: <b class="num">{{ g.p_home|pct(1) }}</b>.
+{% if g.best %}Mejor precio por {{ g.pick }}: <b class="num">{{ g.best.price|num(2) }}</b> en {{ g.best.book }}, valor esperado <span class="num">{{ g.best.ev|pp }}</span> si nuestra probabilidad fuese la verdadera.{% endif %}</p>
+{% if g.reasons %}<p><b>Posibles causas del desacuerdo:</b></p><ul class="reasons">{% for r in g.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+<div class="scroll"><table class="sortable">
+  <thead><tr><th>Casa</th><th>{{ g.home }} (cuota)</th><th>{{ g.away }} (cuota)</th><th>Prob. {{ g.home }} sin comisión</th><th>Nuestra menos casa</th></tr></thead>
+  <tbody>
+  {% for b in g.books %}<tr><td>{{ b.book }}</td><td data-v="{{ b.home_price }}">{{ b.home_price|num(2) }}</td><td data-v="{{ b.away_price }}">{{ b.away_price|num(2) }}</td><td data-v="{{ b.p_home }}">{{ b.p_home|pct(1) }}</td><td data-v="{{ b.edge }}">{{ b.edge|pp }}</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+<p class="small">Cuotas decimales de The Odds API descargadas el {{ g.odds_meta.odds_fetched_at|stamp }}. Pulsa una cabecera para ordenar. Las cuotas se mueven; compara siempre con el precio actual.</p>
+{% else %}
+<h2>Cuotas por casa</h2>
+<p>Aún no hay cuotas de casas para este partido. Se añaden cuando se ejecuta el informe de cuotas.</p>
+{% endif %}
+<p style="margin-top:28px"><a href="{{ rel }}jornada/{{ week }}.html">← Volver a la jornada {{ week }}</a></p>
+{% endblock %}

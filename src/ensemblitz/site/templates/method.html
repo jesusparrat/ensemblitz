@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set nav = 'method' %}
+{% block title %}Método{% endblock %}
+{% block content %}
+<div class="kicker">Cómo funciona y qué tan bien lo hace</div>
+<h1>Método</h1>
+<p class="dek">Qué datos entran, qué modelos hay, cómo se mide y, sobre todo, lo que todavía no sabemos hacer.</p>
+
+<h2>Qué hacemos</h2>
+<p>Partimos de los datos públicos de <a href="https://github.com/nflverse">nflverse</a> (calendarios con líneas de apuestas, jugada a jugada, partes de lesiones). Cada equipo tiene ratings de ataque y defensa por EPA (puntos esperados añadidos por jugada) en pase y carrera, ajustados por la calidad del rival, con memoria que decae y regresión a la media entre temporadas. Todo se calcula solo con lo que se sabía antes del partido.</p>
+<p>Sobre esos ratings corren cuatro modelos más el mercado:</p>
+<ul>
+  <li><b>Kalman:</b> la fuerza ofensiva y defensiva de cada equipo cambia semana a semana, con incertidumbre explícita.</li>
+  <li><b>LightGBM:</b> árboles pequeños con descanso, viaje, QB, clima y ratings; una variante aprende solo lo que el mercado no explica.</li>
+  <li><b>Elo</b> con margen de victoria.</li>
+  <li><b>Mercado:</b> la probabilidad de la línea de cierre sin la comisión de la casa.</li>
+</ul>
+<p>Un <b>ensemble</b> los combina con pesos que se reajustan cada semana usando solo predicciones anteriores, y un <b>simulador</b> de posesiones convierte los puntos esperados de cada equipo en una distribución de marcadores.</p>
+
+{% if bt %}
+<h2>Resultados históricos</h2>
+<p>Simulación semana a semana de {{ bt.seasons[0] }} a {{ bt.seasons[1] }}: {{ bt.n_games }} partidos de temporada regular. En cada semana todo se reconstruye con partidos anteriores; nada del futuro entra.</p>
+<div class="scroll"><table>
+<thead><tr><th>Modelo</th><th>Acierto</th><th>Brier</th><th>Log loss</th><th>Error medio del margen</th><th>Contra el spread</th></tr></thead>
+<tbody>
+{% for c in ['market','elo','kf','lgbm','lgbm_mkt','sim','ens'] %}{% set r = bt.overall[c] %}
+<tr {% if c == 'ens' %}class="hl"{% endif %}><td>{{ model_labels[c] }}</td><td>{{ r.accuracy|pct(1) }}</td><td>{{ r.brier|num(3) }}</td><td>{{ r.log_loss|num(3) }}</td><td>{{ r.mae_margin|num(2) }}</td><td>{% if c == 'market' %}—{% else %}{{ r.ats.win_pct|pct(1) }}{% endif %}</td></tr>
+{% endfor %}
+</tbody></table></div>
+<p class="small">Brier y log loss: menores son mejores. «Contra el spread» es el porcentaje de veces que el lado preferido por el modelo cubre la línea de cierre; con comisión de −110 hace falta un 52,4&nbsp;% para no perder dinero.</p>
+
+<h2>Por temporada</h2>
+<div class="scroll"><table>
+<thead><tr><th>Temporada</th><th>Acierto mercado</th><th>Acierto ensemble</th><th>Log loss mercado</th><th>Log loss ensemble</th></tr></thead>
+<tbody>{% for s, v in bt.per_season.items() %}<tr><td>{{ s }}</td><td>{{ v.market.accuracy|pct(1) }}</td><td>{{ v.ens.accuracy|pct(1) }}</td><td>{{ v.market.log_loss|num(3) }}</td><td>{{ v.ens.log_loss|num(3) }}</td></tr>{% endfor %}</tbody>
+</table></div>
+
+<h2>Calibración</h2>
+<div class="cols"><div>{{ calib|safe }}</div>
+<div><p>Cuando decimos 70&nbsp;%, ¿gana el 70&nbsp;% de las veces? Cada punto es un tramo de probabilidad del ensemble; el tamaño indica cuántos partidos hay. Sobre la diagonal punteada la calibración sería perfecta.</p>
+<p>Los tramos extremos tienen pocos partidos y se mueven mucho por azar.</p></div></div>
+
+{% if clv %}
+<h2>¿Le ganamos a la línea de cierre?</h2>
+<p>{{ clv.verdict }}</p>
+<div class="scroll"><table>
+<thead><tr><th>Modelo · umbral de desacuerdo</th><th>Partidos</th><th>ATS</th><th>ATS %</th><th>ROI plano −110</th><th>ROI moneyline</th></tr></thead>
+<tbody>
+{% for c in ['ens','lgbm_mkt'] %}{% for r in clv.tables[c] if r.n %}
+<tr><td>{{ model_labels[c] }} · {{ 'todos' if r.threshold == 0 else '> %d pp' % (r.threshold*100)|round|int }}</td><td>{{ r.n }}</td><td>{{ r.ats_w }}-{{ r.ats_l }}</td><td>{{ r.ats_pct|pct(1) }}</td><td>{{ r.ats_roi_flat_110|pct(1) }}</td><td>{{ r.ml_roi_flat|pct(1) }}</td></tr>
+{% endfor %}{% endfor %}
+</tbody></table></div>
+<p class="small">Se apuesta siempre el lado que el modelo prefiere frente al mercado, con una unidad plana. Con pocos partidos (más de 5 pp, más de 8 pp) un ROI llamativo es ruido. Tabla completa con los demás modelos en <a href="{{ repo }}/blob/main/reports/backtest.md">reports/backtest.md</a>.</p>
+{% endif %}
+{% endif %}
+
+<h2>Límites</h2>
+<ul>
+  <li>El objetivo realista es un 65–70&nbsp;% de aciertos directos. Nadie con un método público está cerca del 90&nbsp;%; quien lo promete suele estar usando datos del futuro sin darse cuenta.</li>
+  <li>La versión 0.1 <b>no tiene ventaja demostrada sobre la línea de cierre</b>. Para ganarle al mercado hace falta información que él no tenga y probarla fuera de muestra.</li>
+  <li>El QB titular de partidos futuros es el previsto en el calendario. Las bajas solo entran con el parte de la semana anterior.</li>
+  <li>El simulador cuenta posesiones, no jugadas: no modela safeties, touchdowns defensivos, reloj, lesiones durante el partido ni clima.</li>
+  <li>Hay pocas temporadas con datos jugada a jugada (desde 2015): los modelos de árboles se sobreajustan con facilidad.</li>
+</ul>
+
+<h2>Lo que viene</h2>
+<ul>
+  <li>Simulador jugada a jugada con lesiones durante el partido.</li>
+  <li>Modelo de salud de jugadores y recaídas.</li>
+  <li>Clima por hora y por cuarto.</li>
+  <li>Motor de simulación en Rust, y después en GPU, para simular millones de partidos por jornada.</li>
+  <li>Modelo bayesiano jerárquico completo en lugar del filtro de Kalman.</li>
+</ul>
+<p class="small">Todo el código y los datos de salida están en <a href="{{ repo }}">{{ repo }}</a> bajo licencia MIT.</p>
+{% endblock %}

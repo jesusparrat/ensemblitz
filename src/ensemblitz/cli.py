@@ -81,5 +81,16 @@ def odds(
     typer.echo(msg)
 
 
+@app.command()
+def site(out: str = typer.Option("", help="Output directory (default site/_build)")) -> None:
+    """Build the static website from predictions/, results/ and reports/."""
+    from pathlib import Path
+
+    from ensemblitz.site import build_site
+
+    path = build_site(out=Path(out) if out else None)
+    typer.echo(f"site written to {path}")
+
+
 if __name__ == "__main__":
     app()
