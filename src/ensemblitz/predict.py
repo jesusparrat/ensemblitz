@@ -11,12 +11,13 @@ import numpy as np
 import pandas as pd
 
 from ensemblitz import config as C
+from ensemblitz import news as N
 from ensemblitz import pipeline as P
 from ensemblitz.features.build import feature_columns
 from ensemblitz.models import gbm
 from ensemblitz.models.ensemble import Ensemble
 from ensemblitz.models.market import margin_to_prob
-from ensemblitz.sim import SimParams, simulate_games, summarize_sim
+from ensemblitz.sim import SimParams, likely_score, simulate_games, summarize_sim
 
 log = logging.getLogger(__name__)
 
@@ -70,16 +71,54 @@ def simulate_rows(rows: pd.DataFrame, n_sims: int = 20000) -> dict[str, np.ndarr
     h, a = simulate_games(
         (total + margin) / 2, (total - margin) / 2, n_sims=n_sims, seed=2026, params=SimParams()
     )
-    return summarize_sim(h, a)
+    out = summarize_sim(h, a)
+    out.update(likely_score(h, a, rows["ens_prob"].to_numpy() >= 0.5, margin))
+    return out
+
+
+def apply_news(rows: pd.DataFrame, now: str, root: Path | None = None) -> list[dict]:
+    """Adjust ensemble prob/margin for players in ``news/``; returns audit records.
+
+    The player value table is only built (two small downloads) if some news file exists.
+    """
+    cache: dict[tuple[int, int], list[dict]] = {}
+    for key in {(int(r.season), int(r.week)) for r in rows.itertuples()}:
+        cache[key] = N.load_news(N.news_path(*key, root=root))
+    values = None
+    if any(cache.values()):
+        from ensemblitz import players as PL
+
+        season = int(rows["season"].iloc[0])
+        values = PL.build_values(*PL.load_raw(season), season)
+    audits = []
+    for idx, r in rows.iterrows():
+        a = N.adjust_game(
+            r["ens_prob"],
+            r["ens_margin"],
+            r["home_team"],
+            r["away_team"],
+            cache[(int(r["season"]), int(r["week"]))],
+            values,
+            as_of=now,
+        )
+        audits.append(a)
+        if a["applied"]:
+            rows.loc[idx, "ens_prob"] = a["prob_home_after"]
+            rows.loc[idx, "ens_margin"] = a["margin_after"]
+    return audits
 
 
 def _f(x: float | None, nd: int = 4) -> float | None:
     return None if x is None or (isinstance(x, float) and np.isnan(x)) else round(float(x), nd)
 
 
-def game_record(r: pd.Series, sim: dict[str, np.ndarray], i: int, now: str) -> dict:
+def game_record(
+    r: pd.Series, sim: dict[str, np.ndarray], i: int, now: str, news_adj: dict | None = None
+) -> dict:
     comps = {c: _f(r[f"{c}_prob"]) for c in ("market", "elo", "kf", "lgbm", "lgbm_mkt")}
     comps["ensemble"] = _f(r["ens_prob"])
+    if news_adj and news_adj.get("applied"):
+        comps["ensemble_pre_news"] = _f(news_adj["prob_home_before"])
     comps["ensemble_model_only"] = _f(r["nomkt_prob"])
     return {
         "game_id": r["game_id"],
@@ -95,10 +134,17 @@ def game_record(r: pd.Series, sim: dict[str, np.ndarray], i: int, now: str) -> d
         "predicted_margin": _f(r["ens_margin"], 2),
         "model_only_margin": _f(r["nomkt_margin"], 2),
         "predicted_total": _f(r["ens_total"], 2),
+        "news_adjustment": news_adj or {"applied": False},
         "most_likely_score": {
-            "home": int(sim["mode_home"][i]),
-            "away": int(sim["mode_away"][i]),
-            "prob": _f(sim["mode_prob"][i]),
+            "home": int(sim["like_home"][i]),
+            "away": int(sim["like_away"][i]),
+            "prob": _f(sim["like_prob"][i]),
+            "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+            "raw_mode": {
+                "home": int(sim["mode_home"][i]),
+                "away": int(sim["mode_away"][i]),
+                "prob": _f(sim["mode_prob"][i]),
+            },
         },
         "sim": {
             "p_home": _f(sim["p_home"][i]),
@@ -127,7 +173,9 @@ def game_record(r: pd.Series, sim: dict[str, np.ndarray], i: int, now: str) -> d
     }
 
 
-def run_predict(season: int, week: int | None = None, n_weeks: int = 1) -> list[Path]:
+def run_predict(
+    season: int, week: int | None = None, n_weeks: int = 1, use_news: bool = True
+) -> list[Path]:
     """Write ``predictions/<season>/weekXX.json``. Picks of games already kicked off stay frozen."""
     frame = build_frame(season)
     weeks = [week] if week else next_weeks(frame, season, n_weeks)
@@ -135,11 +183,12 @@ def run_predict(season: int, week: int | None = None, n_weeks: int = 1) -> list[
         log.info("no unplayed weeks in %s", season)
         return []
     rows = predict_frame(frame, season, weeks)
-    sim = simulate_rows(rows)
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    paths = []
     rows = rows.reset_index(drop=True)
-    recs = [game_record(r, sim, i, now) for i, r in rows.iterrows()]
+    audits = apply_news(rows, now) if use_news else [None] * len(rows)
+    sim = simulate_rows(rows)
+    paths = []
+    recs = [game_record(r, sim, i, now, audits[i]) for i, r in rows.iterrows()]
     weights = rows.attrs.get("ensemble_weights", {})
     for w in weeks:
         path = pred_path(season, w)

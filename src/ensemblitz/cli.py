@@ -49,12 +49,13 @@ def predict(
     season: int = typer.Option(0, help="0 = current season"),
     week: int = typer.Option(0, help="0 = next unplayed week(s)"),
     weeks: int = typer.Option(1, help="How many upcoming weeks when --week is 0"),
+    news: bool = typer.Option(True, help="Apply confirmed-out players from news/<season>/"),
 ) -> None:
     """Write frozen predictions to predictions/<season>/weekXX.json."""
     from ensemblitz.data.download import current_season
     from ensemblitz.predict import run_predict
 
-    for p in run_predict(season or current_season(), week or None, weeks):
+    for p in run_predict(season or current_season(), week or None, weeks, news):
         typer.echo(f"wrote {p}")
 
 
