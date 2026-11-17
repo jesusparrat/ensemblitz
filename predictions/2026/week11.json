@@ -1,7 +1,7 @@
 {
  "season": 2026,
  "week": 11,
- "generated_at": "2026-11-17T20:45:59Z",
+ "generated_at": "2026-11-17T21:23:30Z",
  "model_version": "0.1.0",
  "ensemble_weights": {
   "with_market": {
@@ -55,7 +55,7 @@
    "home_team": "HOU",
    "away_team": "IND",
    "kickoff_utc": "2026-11-20T01:15:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.84,
@@ -70,10 +70,27 @@
    "predicted_margin": 12.5,
    "model_only_margin": 8.67,
    "predicted_total": 44.9,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.8458,
+    "prob_home_after": 0.8458,
+    "margin_before": 12.5,
+    "margin_after": 12.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 24,
+    "home": 28,
     "away": 17,
-    "prob": 0.0087
+    "prob": 0.0043,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0087
+    }
    },
    "sim": {
     "p_home": 0.8196,
@@ -107,7 +124,7 @@
    "home_team": "KC",
    "away_team": "ARI",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.8989,
@@ -122,10 +139,27 @@
    "predicted_margin": 16.5,
    "model_only_margin": 12.79,
    "predicted_total": 41.88,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.9076,
+    "prob_home_after": 0.9076,
+    "margin_before": 16.5,
+    "margin_after": 16.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 31,
-    "away": 10,
-    "prob": 0.0083
+    "home": 27,
+    "away": 13,
+    "prob": 0.0059,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 31,
+     "away": 10,
+     "prob": 0.0083
+    }
    },
    "sim": {
     "p_home": 0.8932,
@@ -159,7 +193,7 @@
    "home_team": "CAR",
    "away_team": "BAL",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.5635,
@@ -174,10 +208,27 @@
    "predicted_margin": 2.5,
    "model_only_margin": 2.32,
    "predicted_total": 43.89,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.5558,
+    "prob_home_after": 0.5558,
+    "margin_before": 2.5,
+    "margin_after": 2.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 24,
-    "away": 17,
-    "prob": 0.0095
+    "home": 23,
+    "away": 20,
+    "prob": 0.003,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0095
+    }
    },
    "sim": {
     "p_home": 0.5691,
@@ -211,7 +262,7 @@
    "home_team": "NYG",
    "away_team": "JAX",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.3042,
@@ -226,10 +277,27 @@
    "predicted_margin": -6.0,
    "model_only_margin": -7.36,
    "predicted_total": 46.92,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.2858,
+    "prob_home_after": 0.2858,
+    "margin_before": -6.0,
+    "margin_after": -6.0,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 17,
-    "away": 24,
-    "prob": 0.0097
+    "home": 20,
+    "away": 27,
+    "prob": 0.0066,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0097
+    }
    },
    "sim": {
     "p_home": 0.3343,
@@ -263,7 +331,7 @@
    "home_team": "BUF",
    "away_team": "MIA",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.887,
@@ -278,10 +346,27 @@
    "predicted_margin": 16.5,
    "model_only_margin": 15.44,
    "predicted_total": 45.91,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.9041,
+    "prob_home_after": 0.9041,
+    "margin_before": 16.5,
+    "margin_after": 16.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 24,
-    "away": 17,
-    "prob": 0.0078
+    "home": 31,
+    "away": 14,
+    "prob": 0.005,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0078
+    }
    },
    "sim": {
     "p_home": 0.8893,
@@ -315,7 +400,7 @@
    "home_team": "CHI",
    "away_team": "NO",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.8371,
@@ -330,10 +415,27 @@
    "predicted_margin": 11.5,
    "model_only_margin": 10.76,
    "predicted_total": 48.94,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.8452,
+    "prob_home_after": 0.8452,
+    "margin_before": 11.5,
+    "margin_after": 11.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 24,
+    "home": 30,
     "away": 17,
-    "prob": 0.0078
+    "prob": 0.004,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0078
+    }
    },
    "sim": {
     "p_home": 0.7965,
@@ -367,7 +469,7 @@
    "home_team": "DET",
    "away_team": "TB",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.7002,
@@ -382,10 +484,27 @@
    "predicted_margin": 6.5,
    "model_only_margin": 6.49,
    "predicted_total": 45.91,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.706,
+    "prob_home_after": 0.706,
+    "margin_before": 6.5,
+    "margin_after": 6.5,
+    "items": []
+   },
    "most_likely_score": {
     "home": 24,
-    "away": 17,
-    "prob": 0.0086
+    "away": 20,
+    "prob": 0.005,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0086
+    }
    },
    "sim": {
     "p_home": 0.6711,
@@ -419,7 +538,7 @@
    "home_team": "DAL",
    "away_team": "TEN",
    "kickoff_utc": "2026-11-22T18:00:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.7768,
@@ -434,10 +553,27 @@
    "predicted_margin": 8.5,
    "model_only_margin": 8.91,
    "predicted_total": 54.99,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.7793,
+    "prob_home_after": 0.7793,
+    "margin_before": 8.5,
+    "margin_after": 8.5,
+    "items": []
+   },
    "most_likely_score": {
     "home": 31,
-    "away": 24,
-    "prob": 0.0068
+    "away": 23,
+    "prob": 0.0029,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 31,
+     "away": 24,
+     "prob": 0.0068
+    }
    },
    "sim": {
     "p_home": 0.7212,
@@ -471,7 +607,7 @@
    "home_team": "LAC",
    "away_team": "NYJ",
    "kickoff_utc": "2026-11-22T21:05:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.6164,
@@ -486,10 +622,27 @@
    "predicted_margin": 3.5,
    "model_only_margin": 3.39,
    "predicted_total": 41.88,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.604,
+    "prob_home_after": 0.604,
+    "margin_before": 3.5,
+    "margin_after": 3.5,
+    "items": []
+   },
    "most_likely_score": {
     "home": 24,
     "away": 17,
-    "prob": 0.0105
+    "prob": 0.0105,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0105
+    }
    },
    "sim": {
     "p_home": 0.6079,
@@ -523,7 +676,7 @@
    "home_team": "DEN",
    "away_team": "LV",
    "kickoff_utc": "2026-11-22T21:25:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.8173,
@@ -538,10 +691,27 @@
    "predicted_margin": 10.0,
    "model_only_margin": 11.51,
    "predicted_total": 40.87,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.8214,
+    "prob_home_after": 0.8214,
+    "margin_before": 10.0,
+    "margin_after": 10.0,
+    "items": []
+   },
    "most_likely_score": {
     "home": 24,
-    "away": 17,
-    "prob": 0.0103
+    "away": 14,
+    "prob": 0.0055,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0103
+    }
    },
    "sim": {
     "p_home": 0.7763,
@@ -575,7 +745,7 @@
    "home_team": "PHI",
    "away_team": "PIT",
    "kickoff_utc": "2026-11-22T21:25:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.3425,
@@ -590,10 +760,27 @@
    "predicted_margin": -4.5,
    "model_only_margin": -4.49,
    "predicted_total": 38.85,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.3119,
+    "prob_home_after": 0.3119,
+    "margin_before": -4.5,
+    "margin_after": -4.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 10,
-    "away": 17,
-    "prob": 0.0115
+    "home": 17,
+    "away": 21,
+    "prob": 0.0053,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 10,
+     "away": 17,
+     "prob": 0.0115
+    }
    },
    "sim": {
     "p_home": 0.3619,
@@ -627,7 +814,7 @@
    "home_team": "SF",
    "away_team": "MIN",
    "kickoff_utc": "2026-11-23T01:20:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.5934,
@@ -642,10 +829,27 @@
    "predicted_margin": 3.0,
    "model_only_margin": 3.18,
    "predicted_total": 45.91,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.5997,
+    "prob_home_after": 0.5997,
+    "margin_before": 3.0,
+    "margin_after": 3.0,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 17,
-    "away": 24,
-    "prob": 0.0077
+    "home": 24,
+    "away": 21,
+    "prob": 0.0041,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0077
+    }
    },
    "sim": {
     "p_home": 0.5836,
@@ -679,7 +883,7 @@
    "home_team": "WAS",
    "away_team": "CIN",
    "kickoff_utc": "2026-11-24T01:15:00Z",
-   "generated_at": "2026-11-17T20:45:59Z",
+   "generated_at": "2026-11-17T21:23:30Z",
    "model_version": "0.1.0",
    "home_win_prob": {
     "market": 0.282,
@@ -694,10 +898,27 @@
    "predicted_margin": -6.5,
    "model_only_margin": -5.66,
    "predicted_total": 52.98,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.2524,
+    "prob_home_after": 0.2524,
+    "margin_before": -6.5,
+    "margin_after": -6.5,
+    "items": []
+   },
    "most_likely_score": {
-    "home": 17,
-    "away": 24,
-    "prob": 0.0069
+    "home": 24,
+    "away": 30,
+    "prob": 0.0037,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0069
+    }
    },
    "sim": {
     "p_home": 0.3333,

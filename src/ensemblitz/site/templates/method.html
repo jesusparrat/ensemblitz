@@ -54,6 +54,9 @@
 {% endif %}
 {% endif %}
 
+<h2>Noticias y bajas</h2>
+<p>Las noticias de última hora (bajas, dudas, regresos) las cargamos a mano o desde fuentes citadas en <code>news/&lt;año&gt;/weekXX.json</code>; cada una enseña su enlace. Solo mueven el pronóstico las bajas confirmadas y, con menos peso, las dudas. Cada jugador vale lo que produce menos lo que produciría su reemplazo: en ataque, EPA por jugada y volumen (QB, RB, WR, TE); en la línea ofensiva y en defensa, minutos jugados por una referencia de posición, corregida por sacks, presiones, balones robados y pases defendidos (no hay EPA individual defensivo público). El efecto se reduce al 70&nbsp;% y se recorta si la noticia es antigua, porque la línea del mercado ya la ha descontado. Este ajuste <b>no está validado</b> en el backtest, porque no existe un archivo histórico de noticias.</p>
+
 <h2>Límites</h2>
 <ul>
   <li>El objetivo realista es un 65–70&nbsp;% de aciertos directos. Nadie con un método público está cerca del 90&nbsp;%; quien lo promete suele estar usando datos del futuro sin darse cuenta.</li>

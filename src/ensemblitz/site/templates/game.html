@@ -4,15 +4,34 @@
 {% block content %}
 <div class="kicker"><a href="{{ rel }}jornada/{{ week }}.html" style="text-decoration:none">Jornada {{ week }}</a> · {{ g.kick.day }} · {{ g.kick.time }} (hora de Madrid)</div>
 <h1>{{ g.away_name }} en {{ g.home_name }}</h1>
-<p class="dek">Pick: <b>{{ g.pick }}</b> con {{ g.p_pick|pct }} de probabilidad. {{ g.home }} es el local.{% if g.final %} Resultado final: {{ g.away }} {{ g.final.away }} – {{ g.home }} {{ g.final.home }}.{% endif %}</p>
+<p class="dek">{{ g.blurb }}{% if g.adj_text %} {{ g.adj_text }}{% endif %}{% if g.final %} Resultado final: {{ g.away }} {{ g.final.away }} – {{ g.home }} {{ g.final.home }}.{% endif %}</p>
 
 <div class="hero-nums">
   <div><div class="v acc">{{ g.p_pick|pct }}</div><div class="sc l">Gana {{ g.pick }}</div></div>
   <div><div class="v">{{ g.pick }} {{ (-g.margin_pick)|signed }}</div><div class="sc l">Margen previsto</div></div>
-  <div><div class="v">{{ g.score_away }}–{{ g.score_home }}</div><div class="sc l">Marcador más probable ({{ g.away }}–{{ g.home }})</div></div>
+  <div><div class="v">{{ g.score_away }}–{{ g.score_home }}</div><div class="sc l">Marcador típico ({{ g.away }}–{{ g.home }})</div></div>
   <div><div class="v">{{ g.total|num(1) }}</div><div class="sc l">Total previsto{% if g.market.total_line is not none %} · línea {{ g.market.total_line|num(1) }}{% endif %}</div></div>
 </div>
-<p class="small">El marcador exacto más probable solo ocurre en torno al {{ (g.score_prob*100)|num(1) }}&nbsp;% de las simulaciones: lo informativo es la forma de las distribuciones de abajo. Pick congelado el {{ g.generated_at|stamp }}.</p>
+<p class="small">Marcador típico: el marcador frecuente más cercano al promedio de las simulaciones en las que gana el pick con un margen parecido al previsto. Ese marcador exacto ocurre en el {{ (g.score_prob*100)|num(1) }}&nbsp;% de las simulaciones: lo informativo es la forma de las distribuciones de abajo. Pick congelado el {{ g.generated_at|stamp }}.</p>
+
+<h2>Lo que hay que saber</h2>
+{% if g.news %}
+<ul class="news">
+{% for n in g.news %}<li><div><span class="tag">{{ n.team }}</span> <b>{{ n.player }}</b>{% if n.position %} · {{ n.position }}{% endif %} <span class="st st-{{ n.status }}">{{ status_es[n.status] }}</span></div>
+<p>{{ n.summary_es }}</p>
+{% if n.impact_note_es %}<p class="impact">{{ n.impact_note_es }}</p>{% endif %}
+<p class="small">Fuente: {% if n.source_url %}<a href="{{ n.source_url }}" rel="noopener">{{ n.source_handle or n.source_url }}</a>{% else %}{{ n.source_handle or 'sin enlace' }}{% endif %}{% if n.posted_at %} · {{ n.posted_at|stamp }}{% endif %}</p></li>{% endfor %}
+</ul>
+{% if g.adj.applied %}
+<p><b>Efecto en el pronóstico.</b> {{ g.adj_text or 'El ajuste es menor de medio punto porcentual.' }} Margen {{ g.adj.margin_before|signed }} → {{ g.adj.margin_after|signed }} (local). Cada baja pesa su valor sobre un reemplazo × estado (baja 1, muy dudoso 0,75, dudoso 0,25) × frescura de la noticia:</p>
+<div class="scroll"><table><thead><tr><th>Jugador</th><th>Valor (pts/partido)</th><th>Estado</th><th>Frescura</th><th>Puntos de margen</th></tr></thead><tbody>
+{% for i in g.adj['items'] %}<tr><td>{{ i.player }} ({{ i.team }}, {{ i.position }})</td><td>{{ i.value_pts|num(2) }}</td><td>{{ status_es[i.status] }}</td><td>{{ i.freshness|num(2) }}</td><td>{{ i.points|num(2) }}</td></tr>{% endfor %}
+</tbody></table></div>
+<p class="small">Valor del jugador: producción (EPA, objetivos, snaps) menos un reemplazo, reducida al 70&nbsp;%; método y límites en <a href="{{ rel }}metodo.html">Método</a>. Es un ajuste conservador, no una certeza.</p>
+{% else %}<p class="small">Estas noticias no mueven la probabilidad: solo cuentan bajas confirmadas, o dudas con menos peso.</p>{% endif %}
+{% else %}
+<p class="small">Sin noticias cargadas para este partido. Las bajas y novedades de última hora se añaden en <code>news/{{ season }}/week{{ '%02d' % week }}.json</code> y aparecen aquí con su fuente.</p>
+{% endif %}
 
 <h2>Cómo se reparten los resultados</h2>
 <p class="small">20&nbsp;000 partidos simulados posesión a posesión con los puntos esperados de cada equipo. En rojo, el lado del pick; la línea discontinua es la del mercado.</p>

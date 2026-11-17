@@ -13,6 +13,7 @@ import numpy as np
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from ensemblitz import config as C
+from ensemblitz import news as N
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
 from ensemblitz.sim import SimParams, simulate_games
 from ensemblitz.site import charts
@@ -41,6 +42,15 @@ MODEL_LABELS = {
     "lgbm_mkt": "LightGBM (residuo vs mercado)",
     "sim": "Simulador (params Kalman)",
     "ens": "Ensemble",
+}
+
+
+STATUS_ES = {
+    "out": "Baja",
+    "doubtful": "Muy dudoso",
+    "questionable": "Dudoso",
+    "returning": "Vuelve",
+    "other": "Novedad",
 }
 
 
@@ -110,7 +120,13 @@ def load_inputs(root: Path) -> dict:
     }
 
 
-def _game(g: dict, odds_game: dict | None, odds_meta: dict | None, result: dict | None) -> dict:
+def _game(
+    g: dict,
+    odds_game: dict | None,
+    odds_meta: dict | None,
+    result: dict | None,
+    news_items: list[dict] | None = None,
+) -> dict:
     home, away = g["home_team"], g["away_team"]
     probs = g["home_win_prob"]
     ph = probs["ensemble"]
@@ -137,6 +153,8 @@ def _game(g: dict, odds_game: dict | None, odds_meta: dict | None, result: dict 
     margin_pick = g["predicted_margin"] if pick_home else -g["predicted_margin"]
     ml = g["most_likely_score"]
     factors = _factors(g)
+    adj = g.get("news_adjustment") or {"applied": False}
+    news = [x for x in (news_items or []) if x["team"] in (home, away)]
     final = None
     if result:
         tot, mar = result["total"], result["result"]
@@ -179,7 +197,61 @@ def _game(g: dict, odds_game: dict | None, odds_meta: dict | None, result: dict 
         "book_total": (odds_game or {}).get("book_total"),
         "generated_at": g["generated_at"],
         "final": final,
+        "news": news,
+        "adj": adj,
+        "adj_text": _adj_text(adj, home, pick_home),
+        "blurb": blurb(g, odds_game, adj, p_pick, pick, pick_home),
+        "score_method": ml.get("method"),
     }
+
+
+def _adj_text(adj: dict, home: str, pick_home: bool) -> str | None:
+    """'Sin X, la probabilidad de HOU baja del 71 % al 66 %.' from the stored audit record."""
+    if not adj.get("applied"):
+        return None
+    a, b = adj["prob_home_before"], adj["prob_home_after"]
+    if abs(b - a) < 0.005:
+        return None
+    names = ", ".join(f"{i['player']} ({STATUS_ES[i['status']].lower()})" for i in adj["items"])
+    verb = "baja" if b < a else "sube"
+    return f"Con {names}, la probabilidad de {home} {verb} del {fnum(a * 100, 0)}\u202f% al {fnum(b * 100, 0)}\u202f%."
+
+
+def blurb(g: dict, og: dict | None, adj: dict, p_pick: float, pick: str, pick_home: bool) -> str:
+    """One sentence built only from fields we hold: the factor that matters most for this game."""
+    c = g["context"]
+    home, away = g["home_team"], g["away_team"]
+    lead = f"{nick(pick)} parten como favoritos ({fnum(p_pick * 100, 0)}\u202f%)"
+    if adj.get("applied") and abs(adj["prob_home_after"] - adj["prob_home_before"]) >= 0.01:
+        top = max(adj["items"], key=lambda i: i["points"])
+        who = f"{top['player']} ({top['team']})"
+        return f"{lead}; lo que más mueve el pronóstico es la ausencia de {who}."
+    chg = [t for t, k in ((home, "home_qb_change"), (away, "away_qb_change")) if c[k]]
+    if chg:
+        return f"{lead}; {' y '.join(nick(t) for t in chg)} cambian de QB titular respecto a su último partido."
+    if og and og.get("flag_large_disagreement"):
+        mk = og["consensus_home_prob_shin"] if pick_home else 1 - og["consensus_home_prob_shin"]
+        return (
+            f"{lead}; discrepamos con el mercado, que le da {fnum(mk * 100, 0)}\u202f% "
+            f"según {og['n_books']} casas."
+        )
+    if abs(c["home_rest"] - c["away_rest"]) >= 3:
+        more = home if c["home_rest"] > c["away_rest"] else away
+        return (
+            f"{lead}; {nick(more)} llegan con {max(c['home_rest'], c['away_rest'])} días de "
+            f"descanso frente a {min(c['home_rest'], c['away_rest'])} de su rival."
+        )
+    km = haversine_km(*HOME_STADIUMS[away], *HOME_STADIUMS[home])
+    if km >= 3000:
+        return f"{lead}; {nick(away)} viajan {fnum(km, 0)} km hasta {full(home)}."
+    if not c["dome"] and (c["wind"] or 0) >= 15:
+        return f"{lead}; con {fnum(c['wind'], 0)} mph de viento se espera menos juego aéreo."
+    if not c["dome"] and (c["temp"] if c["temp"] is not None else 60) <= 32:
+        return f"{lead}; el frío ({fnum(c['temp'], 0)} °F) es el dato diferencial."
+    if abs(c["home_out_lag"] - c["away_out_lag"]) >= 3:
+        more = home if c["home_out_lag"] > c["away_out_lag"] else away
+        return f"{lead}; {nick(more)} llegan con más bajas en el último parte ({max(c['home_out_lag'], c['away_out_lag'])})."
+    return f"{lead}; sin factores fuera de lo normal, el pronóstico sigue de cerca al mercado."
 
 
 def _books(og: dict, home: str, away: str) -> list[dict]:
@@ -332,6 +404,7 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
         loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
     )
     env.filters.update(num=fnum, signed=fsigned, pct=fpct, pp=fpp, stamp=stamp)
+    env.globals["status_es"] = STATUS_ES
     now = datetime.now(UTC)
     base_ctx = {
         "generated_at": now.strftime("%Y-%m-%d %H:%M UTC"),
@@ -344,12 +417,14 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
     }
 
     graded_by_id = {r["game_id"]: r for r in inputs["graded"]}
+    news_by_week = {k: N.load_news(N.news_path(*k, root=root)) for k in inputs["preds"]}
     week_pages: dict[tuple, list[dict]] = {}
     for key, d in inputs["preds"].items():
         og = {x["game_id"]: x for x in (inputs["odds"].get(key) or {}).get("games", [])}
         meta = inputs["odds"].get(key)
         week_pages[key] = [
-            _game(g, og.get(g["game_id"]), meta, graded_by_id.get(g["game_id"])) for g in d["games"]
+            _game(g, og.get(g["game_id"]), meta, graded_by_id.get(g["game_id"]), news_by_week[key])
+            for g in d["games"]
         ]
     for games in week_pages.values():
         games.sort(key=lambda x: x["kickoff_utc"])
