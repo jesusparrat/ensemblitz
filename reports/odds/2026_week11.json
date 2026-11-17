@@ -1,0 +1,4149 @@
+{
+ "season": 2026,
+ "week": 11,
+ "odds_fetched_at": "2026-11-17T20:54:38Z",
+ "predictions_generated_at": "2026-11-17T20:45:59Z",
+ "games": [
+  {
+   "game_id": "2026_11_IND_HOU",
+   "home": "HOU",
+   "away": "IND",
+   "kickoff_utc": "2026-11-20T01:15:00Z",
+   "our_home_prob": 0.8458,
+   "consensus_home_prob_shin": 0.8577,
+   "consensus_home_prob_mult": 0.8407,
+   "edge": -0.0119,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.17
+   },
+   "best_away_price": {
+    "book": "matchbook",
+    "price": 6.6
+   },
+   "ev_per_unit_best": {
+    "home": -0.0104,
+    "away": 0.0177
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.8555,
+     "p_home_mult": 0.8308,
+     "home_price": 1.12,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0097
+    },
+    "betanysports": {
+     "p_home_shin": 0.8625,
+     "p_home_mult": 0.8469,
+     "home_price": 1.13,
+     "away_price": 6.25,
+     "edge_vs_ours": -0.0167
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.8555,
+     "p_home_mult": 0.8308,
+     "home_price": 1.12,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0097
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.8492,
+     "p_home_mult": 0.8454,
+     "home_price": 1.17,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0034
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.8492,
+     "p_home_mult": 0.8454,
+     "home_price": 1.17,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0034
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.8477,
+     "p_home_mult": 0.8283,
+     "home_price": 1.14,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0019
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.8591,
+     "p_home_mult": 0.8415,
+     "home_price": 1.13,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0133
+    },
+    "betmgm": {
+     "p_home_shin": 0.8586,
+     "p_home_mult": 0.8457,
+     "home_price": 1.14,
+     "away_price": 6.25,
+     "edge_vs_ours": -0.0128
+    },
+    "betonlineag": {
+     "p_home_shin": 0.858,
+     "p_home_mult": 0.8447,
+     "home_price": 1.14,
+     "away_price": 6.2,
+     "edge_vs_ours": -0.0122
+    },
+    "betrivers": {
+     "p_home_shin": 0.8605,
+     "p_home_mult": 0.8437,
+     "home_price": 1.13,
+     "away_price": 6.1,
+     "edge_vs_ours": -0.0147
+    },
+    "betsson": {
+     "p_home_shin": 0.8515,
+     "p_home_mult": 0.8343,
+     "home_price": 1.14,
+     "away_price": 5.74,
+     "edge_vs_ours": -0.0057
+    },
+    "betus": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8479,
+     "home_price": 1.13,
+     "away_price": 6.3,
+     "edge_vs_ours": -0.0173
+    },
+    "betvictor": {
+     "p_home_shin": 0.8555,
+     "p_home_mult": 0.8308,
+     "home_price": 1.12,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0097
+    },
+    "betway": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0095
+    },
+    "bovada": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0095
+    },
+    "boylesports": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0095
+    },
+    "casumo": {
+     "p_home_shin": 0.8591,
+     "p_home_mult": 0.8415,
+     "home_price": 1.13,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0133
+    },
+    "codere_it": {
+     "p_home_shin": 0.8532,
+     "p_home_mult": 0.8321,
+     "home_price": 1.13,
+     "away_price": 5.6,
+     "edge_vs_ours": -0.0074
+    },
+    "coolbet": {
+     "p_home_shin": 0.8566,
+     "p_home_mult": 0.8425,
+     "home_price": 1.14,
+     "away_price": 6.1,
+     "edge_vs_ours": -0.0108
+    },
+    "coral": {
+     "p_home_shin": 0.8591,
+     "p_home_mult": 0.8415,
+     "home_price": 1.13,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0133
+    },
+    "draftkings": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0095
+    },
+    "everygame": {
+     "p_home_shin": 0.858,
+     "p_home_mult": 0.8447,
+     "home_price": 1.14,
+     "away_price": 6.2,
+     "edge_vs_ours": -0.0122
+    },
+    "fanduel": {
+     "p_home_shin": 0.8644,
+     "p_home_mult": 0.8499,
+     "home_price": 1.13,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0186
+    },
+    "gtbets": {
+     "p_home_shin": 0.8573,
+     "p_home_mult": 0.8436,
+     "home_price": 1.14,
+     "away_price": 6.15,
+     "edge_vs_ours": -0.0115
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.8591,
+     "p_home_mult": 0.8415,
+     "home_price": 1.13,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0133
+    },
+    "leovegas": {
+     "p_home_shin": 0.8503,
+     "p_home_mult": 0.8228,
+     "home_price": 1.12,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0045
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.8605,
+     "p_home_mult": 0.8437,
+     "home_price": 1.13,
+     "away_price": 6.1,
+     "edge_vs_ours": -0.0147
+    },
+    "lowvig": {
+     "p_home_shin": 0.858,
+     "p_home_mult": 0.8447,
+     "home_price": 1.14,
+     "away_price": 6.2,
+     "edge_vs_ours": -0.0122
+    },
+    "marathonbet": {
+     "p_home_shin": 0.8555,
+     "p_home_mult": 0.8358,
+     "home_price": 1.13,
+     "away_price": 5.75,
+     "edge_vs_ours": -0.0097
+    },
+    "matchbook": {
+     "p_home_shin": 0.8516,
+     "p_home_mult": 0.8494,
+     "home_price": 1.17,
+     "away_price": 6.6,
+     "edge_vs_ours": -0.0058
+    },
+    "mybookieag": {
+     "p_home_shin": 0.8683,
+     "p_home_mult": 0.8511,
+     "home_price": 1.12,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0225
+    },
+    "nordicbet": {
+     "p_home_shin": 0.8515,
+     "p_home_mult": 0.8343,
+     "home_price": 1.14,
+     "away_price": 5.74,
+     "edge_vs_ours": -0.0057
+    },
+    "paddypower": {
+     "p_home_shin": 0.8477,
+     "p_home_mult": 0.8283,
+     "home_price": 1.14,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0019
+    },
+    "pinnacle": {
+     "p_home_shin": 0.8574,
+     "p_home_mult": 0.8438,
+     "home_price": 1.14,
+     "away_price": 6.16,
+     "edge_vs_ours": -0.0116
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.8874,
+     "p_home_mult": 0.832,
+     "home_price": 1.03,
+     "away_price": 5.1,
+     "edge_vs_ours": -0.0416
+    },
+    "smarkets": {
+     "p_home_shin": 0.8477,
+     "p_home_mult": 0.838,
+     "home_price": 1.16,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0019
+    },
+    "sport888": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8427,
+     "home_price": 1.12,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0173
+    },
+    "tipico_de": {
+     "p_home_shin": 0.8698,
+     "p_home_mult": 0.8482,
+     "home_price": 1.11,
+     "away_price": 6.2,
+     "edge_vs_ours": -0.024
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.8605,
+     "p_home_mult": 0.8488,
+     "home_price": 1.14,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0147
+    },
+    "unibet_se": {
+     "p_home_shin": 0.8605,
+     "p_home_mult": 0.8488,
+     "home_price": 1.14,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.0147
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0095
+    },
+    "williamhill": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8427,
+     "home_price": 1.12,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0173
+    }
+   },
+   "book_spread_home": -12.5,
+   "book_total": 44.5,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_ARI_KC",
+   "home": "KC",
+   "away": "ARI",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.9076,
+   "consensus_home_prob_shin": 0.9182,
+   "consensus_home_prob_mult": 0.8984,
+   "edge": -0.0106,
+   "n_books": 41,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.08
+   },
+   "best_away_price": {
+    "book": "betfair_ex_eu",
+    "price": 12.0
+   },
+   "ev_per_unit_best": {
+    "home": -0.0198,
+    "away": 0.1088
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.9129,
+     "p_home_mult": 0.8891,
+     "home_price": 1.06,
+     "away_price": 8.5,
+     "edge_vs_ours": -0.0053
+    },
+    "betanysports": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0141
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.9202,
+     "p_home_mult": 0.8881,
+     "home_price": 1.04,
+     "away_price": 8.25,
+     "edge_vs_ours": -0.0126
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.9213,
+     "p_home_mult": 0.9174,
+     "home_price": 1.08,
+     "away_price": 12.0,
+     "edge_vs_ours": -0.0137
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.9213,
+     "p_home_mult": 0.9174,
+     "home_price": 1.08,
+     "away_price": 12.0,
+     "edge_vs_ours": -0.0137
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.9129,
+     "p_home_mult": 0.8891,
+     "home_price": 1.06,
+     "away_price": 8.5,
+     "edge_vs_ours": -0.0053
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.9101,
+     "p_home_mult": 0.891,
+     "home_price": 1.07,
+     "away_price": 8.75,
+     "edge_vs_ours": -0.0025
+    },
+    "betmgm": {
+     "p_home_shin": 0.9173,
+     "p_home_mult": 0.9033,
+     "home_price": 1.07,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0097
+    },
+    "betonlineag": {
+     "p_home_shin": 0.9213,
+     "p_home_mult": 0.9035,
+     "home_price": 1.06,
+     "away_price": 9.92,
+     "edge_vs_ours": -0.0137
+    },
+    "betrivers": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.013
+    },
+    "betsson": {
+     "p_home_shin": 0.9166,
+     "p_home_mult": 0.8954,
+     "home_price": 1.06,
+     "away_price": 9.07,
+     "edge_vs_ours": -0.009
+    },
+    "betus": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0141
+    },
+    "betvictor": {
+     "p_home_shin": 0.9129,
+     "p_home_mult": 0.8891,
+     "home_price": 1.06,
+     "away_price": 8.5,
+     "edge_vs_ours": -0.0053
+    },
+    "betway": {
+     "p_home_shin": 0.9117,
+     "p_home_mult": 0.8937,
+     "home_price": 1.07,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.0041
+    },
+    "bovada": {
+     "p_home_shin": 0.9117,
+     "p_home_mult": 0.8937,
+     "home_price": 1.07,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.0041
+    },
+    "boylesports": {
+     "p_home_shin": 0.9236,
+     "p_home_mult": 0.9005,
+     "home_price": 1.05,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.016
+    },
+    "casumo": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.013
+    },
+    "codere_it": {
+     "p_home_shin": 0.9218,
+     "p_home_mult": 0.8976,
+     "home_price": 1.05,
+     "away_price": 9.2,
+     "edge_vs_ours": -0.0142
+    },
+    "coolbet": {
+     "p_home_shin": 0.9147,
+     "p_home_mult": 0.8988,
+     "home_price": 1.07,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0071
+    },
+    "coral": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0115
+    },
+    "draftkings": {
+     "p_home_shin": 0.9147,
+     "p_home_mult": 0.8988,
+     "home_price": 1.07,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0071
+    },
+    "everygame": {
+     "p_home_shin": 0.9249,
+     "p_home_mult": 0.9028,
+     "home_price": 1.05,
+     "away_price": 9.75,
+     "edge_vs_ours": -0.0173
+    },
+    "fanduel": {
+     "p_home_shin": 0.9157,
+     "p_home_mult": 0.9006,
+     "home_price": 1.07,
+     "away_price": 9.7,
+     "edge_vs_ours": -0.0081
+    },
+    "gtbets": {
+     "p_home_shin": 0.916,
+     "p_home_mult": 0.9011,
+     "home_price": 1.07,
+     "away_price": 9.75,
+     "edge_vs_ours": -0.0084
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0115
+    },
+    "leovegas": {
+     "p_home_shin": 0.9048,
+     "p_home_mult": 0.8696,
+     "home_price": 1.05,
+     "away_price": 7.0,
+     "edge_vs_ours": 0.0028
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.013
+    },
+    "lowvig": {
+     "p_home_shin": 0.9213,
+     "p_home_mult": 0.9035,
+     "home_price": 1.06,
+     "away_price": 9.92,
+     "edge_vs_ours": -0.0137
+    },
+    "marathonbet": {
+     "p_home_shin": 0.9149,
+     "p_home_mult": 0.8925,
+     "home_price": 1.06,
+     "away_price": 8.8,
+     "edge_vs_ours": -0.0073
+    },
+    "matchbook": {
+     "p_home_shin": 0.9213,
+     "p_home_mult": 0.9174,
+     "home_price": 1.08,
+     "away_price": 12.0,
+     "edge_vs_ours": -0.0137
+    },
+    "mybookieag": {
+     "p_home_shin": 0.9257,
+     "p_home_mult": 0.9041,
+     "home_price": 1.05,
+     "away_price": 9.9,
+     "edge_vs_ours": -0.0181
+    },
+    "nordicbet": {
+     "p_home_shin": 0.9166,
+     "p_home_mult": 0.8954,
+     "home_price": 1.06,
+     "away_price": 9.07,
+     "edge_vs_ours": -0.009
+    },
+    "paddypower": {
+     "p_home_shin": 0.9129,
+     "p_home_mult": 0.8891,
+     "home_price": 1.06,
+     "away_price": 8.5,
+     "edge_vs_ours": -0.0053
+    },
+    "pinnacle": {
+     "p_home_shin": 0.9149,
+     "p_home_mult": 0.8992,
+     "home_price": 1.07,
+     "away_price": 9.55,
+     "edge_vs_ours": -0.0073
+    },
+    "smarkets": {
+     "p_home_shin": 0.9167,
+     "p_home_mult": 0.8824,
+     "home_price": 1.04,
+     "away_price": 7.8,
+     "edge_vs_ours": -0.0091
+    },
+    "sport888": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0115
+    },
+    "tipico_de": {
+     "p_home_shin": 0.9308,
+     "p_home_mult": 0.9058,
+     "home_price": 1.04,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0232
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.9204,
+     "p_home_mult": 0.9019,
+     "home_price": 1.06,
+     "away_price": 9.75,
+     "edge_vs_ours": -0.0128
+    },
+    "unibet_se": {
+     "p_home_shin": 0.9204,
+     "p_home_mult": 0.9019,
+     "home_price": 1.06,
+     "away_price": 9.75,
+     "edge_vs_ours": -0.0128
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.9241,
+     "p_home_mult": 0.9083,
+     "home_price": 1.06,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0165
+    },
+    "williamhill": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0115
+    }
+   },
+   "book_spread_home": -16.0,
+   "book_total": 41.5,
+   "our_margin_minus_book": 0.5,
+   "our_cover_prob_home": 0.5153
+  },
+  {
+   "game_id": "2026_11_BAL_CAR",
+   "home": "CAR",
+   "away": "BAL",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.5558,
+   "consensus_home_prob_shin": 0.5654,
+   "consensus_home_prob_mult": 0.5622,
+   "edge": -0.0096,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "matchbook",
+    "price": 1.75
+   },
+   "best_away_price": {
+    "book": "betfair_ex_eu",
+    "price": 2.26
+   },
+   "ev_per_unit_best": {
+    "home": -0.0274,
+    "away": 0.0039
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5628,
+     "home_price": 1.67,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.011
+    },
+    "betanysports": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.5649,
+     "p_home_mult": 0.56,
+     "home_price": 1.65,
+     "away_price": 2.1,
+     "edge_vs_ours": -0.0091
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.5695,
+     "p_home_mult": 0.5678,
+     "home_price": 1.72,
+     "away_price": 2.26,
+     "edge_vs_ours": -0.0137
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.5695,
+     "p_home_mult": 0.5678,
+     "home_price": 1.72,
+     "away_price": 2.26,
+     "edge_vs_ours": -0.0137
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.5509,
+     "p_home_mult": 0.5483,
+     "home_price": 1.73,
+     "away_price": 2.1,
+     "edge_vs_ours": 0.0049
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.5616,
+     "p_home_mult": 0.5584,
+     "home_price": 1.7,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.0058
+    },
+    "betmgm": {
+     "p_home_shin": 0.5686,
+     "p_home_mult": 0.5656,
+     "home_price": 1.69,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0128
+    },
+    "betonlineag": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "betrivers": {
+     "p_home_shin": 0.5752,
+     "p_home_mult": 0.5718,
+     "home_price": 1.67,
+     "away_price": 2.23,
+     "edge_vs_ours": -0.0194
+    },
+    "betsson": {
+     "p_home_shin": 0.5616,
+     "p_home_mult": 0.5584,
+     "home_price": 1.7,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.0058
+    },
+    "betus": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "betvictor": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5628,
+     "home_price": 1.67,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.011
+    },
+    "betway": {
+     "p_home_shin": 0.5686,
+     "p_home_mult": 0.5656,
+     "home_price": 1.69,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0128
+    },
+    "bovada": {
+     "p_home_shin": 0.5689,
+     "p_home_mult": 0.5663,
+     "home_price": 1.7,
+     "away_price": 2.22,
+     "edge_vs_ours": -0.0131
+    },
+    "boylesports": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5628,
+     "home_price": 1.67,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.011
+    },
+    "casumo": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5628,
+     "home_price": 1.67,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.011
+    },
+    "codere_it": {
+     "p_home_shin": 0.5622,
+     "p_home_mult": 0.5587,
+     "home_price": 1.69,
+     "away_price": 2.14,
+     "edge_vs_ours": -0.0064
+    },
+    "coolbet": {
+     "p_home_shin": 0.5613,
+     "p_home_mult": 0.559,
+     "home_price": 1.72,
+     "away_price": 2.18,
+     "edge_vs_ours": -0.0055
+    },
+    "coral": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5641,
+     "home_price": 1.7,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.011
+    },
+    "draftkings": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5641,
+     "home_price": 1.7,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.011
+    },
+    "everygame": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "fanduel": {
+     "p_home_shin": 0.5613,
+     "p_home_mult": 0.559,
+     "home_price": 1.72,
+     "away_price": 2.18,
+     "edge_vs_ours": -0.0055
+    },
+    "gtbets": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5641,
+     "home_price": 1.7,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.011
+    },
+    "leovegas": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5615,
+     "home_price": 1.64,
+     "away_price": 2.1,
+     "edge_vs_ours": -0.011
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.5752,
+     "p_home_mult": 0.5718,
+     "home_price": 1.67,
+     "away_price": 2.23,
+     "edge_vs_ours": -0.0194
+    },
+    "lowvig": {
+     "p_home_shin": 0.5651,
+     "p_home_mult": 0.5627,
+     "home_price": 1.71,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.0093
+    },
+    "marathonbet": {
+     "p_home_shin": 0.5486,
+     "p_home_mult": 0.5459,
+     "home_price": 1.73,
+     "away_price": 2.08,
+     "edge_vs_ours": 0.0072
+    },
+    "matchbook": {
+     "p_home_shin": 0.5645,
+     "p_home_mult": 0.5636,
+     "home_price": 1.75,
+     "away_price": 2.26,
+     "edge_vs_ours": -0.0087
+    },
+    "mybookieag": {
+     "p_home_shin": 0.5626,
+     "p_home_mult": 0.5596,
+     "home_price": 1.7,
+     "away_price": 2.16,
+     "edge_vs_ours": -0.0068
+    },
+    "nordicbet": {
+     "p_home_shin": 0.5616,
+     "p_home_mult": 0.5584,
+     "home_price": 1.7,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.0058
+    },
+    "paddypower": {
+     "p_home_shin": 0.5509,
+     "p_home_mult": 0.5483,
+     "home_price": 1.73,
+     "away_price": 2.1,
+     "edge_vs_ours": 0.0049
+    },
+    "pinnacle": {
+     "p_home_shin": 0.5692,
+     "p_home_mult": 0.5671,
+     "home_price": 1.71,
+     "away_price": 2.24,
+     "edge_vs_ours": -0.0134
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.5833,
+     "p_home_mult": 0.5714,
+     "home_price": 1.5,
+     "away_price": 2.0,
+     "edge_vs_ours": -0.0275
+    },
+    "smarkets": {
+     "p_home_shin": 0.5668,
+     "p_home_mult": 0.5641,
+     "home_price": 1.7,
+     "away_price": 2.2,
+     "edge_vs_ours": -0.011
+    },
+    "sport888": {
+     "p_home_shin": 0.5616,
+     "p_home_mult": 0.5584,
+     "home_price": 1.7,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.0058
+    },
+    "tipico_de": {
+     "p_home_shin": 0.556,
+     "p_home_mult": 0.5526,
+     "home_price": 1.7,
+     "away_price": 2.1,
+     "edge_vs_ours": -0.0002
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.5752,
+     "p_home_mult": 0.5718,
+     "home_price": 1.67,
+     "away_price": 2.23,
+     "edge_vs_ours": -0.0194
+    },
+    "unibet_se": {
+     "p_home_shin": 0.5752,
+     "p_home_mult": 0.5718,
+     "home_price": 1.67,
+     "away_price": 2.23,
+     "edge_vs_ours": -0.0194
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.5648,
+     "p_home_mult": 0.5619,
+     "home_price": 1.7,
+     "away_price": 2.18,
+     "edge_vs_ours": -0.009
+    },
+    "williamhill": {
+     "p_home_shin": 0.5616,
+     "p_home_mult": 0.5584,
+     "home_price": 1.7,
+     "away_price": 2.15,
+     "edge_vs_ours": -0.0058
+    }
+   },
+   "book_spread_home": -2.5,
+   "book_total": 44.0,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_JAX_NYG",
+   "home": "NYG",
+   "away": "JAX",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.2858,
+   "consensus_home_prob_shin": 0.2948,
+   "consensus_home_prob_mult": 0.3046,
+   "edge": -0.009,
+   "n_books": 40,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 3.3
+   },
+   "best_away_price": {
+    "book": "marathonbet",
+    "price": 1.44
+   },
+   "ev_per_unit_best": {
+    "home": -0.0569,
+    "away": 0.0284
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.299,
+     "p_home_mult": 0.3119,
+     "home_price": 3.0,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0132
+    },
+    "betanysports": {
+     "p_home_shin": 0.2889,
+     "p_home_mult": 0.2965,
+     "home_price": 3.25,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0031
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.2991,
+     "p_home_mult": 0.314,
+     "home_price": 2.95,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0133
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.2994,
+     "p_home_mult": 0.3008,
+     "home_price": 3.3,
+     "away_price": 1.42,
+     "edge_vs_ours": -0.0136
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.2994,
+     "p_home_mult": 0.3008,
+     "home_price": 3.3,
+     "away_price": 1.42,
+     "edge_vs_ours": -0.0136
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.2886,
+     "p_home_mult": 0.2982,
+     "home_price": 3.2,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0028
+    },
+    "betmgm": {
+     "p_home_shin": 0.2862,
+     "p_home_mult": 0.295,
+     "home_price": 3.25,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0004
+    },
+    "betonlineag": {
+     "p_home_shin": 0.2944,
+     "p_home_mult": 0.302,
+     "home_price": 3.19,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0086
+    },
+    "betrivers": {
+     "p_home_shin": 0.2886,
+     "p_home_mult": 0.2982,
+     "home_price": 3.2,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0028
+    },
+    "betsson": {
+     "p_home_shin": 0.2911,
+     "p_home_mult": 0.3016,
+     "home_price": 3.15,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0053
+    },
+    "betus": {
+     "p_home_shin": 0.2925,
+     "p_home_mult": 0.2993,
+     "home_price": 3.23,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0067
+    },
+    "betvictor": {
+     "p_home_shin": 0.299,
+     "p_home_mult": 0.3119,
+     "home_price": 3.0,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0132
+    },
+    "betway": {
+     "p_home_shin": 0.307,
+     "p_home_mult": 0.3166,
+     "home_price": 3.0,
+     "away_price": 1.39,
+     "edge_vs_ours": -0.0212
+    },
+    "bovada": {
+     "p_home_shin": 0.2913,
+     "p_home_mult": 0.2998,
+     "home_price": 3.2,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0055
+    },
+    "boylesports": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0078
+    },
+    "casumo": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0078
+    },
+    "codere_it": {
+     "p_home_shin": 0.2963,
+     "p_home_mult": 0.3084,
+     "home_price": 3.05,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0105
+    },
+    "coolbet": {
+     "p_home_shin": 0.2964,
+     "p_home_mult": 0.3046,
+     "home_price": 3.15,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0106
+    },
+    "coral": {
+     "p_home_shin": 0.2862,
+     "p_home_mult": 0.295,
+     "home_price": 3.25,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0004
+    },
+    "draftkings": {
+     "p_home_shin": 0.2964,
+     "p_home_mult": 0.3046,
+     "home_price": 3.15,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0106
+    },
+    "everygame": {
+     "p_home_shin": 0.2915,
+     "p_home_mult": 0.2981,
+     "home_price": 3.25,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0057
+    },
+    "fanduel": {
+     "p_home_shin": 0.3121,
+     "p_home_mult": 0.3197,
+     "home_price": 3.0,
+     "away_price": 1.41,
+     "edge_vs_ours": -0.0263
+    },
+    "gtbets": {
+     "p_home_shin": 0.2913,
+     "p_home_mult": 0.2998,
+     "home_price": 3.2,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0055
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.2862,
+     "p_home_mult": 0.295,
+     "home_price": 3.25,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0004
+    },
+    "leovegas": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3107,
+     "home_price": 2.95,
+     "away_price": 1.33,
+     "edge_vs_ours": -0.0078
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.2862,
+     "p_home_mult": 0.295,
+     "home_price": 3.25,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0004
+    },
+    "lowvig": {
+     "p_home_shin": 0.2944,
+     "p_home_mult": 0.302,
+     "home_price": 3.19,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0086
+    },
+    "marathonbet": {
+     "p_home_shin": 0.3359,
+     "p_home_mult": 0.3453,
+     "home_price": 2.73,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0501
+    },
+    "mybookieag": {
+     "p_home_shin": 0.2963,
+     "p_home_mult": 0.3065,
+     "home_price": 3.1,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0105
+    },
+    "nordicbet": {
+     "p_home_shin": 0.2911,
+     "p_home_mult": 0.3016,
+     "home_price": 3.15,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0053
+    },
+    "paddypower": {
+     "p_home_shin": 0.3165,
+     "p_home_mult": 0.3271,
+     "home_price": 2.88,
+     "away_price": 1.4,
+     "edge_vs_ours": -0.0307
+    },
+    "pinnacle": {
+     "p_home_shin": 0.292,
+     "p_home_mult": 0.2987,
+     "home_price": 3.24,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0062
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.2638,
+     "p_home_mult": 0.2976,
+     "home_price": 2.88,
+     "away_price": 1.22,
+     "edge_vs_ours": 0.022
+    },
+    "smarkets": {
+     "p_home_shin": 0.2965,
+     "p_home_mult": 0.3028,
+     "home_price": 3.2,
+     "away_price": 1.39,
+     "edge_vs_ours": -0.0107
+    },
+    "sport888": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0078
+    },
+    "tipico_de": {
+     "p_home_shin": 0.2909,
+     "p_home_mult": 0.3034,
+     "home_price": 3.1,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0051
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.2915,
+     "p_home_mult": 0.2981,
+     "home_price": 3.25,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0057
+    },
+    "unibet_se": {
+     "p_home_shin": 0.2915,
+     "p_home_mult": 0.2981,
+     "home_price": 3.25,
+     "away_price": 1.38,
+     "edge_vs_ours": -0.0057
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.2963,
+     "p_home_mult": 0.3065,
+     "home_price": 3.1,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0105
+    },
+    "williamhill": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0078
+    }
+   },
+   "book_spread_home": 6.0,
+   "book_total": 46.5,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_MIA_BUF",
+   "home": "BUF",
+   "away": "MIA",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.9041,
+   "consensus_home_prob_shin": 0.9204,
+   "consensus_home_prob_mult": 0.9018,
+   "edge": -0.0163,
+   "n_books": 41,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.08
+   },
+   "best_away_price": {
+    "book": "betfair_ex_eu",
+    "price": 11.5
+   },
+   "ev_per_unit_best": {
+    "home": -0.0236,
+    "away": 0.1028
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.0165
+    },
+    "betanysports": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0176
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.9137,
+     "p_home_mult": 0.884,
+     "home_price": 1.05,
+     "away_price": 8.0,
+     "edge_vs_ours": -0.0096
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.9195,
+     "p_home_mult": 0.9141,
+     "home_price": 1.08,
+     "away_price": 11.5,
+     "edge_vs_ours": -0.0154
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.9195,
+     "p_home_mult": 0.9141,
+     "home_price": 1.08,
+     "away_price": 11.5,
+     "edge_vs_ours": -0.0154
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.9161,
+     "p_home_mult": 0.8946,
+     "home_price": 1.06,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.012
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.9274,
+     "p_home_mult": 0.9071,
+     "home_price": 1.05,
+     "away_price": 10.25,
+     "edge_vs_ours": -0.0233
+    },
+    "betmgm": {
+     "p_home_shin": 0.9197,
+     "p_home_mult": 0.9075,
+     "home_price": 1.07,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0156
+    },
+    "betonlineag": {
+     "p_home_shin": 0.9222,
+     "p_home_mult": 0.905,
+     "home_price": 1.06,
+     "away_price": 10.1,
+     "edge_vs_ours": -0.0181
+    },
+    "betrivers": {
+     "p_home_shin": 0.9286,
+     "p_home_mult": 0.9091,
+     "home_price": 1.05,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0245
+    },
+    "betsson": {
+     "p_home_shin": 0.9166,
+     "p_home_mult": 0.8954,
+     "home_price": 1.06,
+     "away_price": 9.07,
+     "edge_vs_ours": -0.0125
+    },
+    "betus": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0176
+    },
+    "betvictor": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.0165
+    },
+    "betway": {
+     "p_home_shin": 0.9173,
+     "p_home_mult": 0.9033,
+     "home_price": 1.07,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0132
+    },
+    "bovada": {
+     "p_home_shin": 0.9147,
+     "p_home_mult": 0.8988,
+     "home_price": 1.07,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0106
+    },
+    "boylesports": {
+     "p_home_shin": 0.9206,
+     "p_home_mult": 0.8955,
+     "home_price": 1.05,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.0165
+    },
+    "casumo": {
+     "p_home_shin": 0.9236,
+     "p_home_mult": 0.9005,
+     "home_price": 1.05,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0195
+    },
+    "codere_it": {
+     "p_home_shin": 0.9149,
+     "p_home_mult": 0.8925,
+     "home_price": 1.06,
+     "away_price": 8.8,
+     "edge_vs_ours": -0.0108
+    },
+    "coolbet": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0176
+    },
+    "coral": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0176
+    },
+    "draftkings": {
+     "p_home_shin": 0.9147,
+     "p_home_mult": 0.8988,
+     "home_price": 1.07,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.0106
+    },
+    "everygame": {
+     "p_home_shin": 0.9249,
+     "p_home_mult": 0.9028,
+     "home_price": 1.05,
+     "away_price": 9.75,
+     "edge_vs_ours": -0.0208
+    },
+    "fanduel": {
+     "p_home_shin": 0.9254,
+     "p_home_mult": 0.9106,
+     "home_price": 1.06,
+     "away_price": 10.8,
+     "edge_vs_ours": -0.0213
+    },
+    "gtbets": {
+     "p_home_shin": 0.9173,
+     "p_home_mult": 0.9033,
+     "home_price": 1.07,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0132
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.9217,
+     "p_home_mult": 0.9042,
+     "home_price": 1.06,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0176
+    },
+    "leovegas": {
+     "p_home_shin": 0.9095,
+     "p_home_mult": 0.8772,
+     "home_price": 1.05,
+     "away_price": 7.5,
+     "edge_vs_ours": -0.0054
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.9286,
+     "p_home_mult": 0.9091,
+     "home_price": 1.05,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0245
+    },
+    "lowvig": {
+     "p_home_shin": 0.9222,
+     "p_home_mult": 0.905,
+     "home_price": 1.06,
+     "away_price": 10.1,
+     "edge_vs_ours": -0.0181
+    },
+    "marathonbet": {
+     "p_home_shin": 0.9149,
+     "p_home_mult": 0.8925,
+     "home_price": 1.06,
+     "away_price": 8.8,
+     "edge_vs_ours": -0.0108
+    },
+    "matchbook": {
+     "p_home_shin": 0.9195,
+     "p_home_mult": 0.9141,
+     "home_price": 1.08,
+     "away_price": 11.5,
+     "edge_vs_ours": -0.0154
+    },
+    "mybookieag": {
+     "p_home_shin": 0.9185,
+     "p_home_mult": 0.8987,
+     "home_price": 1.06,
+     "away_price": 9.4,
+     "edge_vs_ours": -0.0144
+    },
+    "nordicbet": {
+     "p_home_shin": 0.9166,
+     "p_home_mult": 0.8954,
+     "home_price": 1.06,
+     "away_price": 9.07,
+     "edge_vs_ours": -0.0125
+    },
+    "paddypower": {
+     "p_home_shin": 0.9161,
+     "p_home_mult": 0.8946,
+     "home_price": 1.06,
+     "away_price": 9.0,
+     "edge_vs_ours": -0.012
+    },
+    "pinnacle": {
+     "p_home_shin": 0.9166,
+     "p_home_mult": 0.9021,
+     "home_price": 1.07,
+     "away_price": 9.86,
+     "edge_vs_ours": -0.0125
+    },
+    "smarkets": {
+     "p_home_shin": 0.9218,
+     "p_home_mult": 0.9114,
+     "home_price": 1.07,
+     "away_price": 11.0,
+     "edge_vs_ours": -0.0177
+    },
+    "sport888": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.015
+    },
+    "tipico_de": {
+     "p_home_shin": 0.9308,
+     "p_home_mult": 0.9058,
+     "home_price": 1.04,
+     "away_price": 10.0,
+     "edge_vs_ours": -0.0267
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.9286,
+     "p_home_mult": 0.9091,
+     "home_price": 1.05,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0245
+    },
+    "unibet_se": {
+     "p_home_shin": 0.9286,
+     "p_home_mult": 0.9091,
+     "home_price": 1.05,
+     "away_price": 10.5,
+     "edge_vs_ours": -0.0245
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.015
+    },
+    "williamhill": {
+     "p_home_shin": 0.9191,
+     "p_home_mult": 0.8996,
+     "home_price": 1.06,
+     "away_price": 9.5,
+     "edge_vs_ours": -0.015
+    }
+   },
+   "book_spread_home": -16.5,
+   "book_total": 45.5,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_NO_CHI",
+   "home": "CHI",
+   "away": "NO",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.8452,
+   "consensus_home_prob_shin": 0.8474,
+   "consensus_home_prob_mult": 0.8304,
+   "edge": -0.0022,
+   "n_books": 41,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.17
+   },
+   "best_away_price": {
+    "book": "betfair_ex_eu",
+    "price": 6.4
+   },
+   "ev_per_unit_best": {
+    "home": -0.0111,
+    "away": -0.0093
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.8434,
+     "p_home_mult": 0.8216,
+     "home_price": 1.14,
+     "away_price": 5.25,
+     "edge_vs_ours": 0.0018
+    },
+    "betanysports": {
+     "p_home_shin": 0.8471,
+     "p_home_mult": 0.8321,
+     "home_price": 1.15,
+     "away_price": 5.7,
+     "edge_vs_ours": -0.0019
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.8555,
+     "p_home_mult": 0.8308,
+     "home_price": 1.12,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0103
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.8492,
+     "p_home_mult": 0.8454,
+     "home_price": 1.17,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.004
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.8492,
+     "p_home_mult": 0.8454,
+     "home_price": 1.17,
+     "away_price": 6.4,
+     "edge_vs_ours": -0.004
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8104,
+     "home_price": 1.17,
+     "away_price": 5.0,
+     "edge_vs_ours": 0.0178
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.8439,
+     "p_home_mult": 0.8271,
+     "home_price": 1.15,
+     "away_price": 5.5,
+     "edge_vs_ours": 0.0013
+    },
+    "betmgm": {
+     "p_home_shin": 0.8441,
+     "p_home_mult": 0.8321,
+     "home_price": 1.16,
+     "away_price": 5.75,
+     "edge_vs_ours": 0.0011
+    },
+    "betonlineag": {
+     "p_home_shin": 0.8405,
+     "p_home_mult": 0.8263,
+     "home_price": 1.16,
+     "away_price": 5.52,
+     "edge_vs_ours": 0.0047
+    },
+    "betrivers": {
+     "p_home_shin": 0.8455,
+     "p_home_mult": 0.8296,
+     "home_price": 1.15,
+     "away_price": 5.6,
+     "edge_vs_ours": -0.0003
+    },
+    "betsson": {
+     "p_home_shin": 0.8437,
+     "p_home_mult": 0.8268,
+     "home_price": 1.15,
+     "away_price": 5.49,
+     "edge_vs_ours": 0.0015
+    },
+    "betus": {
+     "p_home_shin": 0.85,
+     "p_home_mult": 0.8369,
+     "home_price": 1.15,
+     "away_price": 5.9,
+     "edge_vs_ours": -0.0048
+    },
+    "betvictor": {
+     "p_home_shin": 0.8434,
+     "p_home_mult": 0.8216,
+     "home_price": 1.14,
+     "away_price": 5.25,
+     "edge_vs_ours": 0.0018
+    },
+    "betway": {
+     "p_home_shin": 0.8364,
+     "p_home_mult": 0.8246,
+     "home_price": 1.17,
+     "away_price": 5.5,
+     "edge_vs_ours": 0.0088
+    },
+    "bovada": {
+     "p_home_shin": 0.8339,
+     "p_home_mult": 0.8206,
+     "home_price": 1.17,
+     "away_price": 5.35,
+     "edge_vs_ours": 0.0113
+    },
+    "boylesports": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8427,
+     "home_price": 1.12,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0179
+    },
+    "casumo": {
+     "p_home_shin": 0.8477,
+     "p_home_mult": 0.8283,
+     "home_price": 1.14,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0025
+    },
+    "codere_it": {
+     "p_home_shin": 0.8563,
+     "p_home_mult": 0.8369,
+     "home_price": 1.13,
+     "away_price": 5.8,
+     "edge_vs_ours": -0.0111
+    },
+    "coolbet": {
+     "p_home_shin": 0.8417,
+     "p_home_mult": 0.8284,
+     "home_price": 1.16,
+     "away_price": 5.6,
+     "edge_vs_ours": 0.0035
+    },
+    "coral": {
+     "p_home_shin": 0.8478,
+     "p_home_mult": 0.8333,
+     "home_price": 1.15,
+     "away_price": 5.75,
+     "edge_vs_ours": -0.0026
+    },
+    "draftkings": {
+     "p_home_shin": 0.85,
+     "p_home_mult": 0.8369,
+     "home_price": 1.15,
+     "away_price": 5.9,
+     "edge_vs_ours": -0.0048
+    },
+    "everygame": {
+     "p_home_shin": 0.8486,
+     "p_home_mult": 0.8345,
+     "home_price": 1.15,
+     "away_price": 5.8,
+     "edge_vs_ours": -0.0034
+    },
+    "fanduel": {
+     "p_home_shin": 0.85,
+     "p_home_mult": 0.8369,
+     "home_price": 1.15,
+     "away_price": 5.9,
+     "edge_vs_ours": -0.0048
+    },
+    "gtbets": {
+     "p_home_shin": 0.85,
+     "p_home_mult": 0.8369,
+     "home_price": 1.15,
+     "away_price": 5.9,
+     "edge_vs_ours": -0.0048
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.8478,
+     "p_home_mult": 0.8333,
+     "home_price": 1.15,
+     "away_price": 5.75,
+     "edge_vs_ours": -0.0026
+    },
+    "leovegas": {
+     "p_home_shin": 0.8444,
+     "p_home_mult": 0.814,
+     "home_price": 1.12,
+     "away_price": 4.9,
+     "edge_vs_ours": 0.0008
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.8417,
+     "p_home_mult": 0.8284,
+     "home_price": 1.16,
+     "away_price": 5.6,
+     "edge_vs_ours": 0.0035
+    },
+    "lowvig": {
+     "p_home_shin": 0.8405,
+     "p_home_mult": 0.8263,
+     "home_price": 1.16,
+     "away_price": 5.52,
+     "edge_vs_ours": 0.0047
+    },
+    "marathonbet": {
+     "p_home_shin": 0.8395,
+     "p_home_mult": 0.8203,
+     "home_price": 1.15,
+     "away_price": 5.25,
+     "edge_vs_ours": 0.0057
+    },
+    "mybookieag": {
+     "p_home_shin": 0.8591,
+     "p_home_mult": 0.8415,
+     "home_price": 1.13,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0139
+    },
+    "nordicbet": {
+     "p_home_shin": 0.8437,
+     "p_home_mult": 0.8268,
+     "home_price": 1.15,
+     "away_price": 5.49,
+     "edge_vs_ours": 0.0015
+    },
+    "paddypower": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8104,
+     "home_price": 1.17,
+     "away_price": 5.0,
+     "edge_vs_ours": 0.0178
+    },
+    "pinnacle": {
+     "p_home_shin": 0.8346,
+     "p_home_mult": 0.8216,
+     "home_price": 1.17,
+     "away_price": 5.39,
+     "edge_vs_ours": 0.0106
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.8709,
+     "p_home_mult": 0.819,
+     "home_price": 1.05,
+     "away_price": 4.75,
+     "edge_vs_ours": -0.0257
+    },
+    "smarkets": {
+     "p_home_shin": 0.8579,
+     "p_home_mult": 0.8295,
+     "home_price": 1.11,
+     "away_price": 5.4,
+     "edge_vs_ours": -0.0127
+    },
+    "sport888": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8427,
+     "home_price": 1.12,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0179
+    },
+    "tipico_de": {
+     "p_home_shin": 0.8698,
+     "p_home_mult": 0.8482,
+     "home_price": 1.11,
+     "away_price": 6.2,
+     "edge_vs_ours": -0.0246
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.8381,
+     "p_home_mult": 0.8272,
+     "home_price": 1.17,
+     "away_price": 5.6,
+     "edge_vs_ours": 0.0071
+    },
+    "unibet_se": {
+     "p_home_shin": 0.8381,
+     "p_home_mult": 0.8272,
+     "home_price": 1.17,
+     "away_price": 5.6,
+     "edge_vs_ours": 0.0071
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.8553,
+     "p_home_mult": 0.8403,
+     "home_price": 1.14,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0101
+    },
+    "williamhill": {
+     "p_home_shin": 0.8631,
+     "p_home_mult": 0.8427,
+     "home_price": 1.12,
+     "away_price": 6.0,
+     "edge_vs_ours": -0.0179
+    }
+   },
+   "book_spread_home": -11.5,
+   "book_total": 49.0,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_TB_DET",
+   "home": "DET",
+   "away": "TB",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.706,
+   "consensus_home_prob_shin": 0.7167,
+   "consensus_home_prob_mult": 0.7064,
+   "edge": -0.0107,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.39
+   },
+   "best_away_price": {
+    "book": "betfair_ex_eu",
+    "price": 3.4
+   },
+   "ev_per_unit_best": {
+    "home": -0.0187,
+    "away": -0.0004
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.7157,
+     "p_home_mult": 0.7011,
+     "home_price": 1.33,
+     "away_price": 3.12,
+     "edge_vs_ours": -0.0097
+    },
+    "betanysports": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.7175,
+     "p_home_mult": 0.7014,
+     "home_price": 1.32,
+     "away_price": 3.1,
+     "edge_vs_ours": -0.0115
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.7127,
+     "p_home_mult": 0.7098,
+     "home_price": 1.39,
+     "away_price": 3.4,
+     "edge_vs_ours": -0.0067
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.7127,
+     "p_home_mult": 0.7098,
+     "home_price": 1.39,
+     "away_price": 3.4,
+     "edge_vs_ours": -0.0067
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.701,
+     "p_home_mult": 0.6881,
+     "home_price": 1.36,
+     "away_price": 3.0,
+     "edge_vs_ours": 0.005
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.7114,
+     "p_home_mult": 0.7018,
+     "home_price": 1.36,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0054
+    },
+    "betmgm": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "betonlineag": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "betrivers": {
+     "p_home_shin": 0.7239,
+     "p_home_mult": 0.7143,
+     "home_price": 1.34,
+     "away_price": 3.35,
+     "edge_vs_ours": -0.0179
+    },
+    "betsson": {
+     "p_home_shin": 0.7141,
+     "p_home_mult": 0.7033,
+     "home_price": 1.35,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0081
+    },
+    "betus": {
+     "p_home_shin": 0.7184,
+     "p_home_mult": 0.7113,
+     "home_price": 1.36,
+     "away_price": 3.35,
+     "edge_vs_ours": -0.0124
+    },
+    "betvictor": {
+     "p_home_shin": 0.7157,
+     "p_home_mult": 0.7011,
+     "home_price": 1.33,
+     "away_price": 3.12,
+     "edge_vs_ours": -0.0097
+    },
+    "betway": {
+     "p_home_shin": 0.7138,
+     "p_home_mult": 0.705,
+     "home_price": 1.36,
+     "away_price": 3.25,
+     "edge_vs_ours": -0.0078
+    },
+    "bovada": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "boylesports": {
+     "p_home_shin": 0.7197,
+     "p_home_mult": 0.7064,
+     "home_price": 1.33,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0137
+    },
+    "casumo": {
+     "p_home_shin": 0.7197,
+     "p_home_mult": 0.7064,
+     "home_price": 1.33,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0137
+    },
+    "codere_it": {
+     "p_home_shin": 0.7169,
+     "p_home_mult": 0.7048,
+     "home_price": 1.34,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0109
+    },
+    "coolbet": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "coral": {
+     "p_home_shin": 0.7165,
+     "p_home_mult": 0.7065,
+     "home_price": 1.35,
+     "away_price": 3.25,
+     "edge_vs_ours": -0.0105
+    },
+    "draftkings": {
+     "p_home_shin": 0.7087,
+     "p_home_mult": 0.7002,
+     "home_price": 1.37,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0027
+    },
+    "everygame": {
+     "p_home_shin": 0.7134,
+     "p_home_mult": 0.7066,
+     "home_price": 1.37,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0074
+    },
+    "fanduel": {
+     "p_home_shin": 0.7087,
+     "p_home_mult": 0.7002,
+     "home_price": 1.37,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0027
+    },
+    "gtbets": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.7165,
+     "p_home_mult": 0.7065,
+     "home_price": 1.35,
+     "away_price": 3.25,
+     "edge_vs_ours": -0.0105
+    },
+    "leovegas": {
+     "p_home_shin": 0.7177,
+     "p_home_mult": 0.6995,
+     "home_price": 1.31,
+     "away_price": 3.05,
+     "edge_vs_ours": -0.0117
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.7211,
+     "p_home_mult": 0.7128,
+     "home_price": 1.35,
+     "away_price": 3.35,
+     "edge_vs_ours": -0.0151
+    },
+    "lowvig": {
+     "p_home_shin": 0.7161,
+     "p_home_mult": 0.7082,
+     "home_price": 1.36,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0101
+    },
+    "marathonbet": {
+     "p_home_shin": 0.7169,
+     "p_home_mult": 0.7048,
+     "home_price": 1.34,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0109
+    },
+    "matchbook": {
+     "p_home_shin": 0.7127,
+     "p_home_mult": 0.7098,
+     "home_price": 1.39,
+     "away_price": 3.4,
+     "edge_vs_ours": -0.0067
+    },
+    "mybookieag": {
+     "p_home_shin": 0.7188,
+     "p_home_mult": 0.7074,
+     "home_price": 1.34,
+     "away_price": 3.24,
+     "edge_vs_ours": -0.0128
+    },
+    "nordicbet": {
+     "p_home_shin": 0.7141,
+     "p_home_mult": 0.7033,
+     "home_price": 1.35,
+     "away_price": 3.2,
+     "edge_vs_ours": -0.0081
+    },
+    "paddypower": {
+     "p_home_shin": 0.701,
+     "p_home_mult": 0.6881,
+     "home_price": 1.36,
+     "away_price": 3.0,
+     "edge_vs_ours": 0.005
+    },
+    "pinnacle": {
+     "p_home_shin": 0.7166,
+     "p_home_mult": 0.7088,
+     "home_price": 1.36,
+     "away_price": 3.31,
+     "edge_vs_ours": -0.0106
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.7466,
+     "p_home_mult": 0.7126,
+     "home_price": 1.21,
+     "away_price": 3.0,
+     "edge_vs_ours": -0.0406
+    },
+    "smarkets": {
+     "p_home_shin": 0.7134,
+     "p_home_mult": 0.7066,
+     "home_price": 1.37,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0074
+    },
+    "sport888": {
+     "p_home_shin": 0.7244,
+     "p_home_mult": 0.7127,
+     "home_price": 1.33,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0184
+    },
+    "tipico_de": {
+     "p_home_shin": 0.7273,
+     "p_home_mult": 0.7143,
+     "home_price": 1.32,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0213
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.7206,
+     "p_home_mult": 0.7143,
+     "home_price": 1.36,
+     "away_price": 3.4,
+     "edge_vs_ours": -0.0146
+    },
+    "unibet_se": {
+     "p_home_shin": 0.7206,
+     "p_home_mult": 0.7143,
+     "home_price": 1.36,
+     "away_price": 3.4,
+     "edge_vs_ours": -0.0146
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.7165,
+     "p_home_mult": 0.7065,
+     "home_price": 1.35,
+     "away_price": 3.25,
+     "edge_vs_ours": -0.0105
+    },
+    "williamhill": {
+     "p_home_shin": 0.7244,
+     "p_home_mult": 0.7127,
+     "home_price": 1.33,
+     "away_price": 3.3,
+     "edge_vs_ours": -0.0184
+    }
+   },
+   "book_spread_home": -6.5,
+   "book_total": 45.0,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_TEN_DAL",
+   "home": "DAL",
+   "away": "TEN",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "our_home_prob": 0.7793,
+   "consensus_home_prob_shin": 0.7846,
+   "consensus_home_prob_mult": 0.7705,
+   "edge": -0.0053,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.28
+   },
+   "best_away_price": {
+    "book": "betrivers",
+    "price": 4.6
+   },
+   "ev_per_unit_best": {
+    "home": -0.0025,
+    "away": 0.0152
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.7848,
+     "p_home_mult": 0.7663,
+     "home_price": 1.22,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0055
+    },
+    "betanysports": {
+     "p_home_shin": 0.781,
+     "p_home_mult": 0.7706,
+     "home_price": 1.25,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0017
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.7714,
+     "p_home_mult": 0.7505,
+     "home_price": 1.23,
+     "away_price": 3.7,
+     "edge_vs_ours": 0.0079
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.7743,
+     "p_home_mult": 0.7706,
+     "home_price": 1.28,
+     "away_price": 4.3,
+     "edge_vs_ours": 0.005
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.7743,
+     "p_home_mult": 0.7706,
+     "home_price": 1.28,
+     "away_price": 4.3,
+     "edge_vs_ours": 0.005
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.7848,
+     "p_home_mult": 0.7663,
+     "home_price": 1.22,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0055
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.7842,
+     "p_home_mult": 0.7721,
+     "home_price": 1.24,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0049
+    },
+    "betmgm": {
+     "p_home_shin": 0.7878,
+     "p_home_mult": 0.7774,
+     "home_price": 1.24,
+     "away_price": 4.33,
+     "edge_vs_ours": -0.0085
+    },
+    "betonlineag": {
+     "p_home_shin": 0.788,
+     "p_home_mult": 0.7778,
+     "home_price": 1.24,
+     "away_price": 4.34,
+     "edge_vs_ours": -0.0087
+    },
+    "betrivers": {
+     "p_home_shin": 0.808,
+     "p_home_mult": 0.7931,
+     "home_price": 1.2,
+     "away_price": 4.6,
+     "edge_vs_ours": -0.0287
+    },
+    "betsson": {
+     "p_home_shin": 0.7863,
+     "p_home_mult": 0.7718,
+     "home_price": 1.23,
+     "away_price": 4.16,
+     "edge_vs_ours": -0.007
+    },
+    "betus": {
+     "p_home_shin": 0.781,
+     "p_home_mult": 0.7706,
+     "home_price": 1.25,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0017
+    },
+    "betvictor": {
+     "p_home_shin": 0.7848,
+     "p_home_mult": 0.7663,
+     "home_price": 1.22,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0055
+    },
+    "betway": {
+     "p_home_shin": 0.7667,
+     "p_home_mult": 0.75,
+     "home_price": 1.25,
+     "away_price": 3.75,
+     "edge_vs_ours": 0.0126
+    },
+    "bovada": {
+     "p_home_shin": 0.778,
+     "p_home_mult": 0.7664,
+     "home_price": 1.25,
+     "away_price": 4.1,
+     "edge_vs_ours": 0.0013
+    },
+    "boylesports": {
+     "p_home_shin": 0.7718,
+     "p_home_mult": 0.7573,
+     "home_price": 1.25,
+     "away_price": 3.9,
+     "edge_vs_ours": 0.0075
+    },
+    "casumo": {
+     "p_home_shin": 0.7848,
+     "p_home_mult": 0.7663,
+     "home_price": 1.22,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0055
+    },
+    "codere_it": {
+     "p_home_shin": 0.7718,
+     "p_home_mult": 0.7573,
+     "home_price": 1.25,
+     "away_price": 3.9,
+     "edge_vs_ours": 0.0075
+    },
+    "coolbet": {
+     "p_home_shin": 0.781,
+     "p_home_mult": 0.7706,
+     "home_price": 1.25,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0017
+    },
+    "coral": {
+     "p_home_shin": 0.7908,
+     "p_home_mult": 0.7749,
+     "home_price": 1.22,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0115
+    },
+    "draftkings": {
+     "p_home_shin": 0.7718,
+     "p_home_mult": 0.7605,
+     "home_price": 1.26,
+     "away_price": 4.0,
+     "edge_vs_ours": 0.0075
+    },
+    "everygame": {
+     "p_home_shin": 0.7869,
+     "p_home_mult": 0.7762,
+     "home_price": 1.24,
+     "away_price": 4.3,
+     "edge_vs_ours": -0.0076
+    },
+    "fanduel": {
+     "p_home_shin": 0.7987,
+     "p_home_mult": 0.7867,
+     "home_price": 1.22,
+     "away_price": 4.5,
+     "edge_vs_ours": -0.0194
+    },
+    "gtbets": {
+     "p_home_shin": 0.7842,
+     "p_home_mult": 0.7721,
+     "home_price": 1.24,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0049
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.7908,
+     "p_home_mult": 0.7749,
+     "home_price": 1.22,
+     "away_price": 4.2,
+     "edge_vs_ours": -0.0115
+    },
+    "leovegas": {
+     "p_home_shin": 0.7747,
+     "p_home_mult": 0.752,
+     "home_price": 1.22,
+     "away_price": 3.7,
+     "edge_vs_ours": 0.0046
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.808,
+     "p_home_mult": 0.7931,
+     "home_price": 1.2,
+     "away_price": 4.6,
+     "edge_vs_ours": -0.0287
+    },
+    "lowvig": {
+     "p_home_shin": 0.7789,
+     "p_home_mult": 0.7677,
+     "home_price": 1.25,
+     "away_price": 4.13,
+     "edge_vs_ours": 0.0004
+    },
+    "marathonbet": {
+     "p_home_shin": 0.7705,
+     "p_home_mult": 0.7554,
+     "home_price": 1.25,
+     "away_price": 3.86,
+     "edge_vs_ours": 0.0088
+    },
+    "matchbook": {
+     "p_home_shin": 0.777,
+     "p_home_mult": 0.7746,
+     "home_price": 1.28,
+     "away_price": 4.4,
+     "edge_vs_ours": 0.0023
+    },
+    "mybookieag": {
+     "p_home_shin": 0.7886,
+     "p_home_mult": 0.7751,
+     "home_price": 1.23,
+     "away_price": 4.24,
+     "edge_vs_ours": -0.0093
+    },
+    "nordicbet": {
+     "p_home_shin": 0.7863,
+     "p_home_mult": 0.7718,
+     "home_price": 1.23,
+     "away_price": 4.16,
+     "edge_vs_ours": -0.007
+    },
+    "paddypower": {
+     "p_home_shin": 0.7848,
+     "p_home_mult": 0.7663,
+     "home_price": 1.22,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0055
+    },
+    "pinnacle": {
+     "p_home_shin": 0.7755,
+     "p_home_mult": 0.7658,
+     "home_price": 1.26,
+     "away_price": 4.12,
+     "edge_vs_ours": 0.0038
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.8337,
+     "p_home_mult": 0.7859,
+     "home_price": 1.09,
+     "away_price": 4.0,
+     "edge_vs_ours": -0.0544
+    },
+    "smarkets": {
+     "p_home_shin": 0.7774,
+     "p_home_mult": 0.772,
+     "home_price": 1.27,
+     "away_price": 4.3,
+     "edge_vs_ours": 0.0019
+    },
+    "sport888": {
+     "p_home_shin": 0.775,
+     "p_home_mult": 0.7619,
+     "home_price": 1.25,
+     "away_price": 4.0,
+     "edge_vs_ours": 0.0043
+    },
+    "tipico_de": {
+     "p_home_shin": 0.7879,
+     "p_home_mult": 0.7707,
+     "home_price": 1.22,
+     "away_price": 4.1,
+     "edge_vs_ours": -0.0086
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.808,
+     "p_home_mult": 0.7931,
+     "home_price": 1.2,
+     "away_price": 4.6,
+     "edge_vs_ours": -0.0287
+    },
+    "unibet_se": {
+     "p_home_shin": 0.808,
+     "p_home_mult": 0.7931,
+     "home_price": 1.2,
+     "away_price": 4.6,
+     "edge_vs_ours": -0.0287
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.775,
+     "p_home_mult": 0.7619,
+     "home_price": 1.25,
+     "away_price": 4.0,
+     "edge_vs_ours": 0.0043
+    },
+    "williamhill": {
+     "p_home_shin": 0.775,
+     "p_home_mult": 0.7619,
+     "home_price": 1.25,
+     "away_price": 4.0,
+     "edge_vs_ours": 0.0043
+    }
+   },
+   "book_spread_home": -8.0,
+   "book_total": 55.0,
+   "our_margin_minus_book": 0.5,
+   "our_cover_prob_home": 0.5153
+  },
+  {
+   "game_id": "2026_11_NYJ_LAC",
+   "home": "LAC",
+   "away": "NYJ",
+   "kickoff_utc": "2026-11-22T21:05:00Z",
+   "our_home_prob": 0.604,
+   "consensus_home_prob_shin": 0.6221,
+   "consensus_home_prob_mult": 0.6161,
+   "edge": -0.0181,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.62
+   },
+   "best_away_price": {
+    "book": "everygame",
+    "price": 2.6
+   },
+   "ev_per_unit_best": {
+    "home": -0.0215,
+    "away": 0.0296
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6107,
+     "home_price": 1.53,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0145
+    },
+    "betanysports": {
+     "p_home_shin": 0.6145,
+     "p_home_mult": 0.6112,
+     "home_price": 1.59,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0105
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.6206,
+     "p_home_mult": 0.6122,
+     "home_price": 1.52,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0166
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.6118,
+     "p_home_mult": 0.6106,
+     "home_price": 1.62,
+     "away_price": 2.54,
+     "edge_vs_ours": -0.0078
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.6118,
+     "p_home_mult": 0.6106,
+     "home_price": 1.62,
+     "away_price": 2.54,
+     "edge_vs_ours": -0.0078
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "betmgm": {
+     "p_home_shin": 0.6247,
+     "p_home_mult": 0.6188,
+     "home_price": 1.54,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0207
+    },
+    "betonlineag": {
+     "p_home_shin": 0.6208,
+     "p_home_mult": 0.6171,
+     "home_price": 1.57,
+     "away_price": 2.53,
+     "edge_vs_ours": -0.0168
+    },
+    "betrivers": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "betsson": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6125,
+     "home_price": 1.55,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0145
+    },
+    "betus": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6143,
+     "home_price": 1.57,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0145
+    },
+    "betvictor": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6107,
+     "home_price": 1.53,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0145
+    },
+    "betway": {
+     "p_home_shin": 0.6144,
+     "p_home_mult": 0.6095,
+     "home_price": 1.57,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0104
+    },
+    "bovada": {
+     "p_home_shin": 0.6229,
+     "p_home_mult": 0.6186,
+     "home_price": 1.56,
+     "away_price": 2.53,
+     "edge_vs_ours": -0.0189
+    },
+    "boylesports": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "casumo": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6107,
+     "home_price": 1.53,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0145
+    },
+    "codere_it": {
+     "p_home_shin": 0.6227,
+     "p_home_mult": 0.6156,
+     "home_price": 1.53,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0187
+    },
+    "coolbet": {
+     "p_home_shin": 0.625,
+     "p_home_mult": 0.6201,
+     "home_price": 1.55,
+     "away_price": 2.53,
+     "edge_vs_ours": -0.021
+    },
+    "coral": {
+     "p_home_shin": 0.6226,
+     "p_home_mult": 0.6173,
+     "home_price": 1.55,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0186
+    },
+    "draftkings": {
+     "p_home_shin": 0.6205,
+     "p_home_mult": 0.6158,
+     "home_price": 1.56,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0165
+    },
+    "everygame": {
+     "p_home_shin": 0.6282,
+     "p_home_mult": 0.625,
+     "home_price": 1.56,
+     "away_price": 2.6,
+     "edge_vs_ours": -0.0242
+    },
+    "fanduel": {
+     "p_home_shin": 0.6278,
+     "p_home_mult": 0.6225,
+     "home_price": 1.54,
+     "away_price": 2.54,
+     "edge_vs_ours": -0.0238
+    },
+    "gtbets": {
+     "p_home_shin": 0.6205,
+     "p_home_mult": 0.6158,
+     "home_price": 1.56,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0165
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.6226,
+     "p_home_mult": 0.6173,
+     "home_price": 1.55,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0186
+    },
+    "leovegas": {
+     "p_home_shin": 0.6206,
+     "p_home_mult": 0.6104,
+     "home_price": 1.5,
+     "away_price": 2.35,
+     "edge_vs_ours": -0.0166
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "lowvig": {
+     "p_home_shin": 0.6208,
+     "p_home_mult": 0.6171,
+     "home_price": 1.57,
+     "away_price": 2.53,
+     "edge_vs_ours": -0.0168
+    },
+    "marathonbet": {
+     "p_home_shin": 0.5922,
+     "p_home_mult": 0.5872,
+     "home_price": 1.61,
+     "away_price": 2.29,
+     "edge_vs_ours": 0.0118
+    },
+    "matchbook": {
+     "p_home_shin": 0.6133,
+     "p_home_mult": 0.6124,
+     "home_price": 1.62,
+     "away_price": 2.56,
+     "edge_vs_ours": -0.0093
+    },
+    "mybookieag": {
+     "p_home_shin": 0.6239,
+     "p_home_mult": 0.6179,
+     "home_price": 1.54,
+     "away_price": 2.49,
+     "edge_vs_ours": -0.0199
+    },
+    "nordicbet": {
+     "p_home_shin": 0.6185,
+     "p_home_mult": 0.6125,
+     "home_price": 1.55,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0145
+    },
+    "paddypower": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "pinnacle": {
+     "p_home_shin": 0.6216,
+     "p_home_mult": 0.618,
+     "home_price": 1.57,
+     "away_price": 2.54,
+     "edge_vs_ours": -0.0176
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.643,
+     "p_home_mult": 0.623,
+     "home_price": 1.38,
+     "away_price": 2.28,
+     "edge_vs_ours": -0.039
+    },
+    "smarkets": {
+     "p_home_shin": 0.621,
+     "p_home_mult": 0.6118,
+     "home_price": 1.51,
+     "away_price": 2.38,
+     "edge_vs_ours": -0.017
+    },
+    "sport888": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "tipico_de": {
+     "p_home_shin": 0.6373,
+     "p_home_mult": 0.6296,
+     "home_price": 1.5,
+     "away_price": 2.55,
+     "edge_vs_ours": -0.0333
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "unibet_se": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.6226,
+     "p_home_mult": 0.6173,
+     "home_price": 1.55,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0186
+    },
+    "williamhill": {
+     "p_home_shin": 0.6268,
+     "p_home_mult": 0.6203,
+     "home_price": 1.53,
+     "away_price": 2.5,
+     "edge_vs_ours": -0.0228
+    }
+   },
+   "book_spread_home": -3.5,
+   "book_total": 41.0,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_LV_DEN",
+   "home": "DEN",
+   "away": "LV",
+   "kickoff_utc": "2026-11-22T21:25:00Z",
+   "our_home_prob": 0.8214,
+   "consensus_home_prob_shin": 0.8287,
+   "consensus_home_prob_mult": 0.8126,
+   "edge": -0.0073,
+   "n_books": 41,
+   "best_home_price": {
+    "book": "betfair_ex_eu",
+    "price": 1.2
+   },
+   "best_away_price": {
+    "book": "matchbook",
+    "price": 5.6
+   },
+   "ev_per_unit_best": {
+    "home": -0.0143,
+    "away": 0.0002
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.8232,
+     "p_home_mult": 0.804,
+     "home_price": 1.17,
+     "away_price": 4.8,
+     "edge_vs_ours": -0.0018
+    },
+    "betanysports": {
+     "p_home_shin": 0.8202,
+     "p_home_mult": 0.8078,
+     "home_price": 1.19,
+     "away_price": 5.0,
+     "edge_vs_ours": 0.0012
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.8306,
+     "p_home_mult": 0.8067,
+     "home_price": 1.15,
+     "away_price": 4.8,
+     "edge_vs_ours": -0.0092
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.8258,
+     "p_home_mult": 0.8209,
+     "home_price": 1.2,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0044
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.8258,
+     "p_home_mult": 0.8209,
+     "home_price": 1.2,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0044
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8104,
+     "home_price": 1.17,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.006
+    },
+    "betmgm": {
+     "p_home_shin": 0.8202,
+     "p_home_mult": 0.8078,
+     "home_price": 1.19,
+     "away_price": 5.0,
+     "edge_vs_ours": 0.0012
+    },
+    "betonlineag": {
+     "p_home_shin": 0.8219,
+     "p_home_mult": 0.8105,
+     "home_price": 1.19,
+     "away_price": 5.09,
+     "edge_vs_ours": -0.0005
+    },
+    "betrivers": {
+     "p_home_shin": 0.8349,
+     "p_home_mult": 0.8176,
+     "home_price": 1.16,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0135
+    },
+    "betsson": {
+     "p_home_shin": 0.8229,
+     "p_home_mult": 0.8078,
+     "home_price": 1.18,
+     "away_price": 4.96,
+     "edge_vs_ours": -0.0015
+    },
+    "betus": {
+     "p_home_shin": 0.8235,
+     "p_home_mult": 0.8129,
+     "home_price": 1.19,
+     "away_price": 5.17,
+     "edge_vs_ours": -0.0021
+    },
+    "betvictor": {
+     "p_home_shin": 0.8232,
+     "p_home_mult": 0.804,
+     "home_price": 1.17,
+     "away_price": 4.8,
+     "edge_vs_ours": -0.0018
+    },
+    "betway": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8104,
+     "home_price": 1.17,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.006
+    },
+    "bovada": {
+     "p_home_shin": 0.8257,
+     "p_home_mult": 0.8121,
+     "home_price": 1.18,
+     "away_price": 5.1,
+     "edge_vs_ours": -0.0043
+    },
+    "boylesports": {
+     "p_home_shin": 0.8386,
+     "p_home_mult": 0.8143,
+     "home_price": 1.14,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.0172
+    },
+    "casumo": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8104,
+     "home_price": 1.17,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.006
+    },
+    "codere_it": {
+     "p_home_shin": 0.8349,
+     "p_home_mult": 0.8176,
+     "home_price": 1.16,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0135
+    },
+    "coolbet": {
+     "p_home_shin": 0.8276,
+     "p_home_mult": 0.815,
+     "home_price": 1.18,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0062
+    },
+    "coral": {
+     "p_home_shin": 0.8237,
+     "p_home_mult": 0.8091,
+     "home_price": 1.18,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.0023
+    },
+    "draftkings": {
+     "p_home_shin": 0.8257,
+     "p_home_mult": 0.8121,
+     "home_price": 1.18,
+     "away_price": 5.1,
+     "edge_vs_ours": -0.0043
+    },
+    "everygame": {
+     "p_home_shin": 0.8212,
+     "p_home_mult": 0.8093,
+     "home_price": 1.19,
+     "away_price": 5.05,
+     "edge_vs_ours": 0.0002
+    },
+    "fanduel": {
+     "p_home_shin": 0.8257,
+     "p_home_mult": 0.8121,
+     "home_price": 1.18,
+     "away_price": 5.1,
+     "edge_vs_ours": -0.0043
+    },
+    "gtbets": {
+     "p_home_shin": 0.8257,
+     "p_home_mult": 0.8121,
+     "home_price": 1.18,
+     "away_price": 5.1,
+     "edge_vs_ours": -0.0043
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.8237,
+     "p_home_mult": 0.8091,
+     "home_price": 1.18,
+     "away_price": 5.0,
+     "edge_vs_ours": -0.0023
+    },
+    "leovegas": {
+     "p_home_shin": 0.8237,
+     "p_home_mult": 0.7965,
+     "home_price": 1.15,
+     "away_price": 4.5,
+     "edge_vs_ours": -0.0023
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.8349,
+     "p_home_mult": 0.8176,
+     "home_price": 1.16,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0135
+    },
+    "lowvig": {
+     "p_home_shin": 0.8219,
+     "p_home_mult": 0.8105,
+     "home_price": 1.19,
+     "away_price": 5.09,
+     "edge_vs_ours": -0.0005
+    },
+    "marathonbet": {
+     "p_home_shin": 0.8339,
+     "p_home_mult": 0.8162,
+     "home_price": 1.16,
+     "away_price": 5.15,
+     "edge_vs_ours": -0.0125
+    },
+    "matchbook": {
+     "p_home_shin": 0.8274,
+     "p_home_mult": 0.8235,
+     "home_price": 1.2,
+     "away_price": 5.6,
+     "edge_vs_ours": -0.006
+    },
+    "mybookieag": {
+     "p_home_shin": 0.8367,
+     "p_home_mult": 0.8204,
+     "home_price": 1.16,
+     "away_price": 5.3,
+     "edge_vs_ours": -0.0153
+    },
+    "nordicbet": {
+     "p_home_shin": 0.8229,
+     "p_home_mult": 0.8078,
+     "home_price": 1.18,
+     "away_price": 4.96,
+     "edge_vs_ours": -0.0015
+    },
+    "paddypower": {
+     "p_home_shin": 0.8056,
+     "p_home_mult": 0.7895,
+     "home_price": 1.2,
+     "away_price": 4.5,
+     "edge_vs_ours": 0.0158
+    },
+    "pinnacle": {
+     "p_home_shin": 0.8225,
+     "p_home_mult": 0.8114,
+     "home_price": 1.19,
+     "away_price": 5.12,
+     "edge_vs_ours": -0.0011
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.8606,
+     "p_home_mult": 0.8094,
+     "home_price": 1.06,
+     "away_price": 4.5,
+     "edge_vs_ours": -0.0392
+    },
+    "smarkets": {
+     "p_home_shin": 0.8276,
+     "p_home_mult": 0.8194,
+     "home_price": 1.19,
+     "away_price": 5.4,
+     "edge_vs_ours": -0.0062
+    },
+    "sport888": {
+     "p_home_shin": 0.8386,
+     "p_home_mult": 0.8189,
+     "home_price": 1.15,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0172
+    },
+    "tipico_de": {
+     "p_home_shin": 0.8477,
+     "p_home_mult": 0.8283,
+     "home_price": 1.14,
+     "away_price": 5.5,
+     "edge_vs_ours": -0.0263
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.8349,
+     "p_home_mult": 0.8176,
+     "home_price": 1.16,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0135
+    },
+    "unibet_se": {
+     "p_home_shin": 0.8349,
+     "p_home_mult": 0.8176,
+     "home_price": 1.16,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0135
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.8358,
+     "p_home_mult": 0.819,
+     "home_price": 1.16,
+     "away_price": 5.25,
+     "edge_vs_ours": -0.0144
+    },
+    "williamhill": {
+     "p_home_shin": 0.8386,
+     "p_home_mult": 0.8189,
+     "home_price": 1.15,
+     "away_price": 5.2,
+     "edge_vs_ours": -0.0172
+    }
+   },
+   "book_spread_home": -10.0,
+   "book_total": 40.5,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_PIT_PHI",
+   "home": "PHI",
+   "away": "PIT",
+   "kickoff_utc": "2026-11-22T21:25:00Z",
+   "our_home_prob": 0.3119,
+   "consensus_home_prob_shin": 0.3366,
+   "consensus_home_prob_mult": 0.3445,
+   "edge": -0.0247,
+   "n_books": 42,
+   "best_home_price": {
+    "book": "matchbook",
+    "price": 2.88
+   },
+   "best_away_price": {
+    "book": "betfair_sb_uk",
+    "price": 1.5
+   },
+   "ev_per_unit_best": {
+    "home": -0.1017,
+    "away": 0.0321
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betano_uk": {
+     "p_home_shin": 0.328,
+     "p_home_mult": 0.3415,
+     "home_price": 2.7,
+     "away_price": 1.4,
+     "edge_vs_ours": -0.0161
+    },
+    "betanysports": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.3366,
+     "p_home_mult": 0.3489,
+     "home_price": 2.65,
+     "away_price": 1.42,
+     "edge_vs_ours": -0.0247
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.3393,
+     "p_home_mult": 0.3425,
+     "home_price": 2.86,
+     "away_price": 1.49,
+     "edge_vs_ours": -0.0274
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.3393,
+     "p_home_mult": 0.3425,
+     "home_price": 2.86,
+     "away_price": 1.49,
+     "edge_vs_ours": -0.0274
+    },
+    "betfair_sb_uk": {
+     "p_home_shin": 0.3568,
+     "p_home_mult": 0.3632,
+     "home_price": 2.63,
+     "away_price": 1.5,
+     "edge_vs_ours": -0.0449
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "betmgm": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "betonlineag": {
+     "p_home_shin": 0.33,
+     "p_home_mult": 0.3364,
+     "home_price": 2.86,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0181
+    },
+    "betrivers": {
+     "p_home_shin": 0.3417,
+     "p_home_mult": 0.3483,
+     "home_price": 2.75,
+     "away_price": 1.47,
+     "edge_vs_ours": -0.0298
+    },
+    "betsson": {
+     "p_home_shin": 0.337,
+     "p_home_mult": 0.3452,
+     "home_price": 2.75,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0251
+    },
+    "betus": {
+     "p_home_shin": 0.3365,
+     "p_home_mult": 0.3419,
+     "home_price": 2.83,
+     "away_price": 1.47,
+     "edge_vs_ours": -0.0246
+    },
+    "betvictor": {
+     "p_home_shin": 0.328,
+     "p_home_mult": 0.3415,
+     "home_price": 2.7,
+     "away_price": 1.4,
+     "edge_vs_ours": -0.0161
+    },
+    "betway": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    },
+    "bovada": {
+     "p_home_shin": 0.3282,
+     "p_home_mult": 0.3357,
+     "home_price": 2.85,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0163
+    },
+    "boylesports": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    },
+    "casumo": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    },
+    "codere_it": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    },
+    "coolbet": {
+     "p_home_shin": 0.3348,
+     "p_home_mult": 0.3411,
+     "home_price": 2.82,
+     "away_price": 1.46,
+     "edge_vs_ours": -0.0229
+    },
+    "coral": {
+     "p_home_shin": 0.3313,
+     "p_home_mult": 0.3396,
+     "home_price": 2.8,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0194
+    },
+    "draftkings": {
+     "p_home_shin": 0.3361,
+     "p_home_mult": 0.3427,
+     "home_price": 2.8,
+     "away_price": 1.46,
+     "edge_vs_ours": -0.0242
+    },
+    "everygame": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "fanduel": {
+     "p_home_shin": 0.3433,
+     "p_home_mult": 0.3491,
+     "home_price": 2.76,
+     "away_price": 1.48,
+     "edge_vs_ours": -0.0314
+    },
+    "gtbets": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.3313,
+     "p_home_mult": 0.3396,
+     "home_price": 2.8,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0194
+    },
+    "leovegas": {
+     "p_home_shin": 0.3402,
+     "p_home_mult": 0.3532,
+     "home_price": 2.6,
+     "away_price": 1.42,
+     "edge_vs_ours": -0.0283
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.3417,
+     "p_home_mult": 0.3483,
+     "home_price": 2.75,
+     "away_price": 1.47,
+     "edge_vs_ours": -0.0298
+    },
+    "lowvig": {
+     "p_home_shin": 0.33,
+     "p_home_mult": 0.3364,
+     "home_price": 2.86,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0181
+    },
+    "marathonbet": {
+     "p_home_shin": 0.3493,
+     "p_home_mult": 0.3577,
+     "home_price": 2.64,
+     "away_price": 1.47,
+     "edge_vs_ours": -0.0374
+    },
+    "matchbook": {
+     "p_home_shin": 0.3403,
+     "p_home_mult": 0.3425,
+     "home_price": 2.88,
+     "away_price": 1.5,
+     "edge_vs_ours": -0.0284
+    },
+    "mybookieag": {
+     "p_home_shin": 0.3357,
+     "p_home_mult": 0.3436,
+     "home_price": 2.77,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0238
+    },
+    "nordicbet": {
+     "p_home_shin": 0.337,
+     "p_home_mult": 0.3452,
+     "home_price": 2.75,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0251
+    },
+    "paddypower": {
+     "p_home_shin": 0.3575,
+     "p_home_mult": 0.3641,
+     "home_price": 2.62,
+     "away_price": 1.5,
+     "edge_vs_ours": -0.0456
+    },
+    "pinnacle": {
+     "p_home_shin": 0.3311,
+     "p_home_mult": 0.3364,
+     "home_price": 2.88,
+     "away_price": 1.46,
+     "edge_vs_ours": -0.0192
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.3228,
+     "p_home_mult": 0.3474,
+     "home_price": 2.48,
+     "away_price": 1.32,
+     "edge_vs_ours": -0.0109
+    },
+    "smarkets": {
+     "p_home_shin": 0.3348,
+     "p_home_mult": 0.3411,
+     "home_price": 2.82,
+     "away_price": 1.46,
+     "edge_vs_ours": -0.0229
+    },
+    "sport888": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    },
+    "tipico_de": {
+     "p_home_shin": 0.3404,
+     "p_home_mult": 0.3494,
+     "home_price": 2.7,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0285
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.343,
+     "p_home_mult": 0.3473,
+     "home_price": 2.8,
+     "away_price": 1.49,
+     "edge_vs_ours": -0.0311
+    },
+    "unibet_se": {
+     "p_home_shin": 0.343,
+     "p_home_mult": 0.3473,
+     "home_price": 2.8,
+     "away_price": 1.49,
+     "edge_vs_ours": -0.0311
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.3337,
+     "p_home_mult": 0.3412,
+     "home_price": 2.8,
+     "away_price": 1.45,
+     "edge_vs_ours": -0.0218
+    },
+    "williamhill": {
+     "p_home_shin": 0.3346,
+     "p_home_mult": 0.3437,
+     "home_price": 2.75,
+     "away_price": 1.44,
+     "edge_vs_ours": -0.0227
+    }
+   },
+   "book_spread_home": 4.5,
+   "book_total": 38.5,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_MIN_SF",
+   "home": "SF",
+   "away": "MIN",
+   "kickoff_utc": "2026-11-23T01:20:00Z",
+   "our_home_prob": 0.5997,
+   "consensus_home_prob_shin": 0.6012,
+   "consensus_home_prob_mult": 0.5966,
+   "edge": -0.0015,
+   "n_books": 39,
+   "best_home_price": {
+    "book": "matchbook",
+    "price": 1.66
+   },
+   "best_away_price": {
+    "book": "betway",
+    "price": 2.45
+   },
+   "ev_per_unit_best": {
+    "home": -0.0045,
+    "away": -0.0193
+   },
+   "best_side": "home",
+   "flag_large_disagreement": false,
+   "books": {
+    "betanysports": {
+     "p_home_shin": 0.5903,
+     "p_home_mult": 0.5875,
+     "home_price": 1.65,
+     "away_price": 2.35,
+     "edge_vs_ours": 0.0094
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.5942,
+     "p_home_mult": 0.5875,
+     "home_price": 1.58,
+     "away_price": 2.25,
+     "edge_vs_ours": 0.0055
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.5981,
+     "p_home_mult": 0.5966,
+     "home_price": 1.65,
+     "away_price": 2.44,
+     "edge_vs_ours": 0.0016
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.5981,
+     "p_home_mult": 0.5966,
+     "home_price": 1.65,
+     "away_price": 2.44,
+     "edge_vs_ours": 0.0016
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.5997,
+     "p_home_mult": 0.5949,
+     "home_price": 1.6,
+     "away_price": 2.35,
+     "edge_vs_ours": -0.0
+    },
+    "betmgm": {
+     "p_home_shin": 0.6005,
+     "p_home_mult": 0.5965,
+     "home_price": 1.61,
+     "away_price": 2.38,
+     "edge_vs_ours": -0.0008
+    },
+    "betonlineag": {
+     "p_home_shin": 0.6003,
+     "p_home_mult": 0.597,
+     "home_price": 1.62,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0006
+    },
+    "betrivers": {
+     "p_home_shin": 0.6101,
+     "p_home_mult": 0.6045,
+     "home_price": 1.57,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0104
+    },
+    "betsson": {
+     "p_home_shin": 0.6026,
+     "p_home_mult": 0.5975,
+     "home_price": 1.59,
+     "away_price": 2.36,
+     "edge_vs_ours": -0.0029
+    },
+    "betus": {
+     "p_home_shin": 0.5986,
+     "p_home_mult": 0.595,
+     "home_price": 1.62,
+     "away_price": 2.38,
+     "edge_vs_ours": 0.0011
+    },
+    "betway": {
+     "p_home_shin": 0.6104,
+     "p_home_mult": 0.6064,
+     "home_price": 1.59,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0107
+    },
+    "bovada": {
+     "p_home_shin": 0.6067,
+     "p_home_mult": 0.603,
+     "home_price": 1.6,
+     "away_price": 2.43,
+     "edge_vs_ours": -0.007
+    },
+    "boylesports": {
+     "p_home_shin": 0.6011,
+     "p_home_mult": 0.5943,
+     "home_price": 1.57,
+     "away_price": 2.3,
+     "edge_vs_ours": -0.0014
+    },
+    "casumo": {
+     "p_home_shin": 0.6057,
+     "p_home_mult": 0.5995,
+     "home_price": 1.57,
+     "away_price": 2.35,
+     "edge_vs_ours": -0.006
+    },
+    "codere_it": {
+     "p_home_shin": 0.5989,
+     "p_home_mult": 0.5934,
+     "home_price": 1.59,
+     "away_price": 2.32,
+     "edge_vs_ours": 0.0008
+    },
+    "coolbet": {
+     "p_home_shin": 0.605,
+     "p_home_mult": 0.601,
+     "home_price": 1.6,
+     "away_price": 2.41,
+     "edge_vs_ours": -0.0053
+    },
+    "coral": {
+     "p_home_shin": 0.5996,
+     "p_home_mult": 0.5955,
+     "home_price": 1.61,
+     "away_price": 2.37,
+     "edge_vs_ours": 0.0001
+    },
+    "draftkings": {
+     "p_home_shin": 0.5968,
+     "p_home_mult": 0.593,
+     "home_price": 1.62,
+     "away_price": 2.36,
+     "edge_vs_ours": 0.0029
+    },
+    "everygame": {
+     "p_home_shin": 0.6003,
+     "p_home_mult": 0.597,
+     "home_price": 1.62,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0006
+    },
+    "fanduel": {
+     "p_home_shin": 0.6005,
+     "p_home_mult": 0.5965,
+     "home_price": 1.61,
+     "away_price": 2.38,
+     "edge_vs_ours": -0.0008
+    },
+    "gtbets": {
+     "p_home_shin": 0.6022,
+     "p_home_mult": 0.5985,
+     "home_price": 1.61,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0025
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.5996,
+     "p_home_mult": 0.5955,
+     "home_price": 1.61,
+     "away_price": 2.37,
+     "edge_vs_ours": 0.0001
+    },
+    "leovegas": {
+     "p_home_shin": 0.6004,
+     "p_home_mult": 0.5921,
+     "home_price": 1.55,
+     "away_price": 2.25,
+     "edge_vs_ours": -0.0007
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.6067,
+     "p_home_mult": 0.603,
+     "home_price": 1.6,
+     "away_price": 2.43,
+     "edge_vs_ours": -0.007
+    },
+    "lowvig": {
+     "p_home_shin": 0.6003,
+     "p_home_mult": 0.597,
+     "home_price": 1.62,
+     "away_price": 2.4,
+     "edge_vs_ours": -0.0006
+    },
+    "marathonbet": {
+     "p_home_shin": 0.5807,
+     "p_home_mult": 0.5762,
+     "home_price": 1.64,
+     "away_price": 2.23,
+     "edge_vs_ours": 0.019
+    },
+    "matchbook": {
+     "p_home_shin": 0.5963,
+     "p_home_mult": 0.5951,
+     "home_price": 1.66,
+     "away_price": 2.44,
+     "edge_vs_ours": 0.0034
+    },
+    "mybookieag": {
+     "p_home_shin": 0.5997,
+     "p_home_mult": 0.5949,
+     "home_price": 1.6,
+     "away_price": 2.35,
+     "edge_vs_ours": -0.0
+    },
+    "nordicbet": {
+     "p_home_shin": 0.6026,
+     "p_home_mult": 0.5975,
+     "home_price": 1.59,
+     "away_price": 2.36,
+     "edge_vs_ours": -0.0029
+    },
+    "paddypower": {
+     "p_home_shin": 0.5864,
+     "p_home_mult": 0.5814,
+     "home_price": 1.62,
+     "away_price": 2.25,
+     "edge_vs_ours": 0.0133
+    },
+    "pinnacle": {
+     "p_home_shin": 0.6065,
+     "p_home_mult": 0.6034,
+     "home_price": 1.61,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0068
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.6217,
+     "p_home_mult": 0.6045,
+     "home_price": 1.42,
+     "away_price": 2.17,
+     "edge_vs_ours": -0.022
+    },
+    "smarkets": {
+     "p_home_shin": 0.5984,
+     "p_home_mult": 0.5955,
+     "home_price": 1.63,
+     "away_price": 2.4,
+     "edge_vs_ours": 0.0013
+    },
+    "sport888": {
+     "p_home_shin": 0.6084,
+     "p_home_mult": 0.6025,
+     "home_price": 1.57,
+     "away_price": 2.38,
+     "edge_vs_ours": -0.0087
+    },
+    "tipico_de": {
+     "p_home_shin": 0.5951,
+     "p_home_mult": 0.5897,
+     "home_price": 1.6,
+     "away_price": 2.3,
+     "edge_vs_ours": 0.0046
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.6084,
+     "p_home_mult": 0.6049,
+     "home_price": 1.6,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0087
+    },
+    "unibet_se": {
+     "p_home_shin": 0.6084,
+     "p_home_mult": 0.6049,
+     "home_price": 1.6,
+     "away_price": 2.45,
+     "edge_vs_ours": -0.0087
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.5997,
+     "p_home_mult": 0.5949,
+     "home_price": 1.6,
+     "away_price": 2.35,
+     "edge_vs_ours": -0.0
+    },
+    "williamhill": {
+     "p_home_shin": 0.6084,
+     "p_home_mult": 0.6025,
+     "home_price": 1.57,
+     "away_price": 2.38,
+     "edge_vs_ours": -0.0087
+    }
+   },
+   "book_spread_home": -3.0,
+   "book_total": 46.0,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  },
+  {
+   "game_id": "2026_11_CIN_WAS",
+   "home": "WAS",
+   "away": "CIN",
+   "kickoff_utc": "2026-11-24T01:15:00Z",
+   "our_home_prob": 0.2524,
+   "consensus_home_prob_shin": 0.2826,
+   "consensus_home_prob_mult": 0.2935,
+   "edge": -0.0302,
+   "n_books": 39,
+   "best_home_price": {
+    "book": "marathonbet",
+    "price": 3.45
+   },
+   "best_away_price": {
+    "book": "unibet_uk",
+    "price": 1.37
+   },
+   "ev_per_unit_best": {
+    "home": -0.1292,
+    "away": 0.0242
+   },
+   "best_side": "away",
+   "flag_large_disagreement": false,
+   "books": {
+    "betanysports": {
+     "p_home_shin": 0.2839,
+     "p_home_mult": 0.2918,
+     "home_price": 3.3,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0315
+    },
+    "betclic_fr": {
+     "p_home_shin": 0.2991,
+     "p_home_mult": 0.314,
+     "home_price": 2.95,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0467
+    },
+    "betfair_ex_eu": {
+     "p_home_shin": 0.2831,
+     "p_home_mult": 0.2952,
+     "home_price": 3.2,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0307
+    },
+    "betfair_ex_uk": {
+     "p_home_shin": 0.2831,
+     "p_home_mult": 0.2952,
+     "home_price": 3.2,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0307
+    },
+    "betfred_uk": {
+     "p_home_shin": 0.2756,
+     "p_home_mult": 0.2873,
+     "home_price": 3.3,
+     "away_price": 1.33,
+     "edge_vs_ours": -0.0232
+    },
+    "betmgm": {
+     "p_home_shin": 0.2811,
+     "p_home_mult": 0.2903,
+     "home_price": 3.3,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0287
+    },
+    "betonlineag": {
+     "p_home_shin": 0.2793,
+     "p_home_mult": 0.2878,
+     "home_price": 3.34,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0269
+    },
+    "betrivers": {
+     "p_home_shin": 0.2761,
+     "p_home_mult": 0.2857,
+     "home_price": 3.35,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0237
+    },
+    "betsson": {
+     "p_home_shin": 0.2802,
+     "p_home_mult": 0.2913,
+     "home_price": 3.26,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0278
+    },
+    "betus": {
+     "p_home_shin": 0.2816,
+     "p_home_mult": 0.2887,
+     "home_price": 3.35,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0292
+    },
+    "betway": {
+     "p_home_shin": 0.2711,
+     "p_home_mult": 0.2812,
+     "home_price": 3.4,
+     "away_price": 1.33,
+     "edge_vs_ours": -0.0187
+    },
+    "bovada": {
+     "p_home_shin": 0.2789,
+     "p_home_mult": 0.2872,
+     "home_price": 3.35,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0265
+    },
+    "boylesports": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0412
+    },
+    "casumo": {
+     "p_home_shin": 0.2803,
+     "p_home_mult": 0.2936,
+     "home_price": 3.2,
+     "away_price": 1.33,
+     "edge_vs_ours": -0.0279
+    },
+    "codere_it": {
+     "p_home_shin": 0.2963,
+     "p_home_mult": 0.3084,
+     "home_price": 3.05,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0439
+    },
+    "coolbet": {
+     "p_home_shin": 0.2789,
+     "p_home_mult": 0.2872,
+     "home_price": 3.35,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0265
+    },
+    "coral": {
+     "p_home_shin": 0.2811,
+     "p_home_mult": 0.2903,
+     "home_price": 3.3,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0287
+    },
+    "draftkings": {
+     "p_home_shin": 0.2761,
+     "p_home_mult": 0.2857,
+     "home_price": 3.35,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0237
+    },
+    "everygame": {
+     "p_home_shin": 0.2794,
+     "p_home_mult": 0.2857,
+     "home_price": 3.4,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.027
+    },
+    "fanduel": {
+     "p_home_shin": 0.2862,
+     "p_home_mult": 0.295,
+     "home_price": 3.25,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0338
+    },
+    "gtbets": {
+     "p_home_shin": 0.2761,
+     "p_home_mult": 0.2857,
+     "home_price": 3.35,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0237
+    },
+    "ladbrokes_uk": {
+     "p_home_shin": 0.2811,
+     "p_home_mult": 0.2903,
+     "home_price": 3.3,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0287
+    },
+    "leovegas": {
+     "p_home_shin": 0.2879,
+     "p_home_mult": 0.3056,
+     "home_price": 3.0,
+     "away_price": 1.32,
+     "edge_vs_ours": -0.0355
+    },
+    "leovegas_se": {
+     "p_home_shin": 0.2789,
+     "p_home_mult": 0.2872,
+     "home_price": 3.35,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0265
+    },
+    "lowvig": {
+     "p_home_shin": 0.2848,
+     "p_home_mult": 0.2931,
+     "home_price": 3.28,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0324
+    },
+    "marathonbet": {
+     "p_home_shin": 0.2603,
+     "p_home_mult": 0.2737,
+     "home_price": 3.45,
+     "away_price": 1.3,
+     "edge_vs_ours": -0.0079
+    },
+    "matchbook": {
+     "p_home_shin": 0.2839,
+     "p_home_mult": 0.2918,
+     "home_price": 3.3,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0315
+    },
+    "mybookieag": {
+     "p_home_shin": 0.2901,
+     "p_home_mult": 0.3002,
+     "home_price": 3.17,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0377
+    },
+    "nordicbet": {
+     "p_home_shin": 0.2802,
+     "p_home_mult": 0.2913,
+     "home_price": 3.26,
+     "away_price": 1.34,
+     "edge_vs_ours": -0.0278
+    },
+    "paddypower": {
+     "p_home_shin": 0.299,
+     "p_home_mult": 0.3119,
+     "home_price": 3.0,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0466
+    },
+    "pinnacle": {
+     "p_home_shin": 0.2776,
+     "p_home_mult": 0.2854,
+     "home_price": 3.38,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0252
+    },
+    "pmu_fr": {
+     "p_home_shin": 0.2534,
+     "p_home_mult": 0.2874,
+     "home_price": 3.0,
+     "away_price": 1.21,
+     "edge_vs_ours": -0.001
+    },
+    "smarkets": {
+     "p_home_shin": 0.288,
+     "p_home_mult": 0.3037,
+     "home_price": 3.05,
+     "away_price": 1.33,
+     "edge_vs_ours": -0.0356
+    },
+    "sport888": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0412
+    },
+    "tipico_de": {
+     "p_home_shin": 0.2909,
+     "p_home_mult": 0.3034,
+     "home_price": 3.1,
+     "away_price": 1.35,
+     "edge_vs_ours": -0.0385
+    },
+    "unibet_nl": {
+     "p_home_shin": 0.2794,
+     "p_home_mult": 0.2857,
+     "home_price": 3.4,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.027
+    },
+    "unibet_se": {
+     "p_home_shin": 0.2794,
+     "p_home_mult": 0.2857,
+     "home_price": 3.4,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.027
+    },
+    "unibet_uk": {
+     "p_home_shin": 0.2963,
+     "p_home_mult": 0.3065,
+     "home_price": 3.1,
+     "away_price": 1.37,
+     "edge_vs_ours": -0.0439
+    },
+    "williamhill": {
+     "p_home_shin": 0.2936,
+     "p_home_mult": 0.3049,
+     "home_price": 3.1,
+     "away_price": 1.36,
+     "edge_vs_ours": -0.0412
+    }
+   },
+   "book_spread_home": 6.5,
+   "book_total": 52.75,
+   "our_margin_minus_book": 0.0,
+   "our_cover_prob_home": 0.5
+  }
+ ]
+}
