@@ -182,3 +182,43 @@ def summarize_sim(home: np.ndarray, away: np.ndarray) -> dict[str, np.ndarray]:
         "mode_away": mode_a,
         "mode_prob": mode_p,
     }
+
+
+def likely_score(
+    home: np.ndarray,
+    away: np.ndarray,
+    pick_home: np.ndarray,
+    margin: np.ndarray,
+    width: float = 3.5,
+) -> dict[str, np.ndarray]:
+    """A representative final score that agrees with the predicted winner and margin.
+
+    The raw mode of the joint score distribution is dominated by football's scoring lattice
+    (7s and 3s), so many games share 24-17. Instead: take the simulations where the picked team
+    wins by within ``width`` points of the predicted margin, compute their mean score (the centre
+    of that region), and return the nearest *reachable and frequent* score (seen in at least 40%
+    as many simulations as the most common score in the region). Games with different expected
+    totals therefore get different scores. ``prob`` is the raw simulated probability of that
+    exact score, so it stays honest (about 1%). Falls back to all simulations if the region is
+    empty.
+    """
+    g, n = home.shape
+    size = int(max(home.max(), away.max())) + 1
+    hh, aa = np.meshgrid(np.arange(size), np.arange(size), indexing="ij")
+    out_h, out_a, out_p = np.zeros(g, int), np.zeros(g, int), np.zeros(g)
+    for i in range(g):
+        d = home[i] - away[i]
+        sign = 1.0 if pick_home[i] else -1.0
+        sel = (sign * d > 0) & (np.abs(d - margin[i]) <= width)
+        if not sel.any():
+            sel = np.ones(n, bool)
+        counts = np.zeros((size, size))
+        np.add.at(counts, (home[i][sel], away[i][sel]), 1.0)
+        cen_h, cen_a = home[i][sel].mean(), away[i][sel].mean()
+        ok = counts >= 0.4 * counts.max()
+        dist = np.where(ok, (hh - cen_h) ** 2 + (aa - cen_a) ** 2, np.inf)
+        r, c = divmod(int(dist.argmin()), size)
+        full = np.zeros((size, size))
+        np.add.at(full, (home[i], away[i]), 1.0)
+        out_h[i], out_a[i], out_p[i] = r, c, full[r, c] / n
+    return {"like_home": out_h, "like_away": out_a, "like_prob": out_p}

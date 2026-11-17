@@ -95,21 +95,55 @@ Ensemble frente a mercado por temporada:
 
 Generadas con datos hasta la semana 10. Ver `predictions/2026/week11.json` (y `week12.json`, con horizonte de dos semanas).
 
-| Partido | Pick | Prob. local | Margen | Marcador más probable |
+| Partido | Pick | Prob. local | Margen | Marcador típico (visitante-local) |
 |---|---|---|---|---|
-| IND @ HOU | HOU | 85% | +12.5 | 24-17 |
-| ARI @ KC | KC | 91% | +16.5 | 31-10 |
-| BAL @ CAR | CAR | 56% | +2.5 | 24-17 |
-| JAX @ NYG | JAX | 29% | -6.0 | 17-24 |
-| MIA @ BUF | BUF | 90% | +16.5 | 24-17 |
-| NO @ CHI | CHI | 85% | +11.5 | 24-17 |
-| TB @ DET | DET | 71% | +6.5 | 24-17 |
-| TEN @ DAL | DAL | 78% | +8.5 | 31-24 |
-| NYJ @ LAC | LAC | 60% | +3.5 | 24-17 |
-| LV @ DEN | DEN | 82% | +10.0 | 24-17 |
-| PIT @ PHI | PIT | 31% | -4.5 | 10-17 |
-| MIN @ SF | SF | 60% | +3.0 | 17-24 |
-| CIN @ WAS | CIN | 25% | -6.5 | 17-24 |
+| IND @ HOU | HOU | 85% | +12.5 | 17-28 |
+| ARI @ KC | KC | 91% | +16.5 | 13-27 |
+| BAL @ CAR | CAR | 56% | +2.5 | 20-23 |
+| JAX @ NYG | JAX | 29% | -6.0 | 27-20 |
+| MIA @ BUF | BUF | 90% | +16.5 | 14-31 |
+| NO @ CHI | CHI | 85% | +11.5 | 17-30 |
+| TB @ DET | DET | 71% | +6.5 | 20-24 |
+| TEN @ DAL | DAL | 78% | +8.5 | 23-31 |
+| NYJ @ LAC | LAC | 60% | +3.5 | 17-24 |
+| LV @ DEN | DEN | 82% | +10.0 | 14-24 |
+| PIT @ PHI | PIT | 31% | -4.5 | 21-17 |
+| MIN @ SF | SF | 60% | +3.0 | 21-24 |
+| CIN @ WAS | CIN | 25% | -6.5 | 30-24 |
+
+### Marcador típico
+
+El marcador exacto más frecuente de una simulación casi siempre es 24-17 (la red de 7 y 3 puntos). Por eso el marcador que se publica es el **más frecuente cercano al promedio de las simulaciones en las que gana el pick con un margen parecido al previsto (±3,5)**; su probabilidad exacta sigue siendo ~1 % y se guarda tal cual (`most_likely_score.prob`), junto con el modo bruto (`raw_mode`).
+
+## Noticias y bajas (opcional)
+
+Si existe `news/<año>/weekXX.json`, el sitio muestra "Última hora" en la jornada y "Lo que hay que saber" en cada partido, con enlace a la fuente, y `ensemblitz predict` ajusta la fuerza de los equipos por las bajas. Sin archivo todo funciona igual. Solo afecta a las predicciones, **nunca al backtest** (no hay archivo histórico de noticias con el que validarlo). Cada partido guarda el ajuste en `news_adjustment`.
+
+```json
+[
+  {
+    "team": "DET",                       // abreviatura nflverse (obligatorio)
+    "player": "Aidan Hutchinson",        // obligatorio
+    "position": "DE",                    // QB, RB, WR, TE, T/G/C/OL, DE/EDGE/OLB, DT, LB, CB, S...
+    "status": "out",                     // out | doubtful | questionable | returning | other (obligatorio)
+    "summary_es": "Se pierde el partido por una lesión de tobillo.",
+    "source_handle": "@AdamSchefter",
+    "source_url": "https://x.com/...",
+    "posted_at": "2026-11-17T19:00:00Z", // UTC
+    "impact_note_es": "Sin su mejor presionador, la defensa pierde presión sobre el QB.",
+    "starter": true                      // opcional; false = no se valora
+  }
+]
+```
+
+**Cómo se valora un jugador** (`src/ensemblitz/players.py`, datos de nflverse de la temporada y la anterior con la mitad de peso). Puntos de margen por partido frente a un reemplazo, multiplicados por 0,7 (el volumen se reparte entre compañeros y el EPA es ruidoso):
+
+- **QB, RB, WR, TE:** volumen por partido × (eficiencia EPA reducida hacia la media de la posición − eficiencia del reemplazo). Reemplazo = eficiencia agregada de los jugadores de poco volumen de la misma posición. Ejemplo: JSN vale unos 2,5 puntos, un QB titular de 3 a 6.
+- **Línea ofensiva:** no hay datos individuales; snaps × 0,9 puntos por titular.
+- **Defensa:** no hay EPA individual público; prior de posición (EDGE 1,3, CB 0,9, DT 0,8, LB 0,6, S 0,6) × porcentaje de snaps × índice de producción (sacks, presiones, TFL, INT, pases defendidos por partido frente a los titulares de su posición, reducido hacia 1 y acotado a 0,6-1,8). Los priors son criterio propio, no están ajustados con datos.
+- Si el jugador no aparece en la tabla (novato, nombre distinto), se usa la mitad del prior de su posición. Nombres con sufijos (III, Jr.) y fichajes recientes funcionan: se busca por nombre y posición, no por equipo.
+
+**Estado y frescura:** baja = 1, muy dudoso = 0,75, dudoso = 0,25, regresa/otro = 0. Como la línea del mercado ya descuenta las noticias públicas, una noticia publicada hasta 12 h antes del pick cuenta entera, hasta 48 h la mitad y más antigua un cuarto. Un equipo no pierde más de 7 puntos en total. El cambio de margen mueve la probabilidad con desviación 13,5.
 
 ## Limitaciones
 

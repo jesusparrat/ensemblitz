@@ -183,3 +183,6 @@ cython_debug/
 /data/
 /scratch/
 PR_DESCRIPTION.md
+
+# built website
+/site/_build/

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set nav = 'hist' %}
+{% block title %}Historial{% endblock %}
+{% block content %}
+<div class="kicker">Registro público</div>
+<h1>Historial de picks</h1>
+<p class="dek">Solo cuentan los picks guardados antes del kickoff. Se publican tal cual salen, sin retoques posteriores, y se califican cuando termina el partido.</p>
+{% set s = hist.summary %}
+{% if s.n %}
+<div class="stat-row">
+  <div><div class="v">{{ s.n }}</div><div class="sc">Partidos calificados</div></div>
+  <div><div class="v">{{ s.accuracy|pct(1) }}</div><div class="sc">Acierto ensemble</div></div>
+  <div><div class="v">{{ s.market_accuracy|pct(1) if s.market_accuracy is not none else '—' }}</div><div class="sc">Acierto mercado</div></div>
+  <div><div class="v">{{ s.brier|num(3) }}</div><div class="sc">Brier (menor es mejor)</div></div>
+</div>
+{% if hist.chart %}<h2>Acierto acumulado</h2>{{ hist.chart|safe }}{% endif %}
+<h2>Por jornada</h2>
+<table><thead><tr><th>Jornada</th><th>Partidos</th><th>Aciertos</th><th>%</th></tr></thead><tbody>
+{% for w in hist.weeks %}<tr><td>{{ w.season }} · jornada {{ w.week }}</td><td>{{ w.n }}</td><td>{{ w.ok }}</td><td>{{ (w.ok/w.n)|pct(0) }}</td></tr>{% endfor %}
+</tbody></table>
+<h2>Partido a partido</h2>
+<div class="scroll"><table><thead><tr><th>Partido</th><th>Pick</th><th>Prob.</th><th>Resultado (margen local)</th><th>Acierto</th></tr></thead><tbody>
+{% for r in hist.rows|reverse %}<tr><td>{{ r.away_team }} @ {{ r.home_team }} · {{ r.kick.day }}</td><td>{{ r.pick }}</td><td>{{ r.p|pct(0) }}</td><td>{{ r.result|signed(0) }}</td><td>{{ 'sí' if r.ensemble_correct else 'no' }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}
+<div class="empty"><b>Todavía no hay picks calificados.</b><br>Los primeros picks congelados son los de la jornada 11 de 2026 (semana del 19 de noviembre). Esta página se rellena sola cuando terminan los partidos y se ejecuta la calificación semanal.</div>
+{% endif %}
+<h2>Qué cuenta como pick válido</h2>
+<p>Cada partido guarda la hora exacta en que se generó el pronóstico. Si esa hora es posterior al kickoff, no se califica. Los archivos están en el repositorio (<a href="{{ repo }}/tree/main/predictions">predictions/</a> y <a href="{{ repo }}/tree/main/results">results/</a>), así que cualquiera puede comprobar que no se han tocado.</p>
+{% endblock %}
