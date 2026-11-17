@@ -144,6 +144,8 @@ def _game_features(g, off, dfn, qb_rate, elo, last_qb, inj) -> dict:
     f["dome"] = dome
     f["temp"] = 70.0 if dome else (g.temp if pd.notna(g.temp) else 58.0)
     f["wind"] = 0.0 if dome else (g.wind if pd.notna(g.wind) else 7.0)
+    # Not a model input: lets the site tell a real reading from the 58 F / 7 mph fill-in.
+    f["weather_known"] = int(pd.notna(g.temp) and pd.notna(g.wind))
     f["turf"] = int(isinstance(g.surface, str) and "grass" not in g.surface and g.surface != "")
     # --- injuries reported the week(s) before (the current week's report is not out on Tuesday) -
     f["h_out_lag"] = _lag_inj(inj, g.season, g.week, h)

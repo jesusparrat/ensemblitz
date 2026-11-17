@@ -49,6 +49,7 @@ def _game(gid: str, home: str, away: str, kick: str) -> dict:
             "dome": 0,
             "temp": 50,
             "wind": 6,
+            "weather_known": 1,
             "home_out_lag": 2,
             "away_out_lag": 3,
         },
@@ -129,9 +130,9 @@ def test_site_builds_with_odds_and_backtest(tmp_path):
     ):
         assert (out / page).exists(), page
     game = (out / "partido/2026_11_IND_HOU.html").read_text()
-    assert "<svg" in game and "bk" in game and "cambio de QB" in game
+    assert "<svg" in game and "Bk" in game and "cambio de QB" in game
     home = (out / "index.html").read_text()
-    assert "Jornada 11" in home and "IND" in home and "DESACUERDO" in home
+    assert "Jornada 11" in home and "IND" in home and "Bandera" in home
     assert "Calibración" in (out / "metodo.html").read_text()
 
 
@@ -171,5 +172,42 @@ def test_history_page_with_graded_picks(tmp_path):
     (root / "results/2026/week11.json").write_text(json.dumps(rows))
     out = build_site(root=root, out=root / "site" / "_build")
     hist = (out / "historial.html").read_text()
-    assert "Partidos calificados" in hist and "50,0" in hist and "<svg" in hist
-    assert "Final: IND 17 – HOU 24" in (out / "index.html").read_text()
+    assert "partidos calificados" in hist and "50,0" in hist and "<svg" in hist
+    assert "Final: IND 17, HOU 24" in (out / "index.html").read_text()
+
+
+def test_build_output_has_no_em_dash(tmp_path):
+    root = _repo(tmp_path, True, True)
+    out = build_site(root=root, out=root / "site" / "_build")
+    for page in out.rglob("*.html"):
+        html = page.read_text()
+        assert "\u2014" not in html, page.name
+        assert "Con honestidad" not in html, page.name
+
+
+def test_weather_hidden_when_not_known(tmp_path):
+    root = _repo(tmp_path, False, False)
+    path = root / "predictions/2026/week11.json"
+    d = json.loads(path.read_text())
+    for g in d["games"]:
+        g["context"].update({"weather_known": 0, "temp": None, "wind": None})
+    path.write_text(json.dumps(d))
+    out = build_site(root=root, out=root / "site" / "_build")
+    game = (out / "partido/2026_11_IND_HOU.html").read_text()
+    assert "°C" not in game and "km/h" not in game
+
+
+def test_weather_shown_in_metric_units(tmp_path):
+    root = _repo(tmp_path, False, False)
+    out = build_site(root=root, out=root / "site" / "_build")
+    game = (out / "partido/2026_11_IND_HOU.html").read_text()
+    assert "10 °C" in game or "10\u202f°C" in game
+    assert "km/h" in game and "°F" not in game and "mph" not in game
+
+
+def test_week_without_odds_or_news_shows_no_repo_paths(tmp_path):
+    root = _repo(tmp_path, False, False)
+    out = build_site(root=root, out=root / "site" / "_build")
+    for page in ("index.html", "jornada/11.html", "partido/2026_11_IND_HOU.html"):
+        html = (out / page).read_text()
+        assert "reports/odds" not in html and "predictions/" not in html, page

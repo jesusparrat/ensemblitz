@@ -1,51 +1,106 @@
 {% extends "base.html" %}
+{% from "_macros.html" import icon, pbar, key with context %}
 {% set nav = 'home' %}
 {% block title %}Jornada {{ week }}{% endblock %}
 {% block content %}
-<div class="kicker">Temporada {{ season }} · {{ games|length }} partidos</div>
-<h1>Jornada {{ week }}</h1>
-<p class="dek">Probabilidad de victoria, margen y marcador típico de cada partido, contrastados con lo que pagan las casas de apuestas. Horas en Madrid.</p>
-{% if weeks|length > 1 %}
-<div class="weeknav"><span class="sc">Jornadas</span>
-{% for s, w in weeks if s == season %}<a href="{{ rel }}{{ 'index.html' if (w == week and is_current) else 'jornada/%d.html' % w }}" {% if w == week %}aria-current="page"{% endif %}>{{ w }}</a>{% endfor %}
-</div>
-{% endif %}
-<div class="note"><b>Con honestidad:</b> en la simulación histórica de 2018 a 2025 este sistema <b>empata con la línea de cierre; no la supera</b>. Lo útil aquí son probabilidades bien calibradas y rangos realistas, no una apuesta segura. <a href="{{ rel }}metodo.html">Cómo medimos eso</a>.</div>
-
-<section class="strip" aria-label="Última hora">
-  <div class="sc strip-title">Última hora</div>
-  {% if strip %}
-  <ul>{% for n in strip %}<li><span class="tag">{{ n.team }}</span> <b>{{ n.player }}</b>{% if n.position %} ({{ n.position }}){% endif %} <span class="st st-{{ n.status }}">{{ status_es[n.status] }}</span> {{ n.summary_es }} {% if n.source_url %}<a href="{{ n.source_url }}" rel="noopener">{{ n.source_handle or 'fuente' }}</a>{% elif n.source_handle %}<span class="dim">{{ n.source_handle }}</span>{% endif %}{% if n.posted_at %} <span class="dim mono">{{ n.posted_at|stamp }}</span>{% endif %}</li>{% endfor %}</ul>
-  {% else %}<p class="small" style="margin:0">Sin novedades cargadas para esta jornada. Bajas y noticias se añaden en <code>news/{{ season }}/week{{ '%02d' % week }}.json</code>.</p>{% endif %}
-</section>
-
-<section class="games" aria-label="Partidos de la jornada {{ week }}">
-  <div class="games-head" role="presentation">
-    <span class="sc">Hora</span><span class="sc">Partido</span><span class="sc">Nuestra prob. (pick)</span>
-    <span class="sc">Margen</span><span class="sc">Marcador</span><span class="sc">Mercado</span><span class="sc">Dif.</span><span class="sc">Mejor cuota</span>
+<section class="head" aria-labelledby="h">
+  <div>
+    <h1 id="h"><small>NFL, temporada {{ season }}</small>Jornada {{ week }}</h1>
+    {% if games %}<p class="lede">{{ games|length }} partidos del {{ days[0].games[0].kick.short }} al {{ days[-1].games[-1].kick.short }}. Nuestra probabilidad de victoria frente a lo que pagan {% if n_books %}{{ n_books }} casas de apuestas{% else %}las casas de apuestas{% endif %}, con los marcadores más probables. Horas de Madrid.</p>{% endif %}
   </div>
-  {% for g in games %}
-  <article class="game" id="{{ g.id }}">
-    <div class="g-when"><span class="day">{{ g.kick.day }}</span><span class="time">{{ g.kick.time }}</span></div>
-    <h3 class="g-match"><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }}<span class="at">@</span>{{ g.home }}</a><small>{{ g.away_name }} en {{ g.home_name }}</small></h3>
-    <div class="g-prob"><div class="pbar" title="Probabilidad de que gane {{ g.pick }}"><i style="width:{{ (g.p_pick*100)|round(1) }}%"></i></div><span class="num">{{ g.pick }} {{ g.p_pick|pct }}</span>{% if g.flag %}<span class="lbl edge-big">DESACUERDO</span>{% endif %}</div>
-    <div class="g-stat"><small>Margen</small>{{ g.pick }} {{ (-g.margin_pick)|signed }}</div>
-    <div class="g-stat"><small>Marcador</small>{{ g.score_away }}–{{ g.score_home }}</div>
-    <div class="g-stat"><small>Mercado</small>{{ g.mkt_pick|pct }}</div>
-    <div class="g-stat {% if g.edge is not none and g.edge|abs >= 0.05 %}edge-big{% endif %}"><small>Dif.</small>{{ g.edge|pp }}</div>
-    <div class="best">{% if g.best %}<small class="k">Mejor cuota {{ g.pick }}</small>{{ g.best.price|num(2) }}<small>{{ g.best.book }}</small>{% else %}<small class="k">Mejor cuota</small><span class="dim">sin cuotas</span>{% endif %}</div>
-    <p class="g-blurb">{{ g.blurb }}{% if g.adj_text %} {{ g.adj_text }}{% endif %}</p>
-    {% if g.final %}<div class="final">Final: {{ g.away }} {{ g.final.away }} – {{ g.home }} {{ g.final.home }} · pick {{ '<b>acertado</b>'|safe if g.final.ok else 'fallado' }}</div>{% endif %}
-  </article>
-  {% endfor %}
+  <div class="read" aria-label="Resumen de la jornada">
+    <div><b>{{ games|length }}</b><span>partidos en la jornada</span></div>
+    <div class="hot"><b>{{ '%02d' % flagged|length }}</b><span>banderas: el modelo y el mercado no coinciden</span></div>
+    {% if nxt %}<div><b data-kick="{{ nxt.kickoff_utc }}">{{ nxt.kick.time }}</b><span data-kick-label="para el {{ nxt.away }} en {{ nxt.home }}">{{ nxt.kick.day }}, {{ nxt.away }} en {{ nxt.home }}</span></div>
+    {% elif graded %}<div><b>{{ graded|selectattr('final.ok')|list|length }}/{{ graded|length }}</b><span>picks acertados</span></div>{% endif %}
+  </div>
 </section>
-<p class="small" style="margin-top:12px">Marcador (visitante–local): uno típico coherente con el pick y el margen previsto, tomado de 20&nbsp;000 simulaciones suavizadas. Ningún marcador exacto pasa del 1–2&nbsp;%: es una ilustración, no una predicción. «Mercado» es {{ games[0].mkt_src if games else '' }} para el lado del pick; «Dif.» es nuestra probabilidad menos la del mercado. Picks generados el {{ meta.generated_at|stamp }}.{% if odds_meta %} Cuotas descargadas el {{ odds_meta.odds_fetched_at|stamp }}.{% else %} Todavía no hay cuotas de casas para esta jornada: se muestra la línea de cierre de nflverse.{% endif %}</p>
+
+{% if weeks|length > 1 %}
+<nav class="weeknav" aria-label="Jornadas"><span>Jornadas</span>
+{% for s, w in weeks if s == season %}<a href="{{ rel }}{{ 'index.html' if (w == week and is_current) else 'jornada/%d.html' % w }}"{% if w == week %} aria-current="page"{% endif %} aria-label="Jornada {{ w }}">{{ w }}</a>{% endfor %}
+</nav>
+{% endif %}
+
+<section class="news-strip" aria-labelledby="uh">
+  <h2 id="uh">Última hora</h2>
+  {% if strip %}
+  <ul>{% for n in strip %}<li><span class="tag">{{ n.team }}</span> <b>{{ n.player }}</b>{% if n.position %} ({{ n.position }}){% endif %} <span class="st">{{ status_es[n.status] }}</span>. {{ n.summary_es }} {% if n.source_url %}<a href="{{ n.source_url }}" rel="noopener">{{ n.source_handle or 'fuente' }}</a>{% elif n.source_handle %}<span class="dim">{{ n.source_handle }}</span>{% endif %}{% if n.posted_at %} <span class="dim num">{{ n.posted_at|stamp }}</span>{% endif %}</li>{% endfor %}</ul>
+  {% else %}<p>Sin ajustes por lesiones esta jornada: los pronósticos no incorporan bajas de último momento.</p>
+  <a href="{{ rel }}metodo.html#noticias">Cómo entran las bajas</a>{% endif %}
+</section>
 
 {% if flagged %}
-<h2>Dónde discrepamos del mercado</h2>
-<p class="small">Diferencias de 5 puntos porcentuales o más frente al consenso de las casas. Son hipótesis del modelo, no consejos.</p>
-{% for g in flagged %}
-<p><b><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }} @ {{ g.home }}</a></b>: nosotros {{ g.p_pick|pct }} para {{ g.pick }}, mercado {{ g.mkt_pick|pct }}. {{ g.reasons|join('; ') }}.</p>
-{% endfor %}
+<section class="flags" aria-labelledby="fl">
+  <h2 id="fl">Banderas de la jornada<span class="sub">Brecha de {{ flag_pp }} puntos o más entre el modelo sin mercado y las casas</span></h2>
+  {% for g in flagged[:2] %}
+  <article class="fcard {{ 'big' if loop.first else 'compact' }}">
+    <h3><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }} en {{ g.home }}</a></h3>
+    <div class="when">{{ g.kick.day_full }}, {{ g.kick.time }} (hora de Madrid)</div>
+    {{ pbar(g, 40 if loop.first else 20) }}
+    <div class="vals3"><div><b>{{ g.mkt_pick|pct }}</b>Mercado</div><div><b>{{ g.p_pick|pct }}</b>Ensemble</div><div><b>{{ g.pure_pick|pct }}</b>Solo modelo</div></div>
+    {% if loop.first %}<p>{{ g.flag_text }}</p>{% if g.reasons %}<p class="small">{{ g.reasons|join('; ')|capitalize }}.</p>{% endif %}{% else %}<p>Sin el mercado, el modelo da a <b>{{ g.pick }}</b> un <b>{{ g.pure_pick|pct }}</b> frente al <b>{{ g.mkt_pick|pct }}</b> de las casas.</p>{% endif %}
+  </article>
+  {% endfor %}
+  {% if flagged|length > 2 %}<div class="flags-more">
+  {% for g in flagged[2:] %}
+  <article class="fcard compact">
+    <h3><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }} en {{ g.home }}</a></h3>
+    <div class="when">{{ g.kick.day_full }}, {{ g.kick.time }} (hora de Madrid)</div>
+    {{ pbar(g, 20) }}
+    <div class="vals3"><div><b>{{ g.mkt_pick|pct }}</b>Mercado</div><div><b>{{ g.p_pick|pct }}</b>Ensemble</div><div><b>{{ g.pure_pick|pct }}</b>Solo modelo</div></div>
+  </article>
+  {% endfor %}</div>{% endif %}
+</section>
 {% endif %}
+
+<div class="tools">
+  <div class="chips" role="group" aria-label="Filtrar partidos">
+    <button class="chip" type="button" data-f="all" aria-pressed="true">Todos<span class="n">{{ games|length }}</span></button>
+    {% if flagged %}<button class="chip" type="button" data-f="flag" aria-pressed="false">Solo banderas<span class="n">{{ flagged|length }}</span></button>{% endif %}
+    {% for d in days %}<button class="chip" type="button" data-f="{{ d.id }}" aria-pressed="false">{{ d.label }}<span class="n">{{ d.games|length }}</span></button>{% endfor %}
+  </div>
+  {{ key() }}
+</div>
+
+<div class="cols" aria-hidden="true"><span>Hora</span><span>Partido</span><span>Probabilidad de victoria</span><span style="text-align:center">Marcador típico</span><span class="r">Margen</span><span class="r">Mercado</span><span class="r">Brecha</span><span class="r">Mejor cuota</span></div>
+{% for d in days %}
+<section class="daygroup" aria-labelledby="{{ d.id }}h">
+  <div class="day"><h2 id="{{ d.id }}h">{{ d.label }}</h2><span>{{ d.sub }}</span></div>
+  <ol class="games">
+  {% for g in d.games %}
+  <li class="game" id="{{ g.id }}" data-day="{{ d.id }}" data-flag="{{ 1 if g.flag else 0 }}">
+    <div class="t">{{ g.kick.time }}<small>{{ g.kick.short }}</small></div>
+    <div class="m">
+      <h3><a href="{{ rel }}partido/{{ g.id }}.html">{{ g.away }}<em>en</em>{{ g.home }}</a></h3>
+      <div class="full">{{ g.away_name }} en {{ g.home_name }}</div>
+      {% if g.adj_text %}<div class="ctx">{{ icon('flag') }}<span>{{ g.adj_text }}</span></div>
+      {% elif g.note %}<div class="ctx">{{ icon(g.note.icon) }}<span>{{ g.note.text }}</span></div>{% endif %}
+      {% if g.final %}<div class="final">Final: {{ g.away }} {{ g.final.away }}, {{ g.home }} {{ g.final.home }}. Pick {{ 'acertado' if g.final.ok else 'fallado' }}.</div>{% endif %}
+    </div>
+    <div class="p"><div class="lab"><b>{{ g.pick }}<span>{{ g.p_pick|pct }}</span></b></div>{{ pbar(g) }}</div>
+    <div class="s" role="group" aria-label="Marcador más probable: {{ g.away }} {{ g.score_away }}, {{ g.home }} {{ g.score_home }}"><b data-v="{{ g.score_away }}" aria-hidden="true">{{ g.score_away }}</b><b data-v="{{ g.score_home }}" aria-hidden="true">{{ g.score_home }}</b><small aria-hidden="true">{{ g.away }}</small><small aria-hidden="true">{{ g.home }}</small></div>
+    <div class="vals">
+      <div class="v"><span class="lab-m">Margen</span>{{ g.margin_txt }}</div>
+      <div class="v"><span class="lab-m">Mercado</span>{{ g.mkt_pick|pct }}{% if g.mkt_pick is not none %}<small>{{ g.mkt_src }}</small>{% endif %}</div>
+      <div class="d"><span class="lab-m">Brecha</span>{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ g.gap|pp }}</span><small>{{ 'menos' if g.gap < 0 else 'más' }} que las casas</small>{% elif g.gap is not none %}<span class="plain">{{ g.gap|pp }}</span>{% else %}<span class="plain">n/d</span>{% endif %}</div>
+      <div class="o"><span class="lab-m">Mejor cuota</span>{% if g.best %}<b>{{ g.best.price|num(2) }}</b>{{ g.best.name }}{% else %}Sin cuotas todavía{% endif %}</div>
+    </div>
+  </li>
+  {% endfor %}
+  </ol>
+</section>
+{% endfor %}
+
+<section class="notes" id="como-leer" aria-label="Notas">
+  <div>
+    <p><b>Cómo leer la tabla.</b> Cada barra son 20 casillas de un 5&nbsp;% cada una. Las casillas oscuras son la probabilidad del ensemble para el favorito. La línea vertical es el mercado ({{ games[0].mkt_src if games else 'consenso de las casas' }}, sin comisión) y el rombo es el modelo sin mirar el mercado. La distancia entre la línea y el rombo es la brecha; a partir de {{ flag_pp }} puntos se pinta de amarillo. La columna «Brecha» muestra esa distancia en puntos porcentuales para el favorito.</p>
+    <p><b>El marcador no es una predicción exacta.</b> Es uno frecuente entre 20&nbsp;000 simulaciones compatibles con el ganador y el margen previstos. Ninguno pasa del 1–2&nbsp;% de probabilidad. El margen sigue una sola convención: el favorito y los puntos que da.</p>
+    <p>En el historial de 2018 a 2025 el ensemble empata con la línea de cierre; no la supera. <a href="{{ rel }}metodo.html">Cómo lo medimos</a>.</p>
+  </div>
+  <div>
+    <p>Picks generados el {{ meta.generated_at|stamp }}.{% if odds_meta %} Cuotas descargadas el {{ odds_meta.odds_fetched_at|stamp }}.{% else %} Todavía no hay cuotas de casas para esta jornada: «Mercado» es la línea de cierre de nflverse.{% endif %}</p>
+    <p>Esto es un ejercicio de estadística, no una recomendación de apuesta.</p>
+  </div>
+</section>
 {% endblock %}
