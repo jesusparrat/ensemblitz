@@ -1,57 +1,63 @@
-# Instrucciones para agentes
+# Instructions for agents
 
-## Estilo y diseño
+## Style and design
 
-- Idioma de la web, informes y commits de contenido: español de España. Horas en Europe/Madrid, cifras con coma decimal, °C y km/h.
-- Diseño: seguir `DESIGN.md`. No cambiar tokens, fuentes ni la dirección visual sin que Jesús lo apruebe.
-- Antislop: reglas en `.cursor/rules/antislop.mdc` y copia MIT en `third_party/antislop/` (conservar `LICENSE`). Sin raya larga (em dash) en texto escrito ni en la salida de la web.
-- Nunca mostrar en la web rutas del repositorio, claves internas de casas de apuestas, ni cifras imputadas como si fueran datos reales.
-- Una cifra derivada se calcula con los mismos valores que se muestran. La brecha entre dos porcentajes de la web es la resta de los dos enteros impresos (`gap_pp` en `site/build.py`), no la resta de los valores sin redondear.
+- Language: the site is bilingual (Spanish by default, English under `/en/`). All UI strings live in `src/ensemblitz/site/strings.py`, both languages with identical keys. Repository docs, code comments, commit messages and the README are in English. PR descriptions are written in Spanish for Jesús. Times in Europe/Madrid, Spanish uses decimal commas, °C and km/h.
+- Team names are the official English names in both languages (`site/names.py`). No half-translations.
+- Design: follow `DESIGN.md`. Do not change tokens, fonts or the visual direction without Jesús approving it.
+- Antislop: rules in `.cursor/rules/antislop.mdc` and the MIT copy in `third_party/antislop/` (keep the `LICENSE`). No em dash in written text or in the site output.
+- Never show repository paths, internal bookmaker keys or imputed figures presented as real data on the site. Never show individual bookmaker prices or an expected value: the only market figure is the consensus.
+- A derived figure is computed from the same values that are displayed. The difference between two percentages on the site is the subtraction of the two printed integers (`gap_pts` in `site/build.py`); margin and total follow from the printed expected points of each team.
+- The headline number is the model on its own (no market). The market is a reference. The blended ensemble stays in the data for comparison and for the record of older picks.
 
-## Ramas y pull requests
+## Branches and pull requests
 
-- No se toca `main` directamente. Cada cambio va en una rama nueva (`feat/...`, `fix/...`) y se abre un pull request. No se fusiona sin que Jesús lo diga.
-- Un PR, un tema. Descripción en español: qué cambia, por qué y qué comprobaciones se han pasado (con las cifras).
+- Never touch `main` directly. Each change goes on a new branch (`feat/...`, `fix/...`) with a pull request. It is not merged until Jesús says so.
+- One PR, one topic. Description in Spanish: what changes, why, and which checks were passed (with the numbers).
 
-## Comprobaciones obligatorias antes de dar un cambio por hecho
+## Mandatory checks before calling a change done
 
-Se pasan todas, en este orden, y se pega el resultado en el PR. Si una falla, se arregla la causa; no se desactiva la comprobación ni se ensancha su tolerancia para que pase.
+Run all of them, in this order, and paste the result in the PR. If one fails, fix the cause; do not disable the check or widen its tolerance so it passes.
 
 ```bash
 ruff check . && ruff format --check .
 pytest -q
 ensemblitz site && python scripts/check_site.py
 python scripts/validate_outputs.py --site site/_build
-python scripts/check_baseline.py            # en un PR: añade --ref origin/main
+python scripts/check_baseline.py            # in a PR: add --ref origin/main
 ```
 
-`make check` las encadena. `python scripts/check_baseline.py` re-apila en segundos las predicciones de la caché y falla si el log loss o el Brier del ensemble o del modelo sin mercado empeoran más de la tolerancia (0,0015 y 0,0007) frente al baseline. Si el cambio toca features, Kalman, LightGBM o datos, pasa además `ensemblitz update && python scripts/check_baseline.py --full`, que recalcula todo desde nflverse (es lo que hace el workflow semanal `baseline-full.yml`).
+`make check` chains them. `python scripts/check_baseline.py` re-stacks the cached predictions in seconds and fails if the log loss or Brier of the ensemble or of the model without market get worse than the tolerance (0.0015 and 0.0007) against the baseline. If the change touches features, Kalman, LightGBM or data, also run `ensemblitz update && python scripts/check_baseline.py --full`, which recomputes everything from nflverse (what the weekly `baseline-full.yml` workflow does).
 
-Un cambio de modelo que mejora el baseline se acepta regenerando los artefactos (`ensemblitz baseline --full`) y explicando la mejora en el PR con su intervalo de confianza. Un cambio que lo empeora no se fusiona salvo decisión explícita de Jesús.
+A model change that improves the baseline is accepted by regenerating the artefacts (`ensemblitz baseline --full`) and explaining the improvement in the PR with its confidence interval. A change that worsens it is not merged unless Jesús explicitly decides so.
 
-## Sin fugas de información (regla dura)
+`scripts/check_site.py` also guards the site: contrast of every token pair, em dashes, language markers on every page, jargon on week pages, bookmaker and exchange names, half-translated team names and empty filter groups.
 
-- Todo lo que se use para predecir un partido sale de partidos y datos **anteriores** a su semana. Ratings, Elo, Kalman, LightGBM, pesos del ensemble, impacto por jugador y estatus de lesiones: walk-forward estricto, reajustando antes de cada (temporada, semana).
-- Los hiperparámetros se ajustan solo con temporadas pasadas. Nada se elige mirando 2018 a 2025 y luego se evalúa en 2018 a 2025.
-- Lesiones: usar el estatus del parte (`report_status`, `practice_status`), nunca la lista final de inactivos ni el rendimiento del jugador en la propia semana o después. Un valor por jugador se calcula solo con semanas previas.
-- Todo código nuevo que ajuste algo con resultados lleva un test que cambia resultados y entradas de la semana W en adelante y comprueba que ninguna predicción de semanas anteriores se mueve (ver `tests/test_baseline.py` y `tests/test_features_leakage.py`).
-- Los picks se congelan antes del kickoff y no se reescriben.
+## No information leakage (hard rule)
 
-## Verifica tu trabajo
+- Everything used to predict a game comes from games and data **before** its week. Ratings, Elo, Kalman, LightGBM, ensemble weights, per-player impact and injury status: strict walk-forward, refitted before each (season, week).
+- Hyper-parameters are fitted on past seasons only. Nothing is chosen by looking at 2018 to 2025 and then evaluated on 2018 to 2025.
+- Injuries: use the report status (`report_status`, `practice_status`), never the final inactive list nor the player's performance in the same week or later. A per-player value is computed from earlier weeks only.
+- Any new code that fits something with results carries a test that changes results and inputs from week W on and checks that no prediction of earlier weeks moves (see `tests/test_baseline.py` and `tests/test_features_leakage.py`).
+- Picks are frozen before kickoff and not rewritten. Grading records which number was the headline when the pick was saved.
 
-- No des algo por funcionando porque el código parece correcto: ejecútalo y mira la salida. Cada cambio de comportamiento lleva su test; cada cifra de un informe sale de un comando, no de la memoria.
-- Antes de afirmar que un modelo mejora, compara con la línea base (`reports/BASELINE.md`) con intervalo de confianza. Con unos 2.000 partidos, diferencias de 0,002 de log loss son ruido.
-- Cuando una comprobación nueva debería fallar, demuéstralo una vez (rómpelo a propósito y mira que se pone rojo) antes de fiarte de ella.
-- Salidas JSON sin `NaN` (usar `null`). `validate_outputs.py` lo comprueba.
-- Cuota y coste: no lances trabajos largos o en paralelo sin necesidad. Primero el check barato (`pytest -q`, `check_baseline.py` en modo rápido), después el caro.
+## Verify your work
 
-## Fase 1 (lesiones)
+- Do not assume something works because the code looks right: run it and read the output. Every behaviour change carries its test; every figure in a report comes from a command, not from memory.
+- Before claiming that a model improves, compare against the baseline (`reports/BASELINE.md`) with a confidence interval. With about 2,000 games, differences of 0.002 in log loss are noise.
+- When a new check should fail, show it once (break it on purpose and watch it go red) before trusting it.
+- JSON outputs without `NaN` (use `null`). `validate_outputs.py` checks it.
+- Quota and cost: do not launch long or parallel jobs without need. Cheap check first (`pytest -q`, `check_baseline.py` in fast mode), then the expensive one.
 
-- La regla para conectar algo a producción es el intervalo de confianza pareado del log loss frente a la variante sin el cambio: solo si el IC 95 % queda por debajo de cero. Una mejora de frontera se documenta y no se conecta. Resultado actual en `reports/PHASE1.md` (lesiones: no concluyente, sin conectar).
-- Las variantes que se prueban después de ver los resultados se marcan como exploratorias y no deciden.
+## Phase 1 (injuries)
 
-## Mapa útil
+- The rule for wiring something into production is the paired confidence interval of log loss against the variant without the change: only if the 95% CI is below zero. A borderline improvement is documented and not wired. Current result in `reports/PHASE1.md` (injuries: not significant, not wired).
+- Variants tried after seeing the results are marked exploratory and do not decide.
+- Because injuries are not wired, the site shows notable absences as context, in points of player value, and says they are not part of any number.
 
-- `src/ensemblitz/baseline.py` y `baseline_report.py`: auditoría de la Fase 0. `ensemblitz baseline [--full]` regenera `reports/baseline_*.json|png`, `reports/BASELINE.md` y `reports/baseline_components.parquet`.
-- `scripts/audit_injuries.py`: auditoría de los partes de lesiones de nflverse (necesita red); resultado en `reports/injury_audit.json`.
-- `src/ensemblitz/impact.py`, `margin.py`, `phase1.py`, `phase1_report.py`: impacto de lesiones por jugador (valor sobre reemplazo, probabilidad de jugar, tabla discreta de márgenes). `ensemblitz phase1 [--full]` regenera `reports/phase1_*` y `reports/PHASE1.md`. Sin conectar a producción.
+## Useful map
+
+- `src/ensemblitz/baseline.py` and `baseline_report.py`: Phase 0 audit. `ensemblitz baseline [--full]` regenerates `reports/baseline_*.json|png`, `reports/BASELINE.md` and `reports/baseline_components.parquet`.
+- `scripts/audit_injuries.py`: audit of the nflverse injury reports (needs network); result in `reports/injury_audit.json`.
+- `src/ensemblitz/impact.py`, `margin.py`, `phase1.py`, `phase1_report.py`: per-player injury impact (value over replacement, probability of playing, discrete margin table). `ensemblitz phase1 [--full]` regenerates `reports/phase1_*` and `reports/PHASE1.md`. Not wired into production. `impact.notable_absences` feeds the context lines on the site.
+- `src/ensemblitz/site/`: `build.py` (data and pages), `i18n.py` (language formats), `strings.py` (UI strings), `templates/`, `static/`.

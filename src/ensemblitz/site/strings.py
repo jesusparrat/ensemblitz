@@ -1,0 +1,741 @@
+"""Every user-facing string of the site, in Spanish (default) and English.
+
+Both tables must have exactly the same keys (tests/test_site.py checks it, and that every key
+used by a template exists). ``{name}`` marks a placeholder. Spanish uses comma decimals, a narrow
+no-break space before ``%`` and no em dashes (the project's anti-slop rules); English uses dots.
+Team names are the official English ones in both languages.
+"""
+
+from __future__ import annotations
+
+PC = "\u202f%"  # narrow no-break space and percent sign, Spanish style
+
+ES: dict[str, str] = {
+    "na": "n/d",
+    "even": "igualado",
+    "night_thu": "jueves noche en EE.\u202fUU.",
+    "night_mon": "lunes noche en EE.\u202fUU.",
+    "night_sun": "domingo noche en EE.\u202fUU.",
+    "status_out": "Baja",
+    "status_doubtful": "Muy dudoso",
+    "status_questionable": "Dudoso",
+    "status_returning": "Vuelve",
+    "status_other": "Novedad",
+    "site.title": "Pronósticos NFL",
+    "site.description": (
+        "Quién gana cada partido de la NFL, por cuánto y cuántos puntos se esperan, con la "
+        "predicción de un modelo propio contrastada con el mercado. Picks guardados antes del saque."
+    ),
+    # navigation and chrome
+    "nav.skip": "Saltar al contenido",
+    "nav.home_aria": "ensemblitz, inicio",
+    "nav.aria": "Secciones",
+    "nav.week": "Jornada",
+    "nav.history": "Historial",
+    "nav.method": "Método",
+    "nav.code": "Código",
+    "nav.data_of": "Datos del {when}",
+    "nav.lang_aria": "Read this page in English",
+    "nav.theme_aria": "Cambiar entre tema claro y oscuro",
+    "foot.generated": "Generado el {when}. Los picks se guardan antes del saque y no se editan.",
+    "foot.license": "Licencia MIT. Tipografías Archivo, Doto e IBM Plex Mono con licencia SIL OFL.",
+    # week page
+    "week.title": "Jornada {week}",
+    "week.kicker": "NFL, temporada {season}",
+    "week.h1": "Jornada {week}",
+    "week.lede": (
+        "Para cada partido: quién gana, con qué probabilidad, cuántos puntos se esperan de cada "
+        "equipo, el margen y el total. Es la predicción de nuestro modelo, sin copiar al mercado. "
+        "Horas de Madrid."
+    ),
+    "week.read_aria": "Resumen de la jornada",
+    "week.read_games": "partidos en la jornada",
+    "week.read_flags": "partidos donde diferimos del mercado",
+    "week.read_next": "{away} en {home}",
+    "week.read_next_live": "hasta {away} en {home}",
+    "week.read_hits": "picks acertados",
+    "week.nav": "Jornadas",
+    "week.nav_aria": "Jornadas",
+    "week.nav_item": "Jornada {w}",
+    "week.legend": (
+        "Puntos esperados por equipo y, entre paréntesis, el rango que cubre el 80\u202f% de los "
+        "resultados simulados."
+    ),
+    "week.legend_flag": "Amarillo: nuestra probabilidad se separa {n} puntos o más de la del mercado.",
+    "week.legacy": (
+        "Algunos partidos de esta jornada se guardaron antes del cambio de modelo y muestran el "
+        "pick de entonces, que mezclaba modelo y mercado. Se indica en cada uno."
+    ),
+    "filter.label": "Filtrar partidos",
+    "filter.all": "Todos",
+    "filter.flags": "Donde diferimos del mercado",
+    "cols.time": "Hora",
+    "cols.game": "Partido",
+    "cols.win": "Gana",
+    "cols.points": "Puntos esperados",
+    "cols.margin": "Margen",
+    "cols.total": "Total",
+    "day.games_one": "{n} partido",
+    "day.games_n": "{n} partidos",
+    "day.night": "{night}",
+    "notes.aria": "Notas",
+    "notes.saved": "Picks guardados el {when}.",
+    "notes.market_books": "«Mercado» es el consenso de varias casas de apuestas, sin su margen.",
+    "notes.market_close": "«Mercado» es la línea de cierre de nflverse, sin su margen.",
+    "notes.method": "Cómo lo medimos.",
+    "notes.disclaimer": "Es un ejercicio de estadística, no una recomendación de apuesta.",
+    # card
+    "card.at": "en",
+    "card.wins": "Gana {team}",
+    "card.win_aria": "{team} gana con una probabilidad del {p}",
+    "card.market": "Mercado: {p} (nosotros {d})",
+    "card.final": "Final: {away} {a}, {home} {h}.",
+    "card.hit": "Pick acertado.",
+    "card.miss": "Pick fallado.",
+    "card.hit_short": "Acierto",
+    "card.miss_short": "Fallo",
+    "card.absences": "Bajas notables: {list}.",
+    "card.absence_item": "{player} ({team}, {status}, {pts} pts)",
+    "card.absences_note": "Contexto: no está incluido en el número.",
+    # news
+    "news.title": "Última hora",
+    "news.note": "Contexto: no se aplica a las cifras de la predicción.",
+    "news.source": "fuente",
+    # game page
+    "game.description": "{away} en {home}: gana {fav} con un {p}. Puntos esperados, margen, total y contexto.",
+    "game.kicker": "Jornada {week}, temporada {season}",
+    "game.madrid": "(hora de Madrid)",
+    "game.read_aria": "Resumen del partido",
+    "game.margin_of": "margen, {txt}",
+    "game.total_label": "puntos en total",
+    "game.market_label": "probabilidad del mercado",
+    "game.legacy": (
+        "Este partido se guardó antes del cambio de modelo: su pick mezclaba modelo y mercado y "
+        "no tiene rangos por equipo."
+    ),
+    "game.points_h": "Puntos esperados",
+    "game.col_team": "Equipo",
+    "game.col_exp": "Esperados",
+    "game.col_range": "Rango del 80\u202f%",
+    "game.row_margin": "Margen",
+    "game.row_total": "Total",
+    "game.margin_range": "de {lo} a {hi}",
+    "game.range_note": (
+        "El rango deja fuera el 10\u202f% de los resultados simulados más bajos y el 10\u202f% de los más altos."
+    ),
+    "game.example": (
+        "Un marcador de ejemplo: {away} {a}, {home} {h}. Es uno entre muchos posibles y ninguno "
+        "llega al 2\u202f% de probabilidad."
+    ),
+    "game.market_h": "Frente al mercado",
+    "game.ours": "Nuestro modelo",
+    "game.market": "Mercado",
+    "game.diff": "Diferencia",
+    "game.line": "Línea del mercado",
+    "game.line_total": "total {v}",
+    "game.market_src_books": "El mercado es el consenso de {n} casas de apuestas, sin su margen.",
+    "game.market_src_close": "El mercado es la línea de cierre, sin su margen.",
+    "game.market_note": "Es solo una referencia: no usamos sus cifras para calcular las nuestras.",
+    "game.flag_text": (
+        "El modelo da a {fav} un {ours} y el mercado un {mkt}: {d} puntos de diferencia. A partir de "
+        "{n} puntos, una de las dos lecturas deja algo fuera. No sabemos cuál."
+    ),
+    "game.close_text": "El modelo da a {fav} un {ours} y el mercado un {mkt}: lecturas parecidas.",
+    "game.context_h": "Contexto",
+    "game.absences_h": "Bajas notables",
+    "game.absence": "{player} ({team}): {status}. Valor aproximado: {pts} puntos de margen por partido.",
+    "game.absences_note": (
+        "Es contexto y no entra en las cifras de arriba. Los puntos son una estimación del valor "
+        "del jugador sobre su reemplazo. En las pruebas de 2018 a 2025, ajustar el número por "
+        "lesiones no mejoró la predicción de forma significativa."
+    ),
+    "game.dist_h": "Cuánto puede variar",
+    "game.chart_margin": "Margen simulado (local menos visitante)",
+    "game.chart_total": "Total de puntos simulado",
+    "game.dist_note": "Cada barra es la frecuencia de un resultado entre miles de partidos simulados.",
+    "game.tech_h": "Detalle técnico",
+    "game.tech_src": "Fuente",
+    "game.tech_prob": "Probabilidad de {team}",
+    "game.tech_note": "Los tres primeros modelos forman el número del titular.",
+    "game.back": "Volver a la jornada {week}",
+    "fact.rest": "Descanso",
+    "fact.rest_v": "{home} {h} días, {away} {a} días",
+    "fact.trip": "Viaje del visitante",
+    "fact.trip_v": "{away}, {km} km",
+    "fact.qb": "QB titular",
+    "fact.qb_change": "cambio de titular en {teams}",
+    "fact.qb_same": "sin cambios respecto al último partido",
+    "fact.venue": "Estadio",
+    "fact.venue_dome": "Cubierto o con techo cerrado",
+    "fact.venue_open": "Aire libre, {temp}, viento {wind}",
+    "fact.venue_open_nowx": "Aire libre. El tiempo previsto todavía no entra en el modelo",
+    "chart.line": "línea {v}",
+    "chart.wins": "gana {team}",
+    "chart.points": "puntos totales",
+    "chart.margin_aria": "Distribución del margen simulado (local menos visitante)",
+    "chart.total_aria": "Distribución del total de puntos simulado",
+    # the one-sentence reason
+    "why_qb": "Lo que más pesa: {team} cambia de quarterback titular respecto a su último partido.",
+    "why_rest": "Lo que más pesa: {team} llega con {n} días de descanso y su rival con {m}.",
+    "why_trip": "Lo que más pesa: {team} viaja {km} km para visitar a {home}.",
+    "why_wind": "Lo que más pesa: viento de {wind}, que resta juego aéreo.",
+    "why_home": "Partido parejo: la ventaja de jugar en casa inclina el pick hacia {team}.",
+    "why_away_close": "Partido parejo: {team} es algo mejor, incluso jugando fuera.",
+    "why_form": "Lo que más pesa: la forma reciente. El modelo ve a {team} claramente por encima de {other}.",
+    # model components
+    "comp_ensemble_model_only": "Modelo solo (sin mercado)",
+    "comp_elo": "Elo con margen de victoria",
+    "comp_kf": "Kalman (fuerza dinámica)",
+    "comp_lgbm": "LightGBM sin mercado",
+    "comp_market": "Mercado (cierre sin margen de la casa)",
+    "comp_lgbm_mkt": "LightGBM sobre el mercado",
+    "comp_ensemble": "Modelo mezclado con el mercado",
+    "model_market": "Mercado (cierre)",
+    "model_elo": "Elo (margen de victoria)",
+    "model_kf": "Kalman (fuerza dinámica)",
+    "model_lgbm": "LightGBM (sin mercado)",
+    "model_lgbm_mkt": "LightGBM (residuo frente al mercado)",
+    "model_sim": "Simulador (parámetros Kalman)",
+    "model_ens": "Modelo mezclado con el mercado",
+    # history
+    "hist.title": "Historial",
+    "hist.kicker": "Picks guardados antes del saque",
+    "hist.lede": "Qué dijimos antes de cada partido y qué pasó. Sin cambiar nada después.",
+    "hist.read_aria": "Resumen del historial",
+    "hist.read_hits": "picks acertados",
+    "hist.read_pct": "de acierto",
+    "hist.rule_h": "Cómo se guarda",
+    "hist.rule_1": (
+        "Cada pick se guarda en el repositorio antes del saque y no se edita. Solo se califican "
+        "los partidos con pick guardado antes de empezar."
+    ),
+    "hist.rule_2": (
+        "Desde la jornada 11 de 2026 el pick oficial es el del modelo solo, sin mezclar con el "
+        "mercado. Los picks guardados antes de un cambio se quedan como estaban y se marcan en la "
+        "tabla."
+    ),
+    "hist.rule_3": (
+        "El modelo solo, la mezcla con el mercado y el mercado se califican sobre los mismos "
+        "partidos, para comparar sin sesgo."
+    ),
+    "hist.rule_4": (
+        "Las jornadas 11 y 12 se publicaron el 17 de noviembre con la mezcla y se volvieron a "
+        "guardar el 18 de noviembre con el modelo solo, antes de que se jugara ningún partido."
+    ),
+    "hist.results_h": "Resultados",
+    "hist.col_source": "Fuente",
+    "hist.col_hits": "Aciertos",
+    "hist.col_pct": "Acierto",
+    "hist.src_official": "Pick oficial (el titular de cada fecha)",
+    "hist.src_model_only": "Modelo solo, sin mercado",
+    "hist.src_ensemble": "Modelo mezclado con el mercado",
+    "hist.src_market": "Mercado (cierre)",
+    "hist.kind_model_only": "modelo solo",
+    "hist.kind_ensemble": "mezcla con el mercado (anterior)",
+    "hist.chart_aria": "Acierto acumulado del pick oficial y del mercado",
+    "hist.series_official": "Pick oficial",
+    "hist.series_market": "Mercado",
+    "hist.chart_note": "Porcentaje de aciertos acumulado, partido a partido. Con pocos partidos la línea salta mucho.",
+    "hist.games_h": "Partido a partido",
+    "hist.col_date": "Fecha",
+    "hist.col_game": "Partido",
+    "hist.col_pick": "Pick",
+    "hist.col_p": "Probabilidad",
+    "hist.col_final": "Final",
+    "hist.col_ok": "Resultado",
+    "hist.col_kind": "Tipo de pick",
+    "hist.empty": "Todavía no hay partidos terminados con pick guardado. Aquí aparecerán el día después de cada partido.",
+    "hist.saved_h": "Picks guardados",
+    "hist.saved_lede": "Cada jornada, con el momento exacto en que se guardó y el del primer saque.",
+    "hist.col_week": "Jornada",
+    "hist.col_saved": "Guardado",
+    "hist.col_first": "Primer saque",
+    "hist.col_n": "Partidos",
+    "hist.col_headline": "Número principal",
+    "hist.week_n": "Jornada {week}, {season}",
+    # calibration chart
+    "calib.x": "Probabilidad prevista (%)",
+    "calib.y": "Frecuencia real (%)",
+    "calib.aria": "Calibración de la mezcla entre modelo y mercado",
+    "table.hint": "Desliza la tabla hacia los lados para ver todas las columnas.",
+    # empty
+    "empty.title": "Sin jornada todavía",
+    "empty.h1": "Sin jornada",
+    "empty.lede": "Aún no hay predicciones publicadas. Se generan cada martes por la mañana.",
+    # method
+    "method.title": "Método",
+    "method.kicker": "Cómo funciona y qué tan bien lo hace",
+    "method.lede": "Qué número mostramos, de dónde sale, cómo se mide y, sobre todo, lo que todavía no sabemos hacer.",
+    "method.number_h": "El número que mostramos",
+    "method.number_1": (
+        "La predicción principal es la de nuestro <b>modelo solo</b>: ve estadísticas de los "
+        "equipos y del partido, pero no mira las cuotas. El mercado aparece al lado como "
+        "referencia y para medir en qué partidos discrepamos."
+    ),
+    "method.number_2": (
+        "Esto tiene un coste y lo decimos: en el histórico, el modelo solo acierta menos y calibra "
+        "peor que el mercado. Una mezcla de los dos (el «ensemble» que mostrábamos antes) queda "
+        "empatada con el mercado, no por encima. Seguimos guardando la mezcla para comparar."
+    ),
+    "method.col_source": "Fuente",
+    "method.col_acc": "Acierto",
+    "method.col_brier": "Brier",
+    "method.col_ll": "Log loss",
+    "method.col_mae": "Error medio del margen",
+    "method.col_ats": "Contra el spread",
+    "method.number_table_note": (
+        "{n} partidos de temporada regular de {a} a {b}, semana a semana: cada semana todo se "
+        "reconstruye solo con partidos anteriores. Brier y log loss: menor es mejor."
+    ),
+    "method.how_h": "Cómo se calcula",
+    "method.how_1": (
+        'Partimos de los datos públicos de <a href="https://github.com/nflverse">nflverse</a> '
+        "(calendarios, jugada a jugada, partes de lesiones). Cada equipo tiene ratings de ataque "
+        "y defensa por EPA (puntos esperados añadidos por jugada) en pase y carrera, ajustados por "
+        "la calidad del rival, con memoria que decae y regresión a la media entre temporadas. Todo "
+        "se calcula con lo que se sabía antes del partido. Sobre esos ratings corren tres modelos:"
+    ),
+    "method.how_kf": "<b>Kalman:</b> la fuerza ofensiva y defensiva de cada equipo cambia semana a semana, con incertidumbre explícita.",
+    "method.how_lgbm": "<b>LightGBM:</b> árboles pequeños con descanso, viaje, QB, clima y ratings.",
+    "method.how_elo": "<b>Elo</b> con margen de victoria.",
+    "method.how_stack": (
+        "Un ensemble los combina en una probabilidad, un margen y un total, con pesos que se "
+        "reajustan cada semana usando solo predicciones anteriores."
+    ),
+    "method.how_points": (
+        "Un simulador de posesiones convierte los puntos esperados de cada equipo en 20.000 "
+        "partidos simulados. De ahí salen el rango del 80\u202f% (se descartan el 10\u202f% de los "
+        "resultados más bajos y el 10\u202f% de los más altos) y el marcador de ejemplo. El rango es "
+        "amplio porque el fútbol americano lo es: dos equipos parejos suelen dar márgenes de "
+        "−14 a +14."
+    ),
+    "method.market_h": "El mercado y las casas de apuestas",
+    "method.market_1": (
+        "«Mercado» es la probabilidad que implica el consenso de las casas de apuestas que devuelve "
+        "The Odds API (regiones de Europa, Reino Unido y EE.\u202fUU., con alguna bolsa de apuestas), "
+        "tras quitar el margen de la casa (método de Shin). Si no hay cuotas todavía, es la línea "
+        "de cierre de nflverse."
+    ),
+    "method.market_2": (
+        "No mostramos cuotas de casas concretas: la API devuelve operadores de otros países (Francia, "
+        "Reino Unido, Suecia, Estados Unidos) y bolsas de apuestas, y no podemos garantizar que "
+        "sean las que opera una casa con licencia en España. Por eso solo se enseña el consenso, y "
+        "no calculamos valor esperado ni recomendamos apostar."
+    ),
+    "method.market_3": "La diferencia con el mercado se calcula con los porcentajes tal como los lees: 68\u202f% menos 66\u202f% son 2 puntos.",
+    "method.why_h": "La frase de «por qué»",
+    "method.why_1": (
+        "Cada partido lleva una frase con el motivo principal. Es una regla sobre los datos del "
+        "partido, no una descomposición del modelo. Mira, por este orden: cambio de quarterback "
+        "titular, ventaja clara de descanso para el favorito, viaje largo contra un favorito local, "
+        "viento fuerte, ventaja de campo en un partido parejo y, si nada de eso aplica, la forma "
+        "reciente de los equipos."
+    ),
+    "method.inj_h": "Lesiones",
+    "method.inj_1": (
+        "Las bajas notables (Out o Doubtful en el parte oficial) se muestran como contexto con el "
+        "valor aproximado del jugador, en puntos de margen por partido, medido sobre su reemplazo. "
+        "No cambian ninguna cifra de la predicción."
+    ),
+    "method.inj_2": (
+        "Lo probamos de 2018 a 2025 con validación estricta: la mejora fue pequeña y no "
+        "significativa con el 95\u202f%, así que no se conectó. El mercado ya descuenta las bajas. "
+        "Informe completo:"
+    ),
+    "method.hist_h": "Resultados históricos",
+    "method.hist_1": "Simulación semana a semana de {a} a {b}: {n} partidos de temporada regular. Nada del futuro entra.",
+    "method.hist_note": (
+        "«Contra el spread» es el porcentaje de veces que el lado preferido por el modelo cubre la "
+        "línea de cierre; con comisión de −110 hace falta un 52,4\u202f% para no perder dinero."
+    ),
+    "method.season_h": "Por temporada",
+    "method.col_season": "Temporada",
+    "method.col_acc_mkt": "Acierto mercado",
+    "method.col_acc_ens": "Acierto mezcla",
+    "method.col_ll_mkt": "Log loss mercado",
+    "method.col_ll_ens": "Log loss mezcla",
+    "method.calib_h": "Calibración",
+    "method.calib_1": "Cuando decimos 70\u202f%, ¿gana el 70\u202f% de las veces? Cada punto es un tramo de probabilidad; su tamaño indica cuántos partidos hay. Sobre la diagonal punteada la calibración sería perfecta.",
+    "method.calib_2": "Los tramos extremos tienen pocos partidos y se mueven mucho por azar.",
+    "method.verdict": (
+        "¿Le ganamos a la línea de cierre? No. La mezcla tiene un log loss de {ens} frente a {mkt} "
+        "del mercado: la diferencia es indistinguible del azar. Tabla completa:"
+    ),
+    "method.limits_h": "Límites",
+    "method.limit_1": "El objetivo realista es un 65 a 70\u202f% de aciertos directos. Nadie con un método público está cerca del 90\u202f%; quien lo promete suele usar datos del futuro sin darse cuenta.",
+    "method.limit_2": "No tenemos ventaja demostrada sobre el mercado. Para ganarle hace falta información que él no tenga y probarla fuera de muestra.",
+    "method.limit_3": "El QB titular de partidos futuros es el previsto en el calendario. Las bajas solo se conocen con el parte de la semana.",
+    "method.limit_4": "El simulador cuenta posesiones, no jugadas: no modela safeties, touchdowns defensivos, reloj, lesiones durante el partido ni clima.",
+    "method.limit_5": "Hay pocas temporadas con datos jugada a jugada (desde 2015): los modelos de árboles se sobreajustan con facilidad.",
+    "method.gloss_h": "Glosario",
+    "method.gloss_brier": "Error cuadrático medio de las probabilidades. Menor es mejor.",
+    "method.gloss_ll_t": "Log loss",
+    "method.gloss_ll": "Penaliza las probabilidades seguras que fallan. Menor es mejor.",
+    "method.gloss_ens_t": "Ensemble",
+    "method.gloss_ens": "Combinación de varios modelos con pesos aprendidos de predicciones anteriores.",
+    "method.gloss_sim_t": "Simulaciones",
+    "method.gloss_sim": "20.000 partidos simulados por posesiones para cada partido real.",
+    "method.gloss_pp_t": "Puntos de probabilidad",
+    "method.gloss_pp": "Diferencia entre dos porcentajes: de 66\u202f% a 68\u202f% hay 2 puntos.",
+    "method.gloss_shin_t": "Sin margen de la casa",
+    "method.gloss_shin": "Las cuotas llevan una comisión; se quita para que las probabilidades sumen 100\u202f%.",
+    "method.footer": 'Todo el código y los datos de salida están en <a href="{repo}">{repo}</a> bajo licencia MIT.',
+}
+
+EN: dict[str, str] = {
+    "na": "n/a",
+    "even": "even",
+    "night_thu": "Thursday night in the US",
+    "night_mon": "Monday night in the US",
+    "night_sun": "Sunday night in the US",
+    "status_out": "Out",
+    "status_doubtful": "Doubtful",
+    "status_questionable": "Questionable",
+    "status_returning": "Returning",
+    "status_other": "Update",
+    "site.title": "NFL predictions",
+    "site.description": (
+        "Who wins each NFL game, by how much and how many points to expect, from our own model "
+        "set against the betting market. Picks are saved before kickoff."
+    ),
+    "nav.skip": "Skip to content",
+    "nav.home_aria": "ensemblitz, home",
+    "nav.aria": "Sections",
+    "nav.week": "Week",
+    "nav.history": "Record",
+    "nav.method": "Method",
+    "nav.code": "Code",
+    "nav.data_of": "Data from {when}",
+    "nav.lang_aria": "Leer esta página en español",
+    "nav.theme_aria": "Switch between light and dark theme",
+    "foot.generated": "Generated {when}. Picks are saved before kickoff and never edited.",
+    "foot.license": "MIT license. Typefaces Archivo, Doto and IBM Plex Mono under the SIL OFL.",
+    "week.title": "Week {week}",
+    "week.kicker": "NFL, {season} season",
+    "week.h1": "Week {week}",
+    "week.lede": (
+        "For every game: who wins, how likely that is, how many points we expect from each team, "
+        "the margin and the total. This is our model's own forecast, not a copy of the betting "
+        "market. Madrid times."
+    ),
+    "week.read_aria": "Week summary",
+    "week.read_games": "games this week",
+    "week.read_flags": "games where we differ from the market",
+    "week.read_next": "{away} at {home}",
+    "week.read_next_live": "until {away} at {home}",
+    "week.read_hits": "picks correct",
+    "week.nav": "Weeks",
+    "week.nav_aria": "Weeks",
+    "week.nav_item": "Week {w}",
+    "week.legend": (
+        "Expected points per team and, in brackets, the range covering 80% of the simulated "
+        "outcomes."
+    ),
+    "week.legend_flag": "Yellow: our probability is {n} points or more away from the market's.",
+    "week.legacy": (
+        "Some games this week were saved before the model change and show the pick of that time, "
+        "which blended the model with the market. Each one says so."
+    ),
+    "filter.label": "Filter games",
+    "filter.all": "All",
+    "filter.flags": "Where we differ from the market",
+    "cols.time": "Time",
+    "cols.game": "Game",
+    "cols.win": "Winner",
+    "cols.points": "Expected points",
+    "cols.margin": "Margin",
+    "cols.total": "Total",
+    "day.games_one": "{n} game",
+    "day.games_n": "{n} games",
+    "day.night": "{night}",
+    "notes.aria": "Notes",
+    "notes.saved": "Picks saved {when}.",
+    "notes.market_books": '"Market" is the consensus of several sportsbooks, with their margin removed.',
+    "notes.market_close": '"Market" is the nflverse closing line, with its margin removed.',
+    "notes.method": "How we measure it.",
+    "notes.disclaimer": "This is a statistics exercise, not betting advice.",
+    "card.at": "at",
+    "card.wins": "{team} wins",
+    "card.win_aria": "{team} wins with a probability of {p}",
+    "card.market": "Market: {p} (us {d})",
+    "card.final": "Final: {away} {a}, {home} {h}.",
+    "card.hit": "Pick correct.",
+    "card.miss": "Pick missed.",
+    "card.hit_short": "Hit",
+    "card.miss_short": "Miss",
+    "card.absences": "Notable absences: {list}.",
+    "card.absence_item": "{player} ({team}, {status}, {pts} pts)",
+    "card.absences_note": "Context: not included in the number.",
+    "news.title": "Latest news",
+    "news.note": "Context: not applied to the forecast figures.",
+    "news.source": "source",
+    "game.description": "{away} at {home}: {fav} wins with {p}. Expected points, margin, total and context.",
+    "game.kicker": "Week {week}, {season} season",
+    "game.madrid": "(Madrid time)",
+    "game.read_aria": "Game summary",
+    "game.margin_of": "margin, {txt}",
+    "game.total_label": "total points",
+    "game.market_label": "market probability",
+    "game.legacy": (
+        "This game was saved before the model change: its pick blended the model with the market "
+        "and has no per-team ranges."
+    ),
+    "game.points_h": "Expected points",
+    "game.col_team": "Team",
+    "game.col_exp": "Expected",
+    "game.col_range": "80% range",
+    "game.row_margin": "Margin",
+    "game.row_total": "Total",
+    "game.margin_range": "from {lo} to {hi}",
+    "game.range_note": "The range leaves out the lowest 10% and the highest 10% of the simulated outcomes.",
+    "game.example": (
+        "An example score: {away} {a}, {home} {h}. It is one of many possible scores and none "
+        "reaches 2% probability."
+    ),
+    "game.market_h": "Against the market",
+    "game.ours": "Our model",
+    "game.market": "Market",
+    "game.diff": "Difference",
+    "game.line": "Market line",
+    "game.line_total": "total {v}",
+    "game.market_src_books": "The market is the consensus of {n} sportsbooks, with their margin removed.",
+    "game.market_src_close": "The market is the closing line, with its margin removed.",
+    "game.market_note": "It is only a reference: we do not use its numbers to compute ours.",
+    "game.flag_text": (
+        "The model gives {fav} {ours} and the market {mkt}: a gap of {d} points. From {n} points "
+        "up, one of the two readings is missing something. We do not know which."
+    ),
+    "game.close_text": "The model gives {fav} {ours} and the market {mkt}: similar readings.",
+    "game.context_h": "Context",
+    "game.absences_h": "Notable absences",
+    "game.absence": "{player} ({team}): {status}. Approximate value: {pts} points of margin per game.",
+    "game.absences_note": (
+        "This is context and is not part of the numbers above. The points estimate the player's "
+        "value over a replacement. In 2018 to 2025 tests, adjusting the number for injuries did "
+        "not improve the forecast significantly."
+    ),
+    "game.dist_h": "How much it can vary",
+    "game.chart_margin": "Simulated margin (home minus away)",
+    "game.chart_total": "Simulated total points",
+    "game.dist_note": "Each bar is the frequency of one outcome among thousands of simulated games.",
+    "game.tech_h": "Technical detail",
+    "game.tech_src": "Source",
+    "game.tech_prob": "{team} probability",
+    "game.tech_note": "The first three models make up the headline number.",
+    "game.back": "Back to week {week}",
+    "fact.rest": "Rest",
+    "fact.rest_v": "{home} {h} days, {away} {a} days",
+    "fact.trip": "Visitor's trip",
+    "fact.trip_v": "{away}, {km} km",
+    "fact.qb": "Starting QB",
+    "fact.qb_change": "starter changed for {teams}",
+    "fact.qb_same": "no change since the last game",
+    "fact.venue": "Stadium",
+    "fact.venue_dome": "Dome or closed roof",
+    "fact.venue_open": "Outdoors, {temp}, wind {wind}",
+    "fact.venue_open_nowx": "Outdoors. The forecast weather is not in the model yet",
+    "chart.line": "line {v}",
+    "chart.wins": "{team} wins",
+    "chart.points": "total points",
+    "chart.margin_aria": "Distribution of the simulated margin (home minus away)",
+    "chart.total_aria": "Distribution of the simulated total points",
+    "why_qb": "The biggest factor: {team} start a different quarterback than in their last game.",
+    "why_rest": "The biggest factor: {team} come in with {n} days of rest and their opponent with {m}.",
+    "why_trip": "The biggest factor: {team} travel {km} km to visit {home}.",
+    "why_wind": "The biggest factor: wind of {wind}, which cuts down the passing game.",
+    "why_home": "A close game: home-field advantage tilts the pick towards {team}.",
+    "why_away_close": "A close game: {team} are slightly better, even on the road.",
+    "why_form": "The biggest factor: recent form. The model sees {team} clearly ahead of {other}.",
+    "comp_ensemble_model_only": "Model only (no market)",
+    "comp_elo": "Elo with margin of victory",
+    "comp_kf": "Kalman (dynamic strength)",
+    "comp_lgbm": "LightGBM without market",
+    "comp_market": "Market (closing, margin removed)",
+    "comp_lgbm_mkt": "LightGBM on top of the market",
+    "comp_ensemble": "Model blended with the market",
+    "model_market": "Market (closing)",
+    "model_elo": "Elo (margin of victory)",
+    "model_kf": "Kalman (dynamic strength)",
+    "model_lgbm": "LightGBM (no market)",
+    "model_lgbm_mkt": "LightGBM (residual on the market)",
+    "model_sim": "Simulator (Kalman parameters)",
+    "model_ens": "Model blended with the market",
+    "hist.title": "Record",
+    "hist.kicker": "Picks saved before kickoff",
+    "hist.lede": "What we said before each game and what happened. Nothing changed afterwards.",
+    "hist.read_aria": "Record summary",
+    "hist.read_hits": "picks correct",
+    "hist.read_pct": "accuracy",
+    "hist.rule_h": "How picks are saved",
+    "hist.rule_1": (
+        "Every pick is saved in the repository before kickoff and never edited. Only games with a "
+        "pick saved before they started are graded."
+    ),
+    "hist.rule_2": (
+        "From week 11 of 2026 the official pick is the model on its own, with no market blending. "
+        "Picks saved before a change stay as they were and are marked in the table."
+    ),
+    "hist.rule_3": (
+        "The model alone, the blend with the market and the market are graded on the same games, "
+        "so they compare fairly."
+    ),
+    "hist.rule_4": (
+        "Weeks 11 and 12 were published on 17 November with the blend and saved again on "
+        "18 November with the model alone, before any game was played."
+    ),
+    "hist.results_h": "Results",
+    "hist.col_source": "Source",
+    "hist.col_hits": "Correct",
+    "hist.col_pct": "Accuracy",
+    "hist.src_official": "Official pick (the headline at the time)",
+    "hist.src_model_only": "Model alone, no market",
+    "hist.src_ensemble": "Model blended with the market",
+    "hist.src_market": "Market (closing)",
+    "hist.kind_model_only": "model alone",
+    "hist.kind_ensemble": "blend with the market (earlier)",
+    "hist.chart_aria": "Running accuracy of the official pick and the market",
+    "hist.series_official": "Official pick",
+    "hist.series_market": "Market",
+    "hist.chart_note": "Running share of correct picks, game by game. With few games the line jumps a lot.",
+    "hist.games_h": "Game by game",
+    "hist.col_date": "Date",
+    "hist.col_game": "Game",
+    "hist.col_pick": "Pick",
+    "hist.col_p": "Probability",
+    "hist.col_final": "Final",
+    "hist.col_ok": "Result",
+    "hist.col_kind": "Pick type",
+    "hist.empty": "No finished games with a saved pick yet. They will appear here the day after each game.",
+    "hist.saved_h": "Saved picks",
+    "hist.saved_lede": "Every week, with the exact time it was saved and the first kickoff.",
+    "hist.col_week": "Week",
+    "hist.col_saved": "Saved",
+    "hist.col_first": "First kickoff",
+    "hist.col_n": "Games",
+    "hist.col_headline": "Headline number",
+    "hist.week_n": "Week {week}, {season}",
+    "calib.x": "Predicted probability (%)",
+    "calib.y": "Observed frequency (%)",
+    "calib.aria": "Calibration of the blend of model and market",
+    "table.hint": "Swipe the table sideways to see all columns.",
+    "empty.title": "No week yet",
+    "empty.h1": "No week yet",
+    "empty.lede": "No predictions have been published yet. They are generated every Tuesday morning.",
+    "method.title": "Method",
+    "method.kicker": "How it works and how well it does",
+    "method.lede": "Which number we show, where it comes from, how it is measured and, above all, what we cannot do yet.",
+    "method.number_h": "The number we show",
+    "method.number_1": (
+        "The headline prediction is our <b>model on its own</b>: it sees team and game statistics "
+        "but not the odds. The market sits next to it as a reference and to show where we "
+        "disagree."
+    ),
+    "method.number_2": (
+        "This has a cost and we say so: in the record, the model alone is less accurate and less "
+        'well calibrated than the market. A blend of the two (the "ensemble" we showed before) '
+        "ties with the market, it does not beat it. We keep saving the blend for comparison."
+    ),
+    "method.col_source": "Source",
+    "method.col_acc": "Accuracy",
+    "method.col_brier": "Brier",
+    "method.col_ll": "Log loss",
+    "method.col_mae": "Mean margin error",
+    "method.col_ats": "Against the spread",
+    "method.number_table_note": (
+        "{n} regular-season games from {a} to {b}, week by week: each week everything is rebuilt "
+        "using earlier games only. Brier and log loss: lower is better."
+    ),
+    "method.how_h": "How it is computed",
+    "method.how_1": (
+        'We start from the public data of <a href="https://github.com/nflverse">nflverse</a> '
+        "(schedules, play by play, injury reports). Each team has attack and defence ratings from "
+        "EPA (expected points added per play) in passing and rushing, adjusted for opponent "
+        "quality, with decaying memory and regression to the mean between seasons. Everything is "
+        "computed from what was known before the game. Three models run on those ratings:"
+    ),
+    "method.how_kf": "<b>Kalman:</b> each team's offensive and defensive strength changes week to week, with explicit uncertainty.",
+    "method.how_lgbm": "<b>LightGBM:</b> small trees using rest, travel, QB, weather and ratings.",
+    "method.how_elo": "<b>Elo</b> with margin of victory.",
+    "method.how_stack": (
+        "An ensemble combines them into a probability, a margin and a total, with weights refitted "
+        "every week using earlier predictions only."
+    ),
+    "method.how_points": (
+        "A possession simulator turns each team's expected points into 20,000 simulated games. "
+        "The 80% range (the lowest 10% and the highest 10% of outcomes are dropped) and the "
+        "example score come from there. The range is wide because football is: two even teams "
+        "often produce margins from −14 to +14."
+    ),
+    "method.market_h": "The market and sportsbooks",
+    "method.market_1": (
+        '"Market" is the probability implied by the consensus of the sportsbooks returned by '
+        "The Odds API (Europe, the UK and the US regions, with some betting exchanges), with the "
+        "bookmaker's margin removed (Shin's method). When there are no odds yet, it is the nflverse "
+        "closing line."
+    ),
+    "method.market_2": (
+        "We do not show prices from individual sportsbooks: the API returns operators from other "
+        "countries (France, the UK, Sweden, the US) and betting exchanges, and we cannot guarantee "
+        "they are the ones a Spanish-licensed operator offers. So only the consensus is shown, and "
+        "we compute no expected value and do not recommend bets."
+    ),
+    "method.market_3": "The difference from the market uses the percentages as you read them: 68% minus 66% is 2 points.",
+    "method.why_h": 'The "why" sentence',
+    "method.why_1": (
+        "Every game carries one sentence with its main reason. It is a rule over the game's "
+        "inputs, not a decomposition of the model. It checks, in this order: a quarterback change, "
+        "a clear rest edge for the favourite, a long trip against a home favourite, strong wind, "
+        "home-field advantage in a close game and, if none applies, the teams' recent form."
+    ),
+    "method.inj_h": "Injuries",
+    "method.inj_1": (
+        "Notable absences (Out or Doubtful on the official report) are shown as context with the "
+        "player's approximate value, in points of margin per game over a replacement. They do not "
+        "change any forecast figure."
+    ),
+    "method.inj_2": (
+        "We tested it over 2018 to 2025 with strict validation: the improvement was small and not "
+        "significant at 95%, so it was not wired in. The market already prices absences in. Full "
+        "report:"
+    ),
+    "method.hist_h": "Historical results",
+    "method.hist_1": "Week-by-week simulation from {a} to {b}: {n} regular-season games. Nothing from the future gets in.",
+    "method.hist_note": (
+        '"Against the spread" is how often the side the model prefers covers the closing line; '
+        "with −110 juice you need 52.4% to break even."
+    ),
+    "method.season_h": "By season",
+    "method.col_season": "Season",
+    "method.col_acc_mkt": "Market accuracy",
+    "method.col_acc_ens": "Blend accuracy",
+    "method.col_ll_mkt": "Market log loss",
+    "method.col_ll_ens": "Blend log loss",
+    "method.calib_h": "Calibration",
+    "method.calib_1": "When we say 70%, does the team win 70% of the time? Each dot is a probability bucket; its size shows how many games it holds. On the dotted diagonal calibration would be perfect.",
+    "method.calib_2": "The extreme buckets hold few games and move a lot by chance.",
+    "method.verdict": (
+        "Do we beat the closing line? No. The blend has a log loss of {ens} against {mkt} for the "
+        "market: the difference cannot be told from chance. Full table:"
+    ),
+    "method.limits_h": "Limits",
+    "method.limit_1": "A realistic target is 65 to 70% straight-up accuracy. Nobody with a public method is near 90%; whoever promises it is usually using future data without noticing.",
+    "method.limit_2": "We have no demonstrated edge over the market. Beating it takes information it lacks, proven out of sample.",
+    "method.limit_3": "The starting QB of future games is the one expected on the schedule. Absences are only known from the week's report.",
+    "method.limit_4": "The simulator counts possessions, not plays: it does not model safeties, defensive touchdowns, the clock, in-game injuries or weather.",
+    "method.limit_5": "Few seasons have play-by-play data (since 2015): tree models overfit easily.",
+    "method.gloss_h": "Glossary",
+    "method.gloss_brier": "Mean squared error of the probabilities. Lower is better.",
+    "method.gloss_ll_t": "Log loss",
+    "method.gloss_ll": "Punishes confident probabilities that miss. Lower is better.",
+    "method.gloss_ens_t": "Ensemble",
+    "method.gloss_ens": "A combination of several models with weights learned from earlier predictions.",
+    "method.gloss_sim_t": "Simulations",
+    "method.gloss_sim": "20,000 possession-by-possession games simulated for every real game.",
+    "method.gloss_pp_t": "Points of probability",
+    "method.gloss_pp": "The difference between two percentages: from 66% to 68% is 2 points.",
+    "method.gloss_shin_t": "Margin removed",
+    "method.gloss_shin": "Odds carry a bookmaker fee; it is taken out so the probabilities add up to 100%.",
+    "method.footer": 'All the code and output data are at <a href="{repo}">{repo}</a> under the MIT license.',
+}
+
+STRINGS = {"es": ES, "en": EN}
