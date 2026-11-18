@@ -19,7 +19,8 @@ Rules for any implementation (the Python one, the Rust one, the play-by-play one
 - Swapping home/away inputs swaps the outputs (symmetry), up to Monte Carlo noise.
 - Scores are non-negative integers. Probabilities sum to 1 (`p_home` counts a tie as half).
 
-v0.1 simulates *possessions*, not plays. The extension points for later:
-`exp_points_*` becomes a per-team rating vector (pass/rush/defence), possession outcomes become
-play sequences, and in-game injuries, player health and hourly weather become time-varying
-modifiers of those ratings.
+v0.1 simulates possessions from expected points. `ensemblitz.sim.hybrid` is the
+phase-3 game: the same possession draw for most of the clock, and plays only in the
+last four minutes of the fourth quarter (and the last two of the first half) when the
+margin is within 8. `ensemblitz pbp --evaluate` writes `reports/PBP_SIM.md`. It is not
+what `ensemblitz predict` calls. Arrays in, arrays out, seed controls the randomness.
