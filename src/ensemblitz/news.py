@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import numpy as np
 import pandas as pd
@@ -46,6 +48,26 @@ FALLBACK_PTS = {
     "S": 0.3,
 }
 REQUIRED = ("team", "player", "status")
+ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+# Only these hosts may be linked as a source (X posts and the main outlets). Extend deliberately.
+SOURCE_HOSTS = ("x.com", "twitter.com", "nfl.com", "espn.com", "theathletic.com")
+
+
+def safe_url(url: object) -> str | None:
+    """Return the URL only if it is plain https on an allow-listed host, else None.
+
+    Jinja autoescape stops HTML injection but NOT ``javascript:`` or ``data:`` schemes in href.
+    """
+    if not isinstance(url, str) or len(url) > 300:
+        return None
+    parts = urlsplit(url.strip())
+    host = (parts.hostname or "").lower()
+    ok = parts.scheme == "https" and any(host == h or host.endswith("." + h) for h in SOURCE_HOSTS)
+    return url.strip() if ok and not parts.username else None
+
+
+def _text(x: object, limit: int = 600) -> str | None:
+    return None if x is None else str(x)[:limit]
 
 
 def news_path(season: int, week: int, root: Path | None = None) -> Path:
@@ -56,24 +78,35 @@ def load_news(path: Path) -> list[dict]:
     """Read and normalise a news file. Invalid items are skipped with a warning; no file -> []."""
     if not path.exists():
         return []
-    raw = json.loads(path.read_text())
+    try:
+        raw = json.loads(path.read_text())
+    except json.JSONDecodeError:
+        log.error("news file is not valid JSON, ignored: %s", path)
+        return []
     items = []
     for it in raw if isinstance(raw, list) else []:
         if not isinstance(it, dict) or any(not it.get(k) for k in REQUIRED):
             log.warning("news item skipped (missing fields): %s", it)
             continue
         status = str(it["status"]).lower()
+        posted = it.get("posted_at")
+        if posted is not None and not (isinstance(posted, str) and ISO_Z.match(posted)):
+            log.warning("news item skipped (posted_at must be YYYY-MM-DDTHH:MM:SSZ): %s", it)
+            continue
+        if not isinstance(it["player"], str) or not isinstance(it["team"], str):
+            log.warning("news item skipped (player/team must be text): %s", it)
+            continue
         items.append(
             {
                 "team": str(it["team"]).upper(),
-                "player": it["player"],
-                "position": str(it.get("position") or "").upper(),
+                "player": it["player"][:80],
+                "position": str(it.get("position") or "").upper()[:6],
                 "status": status if status in STATUSES else "other",
-                "summary_es": it.get("summary_es", ""),
-                "source_handle": it.get("source_handle"),
-                "source_url": it.get("source_url"),
-                "posted_at": it.get("posted_at"),
-                "impact_note_es": it.get("impact_note_es"),
+                "summary_es": _text(it.get("summary_es", "")),
+                "source_handle": _text(it.get("source_handle"), 60),
+                "source_url": safe_url(it.get("source_url")),
+                "posted_at": posted,
+                "impact_note_es": _text(it.get("impact_note_es")),
                 "starter": bool(it.get("starter", True)),
             }
         )
