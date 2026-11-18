@@ -66,6 +66,34 @@ def baseline(
 
 
 @app.command()
+def phase1(
+    full: bool = typer.Option(False, help="Rebuild injury features from data/ (ensemblitz update)"),
+    boot: int = typer.Option(10_000, help="Bootstrap resamples"),
+) -> None:
+    """Phase 1 audit: per-player injury impact, availability and discrete margin table."""
+    import json
+
+    from ensemblitz import baseline as B
+    from ensemblitz import impact as I  # noqa: E741
+    from ensemblitz import phase1 as P
+    from ensemblitz import phase1_report as R
+
+    if full:
+        feats = P.build_injury_features()
+        P.save_inputs(feats)
+        d = I.load_inputs()
+        rows = I.injury_rows(d["inj"], d["snaps"], d["ids"])
+        av = P.availability_summary(rows, C.LAST_BACKTEST_SEASON + 1, 1)
+        R.AVAIL_PATH.write_text(json.dumps(av, indent=1) + "\n")
+    feats, hist = P.load_inputs_cached()
+    res, _ = P.audit(B.load_cache(), feats, hist, boot)
+    P.write_json(res)
+    P.forest_plot(res)
+    R.write_markdown(res)
+    typer.echo(f"phase1 written to {C.REPORTS_DIR}; verdict: {res['verdict']['significant_at_95']}")
+
+
+@app.command()
 def predict(
     season: int = typer.Option(0, help="0 = current season"),
     week: int = typer.Option(0, help="0 = next unplayed week(s)"),
