@@ -83,7 +83,7 @@
     <div class="vals">
       <div class="v"><span class="lab-m">Margen</span>{{ g.margin_txt }}</div>
       <div class="v"><span class="lab-m">Mercado</span>{{ g.mkt_pick|pct }}{% if g.mkt_pick is not none %}<small>{{ g.mkt_src }}</small>{% endif %}</div>
-      <div class="d"><span class="lab-m">Brecha</span>{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ g.gap|pp }}</span><small>{{ 'menos' if g.gap < 0 else 'más' }} que las casas</small>{% elif g.gap is not none %}<span class="plain">{{ g.gap|pp }}</span>{% else %}<span class="plain">n/d</span>{% endif %}</div>
+      <div class="d"><span class="lab-m">Brecha</span>{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ g.gap|gappp }}</span><small>{{ 'menos' if g.gap < 0 else 'más' }} que las casas</small>{% elif g.gap is not none %}<span class="plain">{{ g.gap|gappp }}</span>{% else %}<span class="plain">n/d</span>{% endif %}</div>
       <div class="o"><span class="lab-m">Mejor cuota</span>{% if g.best %}<b>{{ g.best.price|num(2) }}</b>{{ g.best.name }}{% else %}Sin cuotas todavía{% endif %}</div>
     </div>
   </li>

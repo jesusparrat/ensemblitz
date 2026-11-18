@@ -85,7 +85,17 @@ def update_injuries(seasons: Iterable[int]) -> None:
         except Exception as exc:
             log.warning("injuries %s unavailable: %s", s, exc)
     if frames:
-        cols = ["season", "week", "team", "gsis_id", "position", "report_status"]
+        # practice_status and date_modified are kept for Phase 1 (see reports/BASELINE.md).
+        cols = [
+            "season",
+            "week",
+            "team",
+            "gsis_id",
+            "position",
+            "report_status",
+            "practice_status",
+            "date_modified",
+        ]
         inj = pd.concat(frames, ignore_index=True)
         inj[[c for c in cols if c in inj.columns]].to_parquet(
             C.RAW_DIR / "injuries.parquet", index=False

@@ -1,0 +1,219 @@
+{
+  "source": "nflreadpy.load_injuries + load_snap_counts (temporada regular 2015-2025)",
+  "timestamps": {
+    "rows": 58449,
+    "rows_per_player_week_duplicates": 4,
+    "date_modified_present_by_season": {
+      "2015": 1.0,
+      "2016": 1.0,
+      "2017": 1.0,
+      "2018": 1.0,
+      "2019": 1.0,
+      "2020": 1.0,
+      "2021": 1.0,
+      "2022": 1.0,
+      "2023": 1.0,
+      "2024": 1.0,
+      "2025": 0.0
+    },
+    "date_modified_weekday_share": {
+      "Friday": 0.8001,
+      "Wednesday": 0.0837,
+      "Saturday": 0.0699,
+      "Thursday": 0.0407,
+      "Tuesday": 0.0028,
+      "Monday": 0.002,
+      "Sunday": 0.0008
+    }
+  },
+  "columns": [
+    "season",
+    "game_type",
+    "team",
+    "week",
+    "gsis_id",
+    "position",
+    "full_name",
+    "first_name",
+    "last_name",
+    "report_primary_injury",
+    "report_secondary_injury",
+    "report_status",
+    "practice_primary_injury",
+    "practice_secondary_injury",
+    "practice_status",
+    "date_modified",
+    "season_type"
+  ],
+  "p_played_by_report_status": {
+    "(sin etiqueta)": {
+      "n": 27516,
+      "p_played": 0.9293
+    },
+    "Doubtful": {
+      "n": 1870,
+      "p_played": 0.0086
+    },
+    "Note": {
+      "n": 6,
+      "p_played": 0.8333
+    },
+    "Out": {
+      "n": 11041,
+      "p_played": 0.0005
+    },
+    "Probable": {
+      "n": 2553,
+      "p_played": 0.9542
+    },
+    "Questionable": {
+      "n": 15463,
+      "p_played": 0.6671
+    }
+  },
+  "p_played_questionable_by_practice_status": {
+    "\n    ": {
+      "n": 138,
+      "p_played": 0.7029
+    },
+    "(sin dato)": {
+      "n": 31,
+      "p_played": 0.6129
+    },
+    "Did Not Participate In Practice": {
+      "n": 2469,
+      "p_played": 0.435
+    },
+    "Full Participation in Practice": {
+      "n": 3083,
+      "p_played": 0.7973
+    },
+    "Limited Participation in Practice": {
+      "n": 9742,
+      "p_played": 0.6845
+    }
+  },
+  "p_played_questionable_by_position": {
+    "C": {
+      "n": 425,
+      "p_played": 0.6447
+    },
+    "CB": {
+      "n": 2073,
+      "p_played": 0.5948
+    },
+    "DE": {
+      "n": 1168,
+      "p_played": 0.7072
+    },
+    "DT": {
+      "n": 1177,
+      "p_played": 0.7162
+    },
+    "G": {
+      "n": 942,
+      "p_played": 0.6656
+    },
+    "K": {
+      "n": 114,
+      "p_played": 0.6754
+    },
+    "LB": {
+      "n": 2084,
+      "p_played": 0.7116
+    },
+    "QB": {
+      "n": 339,
+      "p_played": 0.4572
+    },
+    "RB": {
+      "n": 1210,
+      "p_played": 0.6355
+    },
+    "S": {
+      "n": 1344,
+      "p_played": 0.6815
+    },
+    "T": {
+      "n": 1342,
+      "p_played": 0.6304
+    },
+    "TE": {
+      "n": 908,
+      "p_played": 0.6916
+    },
+    "WR": {
+      "n": 2199,
+      "p_played": 0.6971
+    }
+  },
+  "p_played_questionable_by_season": {
+    "2015": 0.6128,
+    "2016": 0.7356,
+    "2017": 0.664,
+    "2018": 0.6486,
+    "2019": 0.6425,
+    "2020": 0.6742,
+    "2021": 0.6882,
+    "2022": 0.6651,
+    "2023": 0.6624,
+    "2024": 0.6544,
+    "2025": 0.6582
+  },
+  "report_vs_practice_counts": {
+    "(sin etiqueta)": {
+      "\n    ": 0,
+      "(sin dato)": 3,
+      "Did Not Participate In Practice": 2819,
+      "Full Participation in Practice": 21374,
+      "Limited Participation in Practice": 3319,
+      "Note": 0,
+      "Out (Definitely Will Not Play)": 1
+    },
+    "Doubtful": {
+      "\n    ": 3,
+      "(sin dato)": 2,
+      "Did Not Participate In Practice": 1358,
+      "Full Participation in Practice": 60,
+      "Limited Participation in Practice": 447,
+      "Note": 0,
+      "Out (Definitely Will Not Play)": 0
+    },
+    "Note": {
+      "\n    ": 2,
+      "(sin dato)": 0,
+      "Did Not Participate In Practice": 0,
+      "Full Participation in Practice": 4,
+      "Limited Participation in Practice": 0,
+      "Note": 0,
+      "Out (Definitely Will Not Play)": 0
+    },
+    "Out": {
+      "\n    ": 67,
+      "(sin dato)": 7,
+      "Did Not Participate In Practice": 9938,
+      "Full Participation in Practice": 202,
+      "Limited Participation in Practice": 774,
+      "Note": 1,
+      "Out (Definitely Will Not Play)": 52
+    },
+    "Probable": {
+      "\n    ": 0,
+      "(sin dato)": 0,
+      "Did Not Participate In Practice": 47,
+      "Full Participation in Practice": 2124,
+      "Limited Participation in Practice": 382,
+      "Note": 0,
+      "Out (Definitely Will Not Play)": 0
+    },
+    "Questionable": {
+      "\n    ": 138,
+      "(sin dato)": 31,
+      "Did Not Participate In Practice": 2469,
+      "Full Participation in Practice": 3083,
+      "Limited Participation in Practice": 9742,
+      "Note": 0,
+      "Out (Definitely Will Not Play)": 0
+    }
+  }
+}

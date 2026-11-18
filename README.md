@@ -56,6 +56,10 @@ make test lint
 
 Exporta `ODDS_API_KEY` (plan gratuito de [The Odds API](https://the-odds-api.com), 500 peticiones/mes). Se hace **una** llamada por ejecución, se guarda en `data/odds/` y se respeta la cabecera de cuota restante; sin clave, el comando se salta con un aviso y no falla. El informe sale en `reports/odds/<año>_weekXX.md/.json`: probabilidad nuestra vs cada casa y el consenso, edge, valor esperado al mejor precio y, en desacuerdos grandes (≥ 5 pp), posibles causas sacadas de nuestros datos (cambio de QB, descanso, viento/frío, bajas).
 
+## Línea base y barrera de CI (Fase 0)
+
+`ensemblitz baseline` audita 2018-2025 con walk-forward estricto el modelo sin mercado, el cierre del mercado sin comisión y el ensemble publicado (log loss, Brier, acierto, calibración por deciles, ATS, bootstrap del 95 %, extremizar y colinealidad). Resultado en [`reports/BASELINE.md`](reports/BASELINE.md). `python scripts/check_baseline.py` falla si el ensemble o el modelo sin mercado empeoran frente a esa línea base (en CI, contra `main`); `--full` recalcula todo desde nflverse y lo ejecuta cada semana `baseline-full.yml`. Reglas para agentes en [`AGENTS.md`](AGENTS.md).
+
 ## Resultados del backtest (walk-forward 2018-2025, 2141 partidos de temporada regular)
 
 Cada semana todo se reconstruye solo con partidos anteriores. Detalle (por temporada, calibración, MAE del total) en [`reports/backtest.md`](reports/backtest.md).
