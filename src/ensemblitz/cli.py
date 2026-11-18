@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+import numpy as np
 import typer
 
 from ensemblitz import config as C
@@ -129,6 +130,53 @@ def odds(
 
     msg = run_odds(season or current_season(), week or None, fetch=fetch)
     typer.echo(msg)
+
+
+@app.command()
+def pbp(
+    evaluate: bool = typer.Option(
+        False, "--evaluate", help="Walk-forward 2018-2025, write reports/PBP_SIM.md"
+    ),
+    sims: int = typer.Option(1000, help="Simulations per game"),
+    home: str = typer.Option("", help="Home team abbreviation, with --away"),
+    away: str = typer.Option("", help="Away team abbreviation, with --home"),
+    season: int = typer.Option(0, help="Season for a single game (0 = latest backtest season)"),
+    week: int = typer.Option(1, help="Week for a single game; rates use only earlier weeks"),
+    seed: int = typer.Option(0, help="Random seed"),
+) -> None:
+    """Drive-level Monte Carlo with a clutch window. Not used by `ensemblitz predict`."""
+    from ensemblitz.sim.drive_fit import load_drives, rates_before
+    from ensemblitz.sim.hybrid import from_book, simulate, split_probs
+    from ensemblitz.sim.pbp_eval import run_evaluation
+
+    if evaluate:
+        payload = run_evaluation(n_sims=sims, seed=seed or 202603)
+        g = payload["gates"]
+        typer.echo(
+            f"log loss {g['win_prob_log_loss']:.4f}  model-only {g['model_only_log_loss']:.4f}  "
+            f"margin sd {g['margin_sd']:.2f}  eligible {g['eligible_for_production']}"
+        )
+        typer.echo(f"wrote {C.REPORTS_DIR / 'PBP_SIM.md'}")
+        return
+    if not home or not away:
+        raise typer.BadParameter("pass --evaluate, or both --home and --away")
+    season = season or C.LAST_BACKTEST_SEASON
+    book = rates_before(load_drives(), season, week)
+    match = from_book(
+        book,
+        np.array([home.upper()]),
+        np.array([away.upper()]),
+        np.array([season]),
+        is_neutral=False,
+    )
+    h, a = simulate(match, n_sims=sims, seed=seed)
+    summary = split_probs(h, a)
+    typer.echo(
+        f"{away.upper()} @ {home.upper()} {season} week {week}: "
+        f"home win {summary['p_home'][0]:.3f}  "
+        f"margin {summary['margin'][0]:+.1f}  "
+        f"total {summary['total'][0]:.1f}"
+    )
 
 
 @app.command()
