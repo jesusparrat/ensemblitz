@@ -102,6 +102,17 @@ def build_results(reg: pd.DataFrame, kf_params: dict | None = None) -> dict:
     return res
 
 
+def _finite(o: object) -> object:
+    """NaN/Inf are not valid JSON (browsers and strict parsers reject them): store null."""
+    if isinstance(o, dict):
+        return {k: _finite(v) for k, v in o.items()}
+    if isinstance(o, list | tuple):
+        return [_finite(v) for v in o]
+    if isinstance(o, np.generic):
+        o = o.item()
+    return None if isinstance(o, float) and not np.isfinite(o) else o
+
+
 def _json_default(o: object) -> object:
     if isinstance(o, np.integer):
         return int(o)
@@ -117,7 +128,7 @@ def _fmt(x: float, nd: int = 3) -> str:
 def write_report(results: dict, extra_md: str = "") -> None:
     C.REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     (C.REPORTS_DIR / "backtest.json").write_text(
-        json.dumps(results, indent=2, default=_json_default)
+        json.dumps(_finite(results), indent=2, default=_json_default, allow_nan=False)
     )
     ov = results["overall"]
     lines = [
