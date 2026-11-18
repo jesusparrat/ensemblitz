@@ -45,7 +45,13 @@ Un cambio de modelo que mejora el baseline se acepta regenerando los artefactos 
 - Salidas JSON sin `NaN` (usar `null`). `validate_outputs.py` lo comprueba.
 - Cuota y coste: no lances trabajos largos o en paralelo sin necesidad. Primero el check barato (`pytest -q`, `check_baseline.py` en modo rápido), después el caro.
 
+## Fase 1 (lesiones)
+
+- La regla para conectar algo a producción es el intervalo de confianza pareado del log loss frente a la variante sin el cambio: solo si el IC 95 % queda por debajo de cero. Una mejora de frontera se documenta y no se conecta. Resultado actual en `reports/PHASE1.md` (lesiones: no concluyente, sin conectar).
+- Las variantes que se prueban después de ver los resultados se marcan como exploratorias y no deciden.
+
 ## Mapa útil
 
 - `src/ensemblitz/baseline.py` y `baseline_report.py`: auditoría de la Fase 0. `ensemblitz baseline [--full]` regenera `reports/baseline_*.json|png`, `reports/BASELINE.md` y `reports/baseline_components.parquet`.
 - `scripts/audit_injuries.py`: auditoría de los partes de lesiones de nflverse (necesita red); resultado en `reports/injury_audit.json`.
+- `src/ensemblitz/impact.py`, `margin.py`, `phase1.py`, `phase1_report.py`: impacto de lesiones por jugador (valor sobre reemplazo, probabilidad de jugar, tabla discreta de márgenes). `ensemblitz phase1 [--full]` regenera `reports/phase1_*` y `reports/PHASE1.md`. Sin conectar a producción.
