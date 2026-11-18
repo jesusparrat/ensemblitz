@@ -1,79 +1,91 @@
 {% extends "base.html" %}
 {% from "_macros.html" import scroll_start, scroll_end with context %}
 {% set nav = 'method' %}
-{% block title %}Método{% endblock %}
+{% block title %}{{ t('method.title') }}{% endblock %}
 {% block content %}
 <section class="head" aria-labelledby="h"><div>
-<h1 id="h"><small>Cómo funciona y qué tan bien lo hace</small>Método</h1>
-<p class="lede">Qué datos entran, qué modelos hay, cómo se mide y, sobre todo, lo que todavía no sabemos hacer.</p></div></section>
+<h1 id="h"><small>{{ t('method.kicker') }}</small>{{ t('method.title') }}</h1>
+<p class="lede">{{ t('method.lede') }}</p></div></section>
 
-<h2>Qué hacemos</h2>
-<p>Partimos de los datos públicos de <a href="https://github.com/nflverse">nflverse</a> (calendarios con líneas de apuestas, jugada a jugada, partes de lesiones). Cada equipo tiene ratings de ataque y defensa por EPA (puntos esperados añadidos por jugada) en pase y carrera, ajustados por la calidad del rival, con memoria que decae y regresión a la media entre temporadas. Todo se calcula solo con lo que se sabía antes del partido.</p>
-<p>Sobre esos ratings corren cuatro modelos más el mercado:</p>
-<ul>
-  <li><b>Kalman:</b> la fuerza ofensiva y defensiva de cada equipo cambia semana a semana, con incertidumbre explícita.</li>
-  <li><b>LightGBM:</b> árboles pequeños con descanso, viaje, QB, clima y ratings; una variante aprende solo lo que el mercado no explica.</li>
-  <li><b>Elo</b> con margen de victoria.</li>
-  <li><b>Mercado:</b> la probabilidad de la línea de cierre sin la comisión de la casa.</li>
-</ul>
-<p>Un <b>ensemble</b> los combina con pesos que se reajustan cada semana usando solo predicciones anteriores, y un <b>simulador</b> de posesiones convierte los puntos esperados de cada equipo en una distribución de marcadores.</p>
-
-{% if bt %}
-<h2>Resultados históricos</h2>
-<p>Simulación semana a semana de {{ bt.seasons[0] }} a {{ bt.seasons[1] }}: {{ bt.n_games }} partidos de temporada regular. En cada semana todo se reconstruye con partidos anteriores; nada del futuro entra.</p>
-{{ scroll_start("Resultados por modelo") }}<table>
-<thead><tr><th>Modelo</th><th>Acierto</th><th>Brier</th><th>Log loss</th><th>Error medio del margen</th><th>Contra el spread</th></tr></thead>
+<h2 id="numero">{{ t('method.number_h') }}</h2>
+<p>{{ t('method.number_1') }}</p>
+<p>{{ t('method.number_2') }}</p>
+{% if bl %}
+{{ scroll_start(tx('method.number_h')) }}<table>
+<thead><tr><th>{{ t('method.col_source') }}</th><th>{{ t('method.col_acc') }}</th><th>{{ t('method.col_brier') }}</th><th>{{ t('method.col_ll') }}</th></tr></thead>
 <tbody>
-{% for c in ['market','elo','kf','lgbm','lgbm_mkt','sim','ens'] %}{% set r = bt.overall[c] %}
-<tr {% if c == 'ens' %}class="hl"{% endif %}><td>{{ model_labels[c] }}</td><td>{{ r.accuracy|pct(1) }}</td><td>{{ r.brier|num(3) }}</td><td>{{ r.log_loss|num(3) }}</td><td>{{ r.mae_margin|num(2) }}</td><td>{% if c == 'market' %}n/d{% else %}{{ r.ats.win_pct|pct(1) }}{% endif %}</td></tr>
+{% for k, lab in (('model_only', t('comp_ensemble_model_only')), ('ens', t('comp_ensemble')), ('market', t('comp_market'))) %}{% set r = bl.overall[k] %}
+<tr{% if k == 'model_only' %} class="hl"{% endif %}><td>{{ lab }}</td><td>{{ pct(r.accuracy, 1) }}</td><td>{{ n(r.brier, 3) }}</td><td>{{ n(r.log_loss, 3) }}</td></tr>
 {% endfor %}
 </tbody></table>{{ scroll_end() }}
-<p class="small">Brier y log loss: menores son mejores. «Contra el spread» es el porcentaje de veces que el lado preferido por el modelo cubre la línea de cierre; con comisión de −110 hace falta un 52,4&nbsp;% para no perder dinero.</p>
+<p class="small">{{ t('method.number_table_note', n=bl.n_games, a=bl.seasons[0], b=bl.seasons[1]) }}</p>
+{% endif %}
 
-<h2>Por temporada</h2>
-{{ scroll_start("Resultados por temporada") }}<table>
-<thead><tr><th>Temporada</th><th>Acierto mercado</th><th>Acierto ensemble</th><th>Log loss mercado</th><th>Log loss ensemble</th></tr></thead>
-<tbody>{% for s, v in bt.per_season.items() %}<tr><td>{{ s }}</td><td>{{ v.market.accuracy|pct(1) }}</td><td>{{ v.ens.accuracy|pct(1) }}</td><td>{{ v.market.log_loss|num(3) }}</td><td>{{ v.ens.log_loss|num(3) }}</td></tr>{% endfor %}</tbody>
+<h2>{{ t('method.how_h') }}</h2>
+<p>{{ t('method.how_1') }}</p>
+<ul>
+  <li>{{ t('method.how_kf') }}</li>
+  <li>{{ t('method.how_lgbm') }}</li>
+  <li>{{ t('method.how_elo') }}</li>
+</ul>
+<p>{{ t('method.how_stack') }}</p>
+<p>{{ t('method.how_points') }}</p>
+
+<h2>{{ t('method.market_h') }}</h2>
+<p>{{ t('method.market_1') }}</p>
+<p>{{ t('method.market_2') }}</p>
+<p>{{ t('method.market_3') }}</p>
+
+<h2>{{ t('method.why_h') }}</h2>
+<p>{{ t('method.why_1') }}</p>
+
+<h2 id="lesiones">{{ t('method.inj_h') }}</h2>
+<p>{{ t('method.inj_1') }}</p>
+<p>{{ t('method.inj_2') }} <a href="{{ repo }}/blob/main/reports/PHASE1.md">reports/PHASE1.md</a></p>
+
+{% if bt %}
+<h2>{{ t('method.hist_h') }}</h2>
+<p>{{ t('method.hist_1', n=bt.n_games, a=bt.seasons[0], b=bt.seasons[1]) }}</p>
+{{ scroll_start(tx('method.hist_h')) }}<table>
+<thead><tr><th>{{ t('method.col_source') }}</th><th>{{ t('method.col_acc') }}</th><th>{{ t('method.col_brier') }}</th><th>{{ t('method.col_ll') }}</th><th>{{ t('method.col_mae') }}</th><th>{{ t('method.col_ats') }}</th></tr></thead>
+<tbody>
+{% for c in ['market','elo','kf','lgbm','lgbm_mkt','sim','ens'] %}{% set r = bt.overall[c] %}
+<tr{% if c == 'ens' %} class="hl"{% endif %}><td>{{ model_labels[c] }}</td><td>{{ pct(r.accuracy, 1) }}</td><td>{{ n(r.brier, 3) }}</td><td>{{ n(r.log_loss, 3) }}</td><td>{{ n(r.mae_margin, 2) }}</td><td>{% if c == 'market' %}{{ t('na') }}{% else %}{{ pct(r.ats.win_pct, 1) }}{% endif %}</td></tr>
+{% endfor %}
+</tbody></table>{{ scroll_end() }}
+<p class="small">{{ t('method.hist_note') }}</p>
+
+<h3 class="sub-h">{{ t('method.season_h') }}</h3>
+{{ scroll_start(tx('method.season_h')) }}<table>
+<thead><tr><th>{{ t('method.col_season') }}</th><th>{{ t('method.col_acc_mkt') }}</th><th>{{ t('method.col_acc_ens') }}</th><th>{{ t('method.col_ll_mkt') }}</th><th>{{ t('method.col_ll_ens') }}</th></tr></thead>
+<tbody>{% for s, v in bt.per_season.items() %}<tr><td>{{ s }}</td><td>{{ pct(v.market.accuracy, 1) }}</td><td>{{ pct(v.ens.accuracy, 1) }}</td><td>{{ n(v.market.log_loss, 3) }}</td><td>{{ n(v.ens.log_loss, 3) }}</td></tr>{% endfor %}</tbody>
 </table>{{ scroll_end() }}
 
-<h2>Calibración</h2>
+<h3 class="sub-h">{{ t('method.calib_h') }}</h3>
 <div class="cols2"><div>{{ calib|safe }}</div>
-<div><p>Cuando decimos 70&nbsp;%, ¿gana el 70&nbsp;% de las veces? Cada punto es un tramo de probabilidad del ensemble; el tamaño indica cuántos partidos hay. Sobre la diagonal punteada la calibración sería perfecta.</p>
-<p>Los tramos extremos tienen pocos partidos y se mueven mucho por azar.</p></div></div>
+<div><p>{{ t('method.calib_1') }}</p><p>{{ t('method.calib_2') }}</p></div></div>
 
-{% if clv %}
-<h2>¿Le ganamos a la línea de cierre?</h2>
-<p>{{ clv.verdict }}</p>
-{{ scroll_start("Validación contra la línea de cierre") }}<table>
-<thead><tr><th>Modelo y umbral de desacuerdo</th><th>Partidos</th><th>ATS</th><th>ATS %</th><th>ROI plano −110</th><th>ROI moneyline</th></tr></thead>
-<tbody>
-{% for c in ['ens','lgbm_mkt'] %}{% for r in clv.tables[c] if r.n %}
-<tr><td>{{ model_labels[c] }}, {{ 'todos' if r.threshold == 0 else '> %d pp' % (r.threshold*100)|round|int }}</td><td>{{ r.n }}</td><td>{{ r.ats_w }}-{{ r.ats_l }}</td><td>{{ r.ats_pct|pct(1) }}</td><td>{{ r.ats_roi_flat_110|pct(1) }}</td><td>{{ r.ml_roi_flat|pct(1) }}</td></tr>
-{% endfor %}{% endfor %}
-</tbody></table>{{ scroll_end() }}
-<p class="small">Se apuesta siempre el lado que el modelo prefiere frente al mercado, con una unidad plana. Con pocos partidos (más de 5 pp, más de 8 pp) un ROI llamativo es ruido. Tabla completa con los demás modelos en <a href="{{ repo }}/blob/main/reports/backtest.md">reports/backtest.md</a>.</p>
-{% endif %}
+<p>{{ t('method.verdict', ens=n(bt.overall.ens.log_loss, 3), mkt=n(bt.overall.market.log_loss, 3)) }} <a href="{{ repo }}/blob/main/reports/backtest.md">reports/backtest.md</a></p>
 {% endif %}
 
-<h2 id="noticias">Noticias y bajas</h2>
-<p>Las noticias de última hora (bajas, dudas, regresos) se cargan a mano o desde fuentes citadas, y cada una enseña su enlace. Solo mueven el pronóstico las bajas confirmadas y, con menos peso, las dudas. Cada jugador vale lo que produce menos lo que produciría su reemplazo: en ataque, EPA por jugada y volumen (QB, RB, WR, TE); en la línea ofensiva y en defensa, minutos jugados por una referencia de posición, corregida por sacks, presiones, balones robados y pases defendidos (no hay EPA individual defensivo público). El efecto se reduce al 70&nbsp;% y se recorta si la noticia es antigua, porque la línea del mercado ya la ha descontado. Este ajuste <b>no está validado</b> en el backtest, porque no existe un archivo histórico de noticias.</p>
-
-<h2>Límites</h2>
+<h2>{{ t('method.limits_h') }}</h2>
 <ul>
-  <li>El objetivo realista es un 65–70&nbsp;% de aciertos directos. Nadie con un método público está cerca del 90&nbsp;%; quien lo promete suele estar usando datos del futuro sin darse cuenta.</li>
-  <li>La versión 0.1 <b>no tiene ventaja demostrada sobre la línea de cierre</b>. Para ganarle al mercado hace falta información que él no tenga y probarla fuera de muestra.</li>
-  <li>El QB titular de partidos futuros es el previsto en el calendario. Las bajas solo entran con el parte de la semana anterior.</li>
-  <li>El simulador cuenta posesiones, no jugadas: no modela safeties, touchdowns defensivos, reloj, lesiones durante el partido ni clima.</li>
-  <li>Hay pocas temporadas con datos jugada a jugada (desde 2015): los modelos de árboles se sobreajustan con facilidad.</li>
+  <li>{{ t('method.limit_1') }}</li>
+  <li>{{ t('method.limit_2') }}</li>
+  <li>{{ t('method.limit_3') }}</li>
+  <li>{{ t('method.limit_4') }}</li>
+  <li>{{ t('method.limit_5') }}</li>
 </ul>
 
-<h2>Lo que viene</h2>
-<ul>
-  <li>Simulador jugada a jugada con lesiones durante el partido.</li>
-  <li>Modelo de salud de jugadores y recaídas.</li>
-  <li>Clima por hora y por cuarto.</li>
-  <li>Motor de simulación en Rust, y después en GPU, para simular millones de partidos por jornada.</li>
-  <li>Modelo bayesiano jerárquico completo en lugar del filtro de Kalman.</li>
-</ul>
-<p class="small">Todo el código y los datos de salida están en <a href="{{ repo }}">{{ repo }}</a> bajo licencia MIT.</p>
+<h2>{{ t('method.gloss_h') }}</h2>
+<dl class="facts">
+  <dt>Brier</dt><dd>{{ t('method.gloss_brier') }}</dd>
+  <dt>{{ t('method.gloss_ll_t') }}</dt><dd>{{ t('method.gloss_ll') }}</dd>
+  <dt>{{ t('method.gloss_ens_t') }}</dt><dd>{{ t('method.gloss_ens') }}</dd>
+  <dt>{{ t('method.gloss_sim_t') }}</dt><dd>{{ t('method.gloss_sim') }}</dd>
+  <dt>{{ t('method.gloss_pp_t') }}</dt><dd>{{ t('method.gloss_pp') }}</dd>
+  <dt>{{ t('method.gloss_shin_t') }}</dt><dd>{{ t('method.gloss_shin') }}</dd>
+</dl>
+
+<p class="small">{{ t('method.footer', repo=repo) }}</p>
 {% endblock %}

@@ -249,3 +249,52 @@ def injury_features(
                     rec[f"{side}b_{bg}"] = float(agg.at[key, "xb"]) if key in agg.index else 0.0
             out.append(rec)
     return pd.DataFrame(out)
+
+
+# ------------------------------------------------------------------ context for the site
+NOTABLE_PTS = (
+    1.0  # spread points per game over a replacement; below this a name is not worth a line
+)
+
+
+def notable_absences(
+    season: int, week: int, min_pts: float = NOTABLE_PTS, data: dict | None = None
+) -> dict[str, list[dict]]:
+    """Players listed Out or Doubtful for (season, week) whose value is at least ``min_pts``.
+
+    Returns ``{team: [{player, position, status, points}]}``, most valuable first. ``points`` is
+    the walk-forward value table's prior scale (spread points per game over a replacement). It is
+    shown on the site as context only: Phase 1 found no demonstrated gain from wiring injuries
+    into the number (see reports/PHASE1.md), so it must not be summed or applied.
+    """
+    d = data or load_inputs()
+    pg = player_games(d["stats"], d["snaps"], d["ids"])
+    rows = injury_rows(d["inj"], d["snaps"], d["ids"])
+    wk = rows[
+        (rows["season"] == season)
+        & (rows["week"] == week)
+        & rows["label"].isin(["Out", "Doubtful"])
+    ]
+    if wk.empty:
+        return {}
+    vt = value_table(pg, int(tau(season, week)))
+    names = (
+        d["stats"][["player_id", "player_display_name"]]
+        .drop_duplicates("player_id")
+        .set_index("player_id")["player_display_name"]
+    )
+    wk = wk.join(vt, on="gsis_id", how="left", rsuffix="_stat")
+    out: dict[str, list[dict]] = {}
+    for r in wk.itertuples():
+        pts = r.value_pts
+        if pts is None or np.isnan(pts) or pts < min_pts or r.gsis_id not in names.index:
+            continue
+        out.setdefault(r.team, []).append(
+            {
+                "player": str(names[r.gsis_id]),
+                "position": str(r.position),
+                "status": str(r.label).lower(),
+                "points": round(float(pts), 1),
+            }
+        )
+    return {t: sorted(v, key=lambda x: -x["points"])[:3] for t, v in out.items()}

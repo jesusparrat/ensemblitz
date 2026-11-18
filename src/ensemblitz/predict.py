@@ -80,18 +80,26 @@ def predict_frame(frame: pd.DataFrame, season: int, weeks: list[int]) -> pd.Data
     nm = ens.no_market
     out["nomkt_prob"] = nm.prob(out)
     out["nomkt_margin"] = nm.margin(out)
+    out["nomkt_total"] = nm.total(out)
     out.attrs["ensemble_weights"] = ens.weights()
     return out
 
 
 def simulate_rows(rows: pd.DataFrame, n_sims: int = 20000) -> dict[str, np.ndarray]:
-    total = rows["ens_total"].to_numpy()
-    margin = rows["ens_margin"].to_numpy()
-    h, a = simulate_games(
-        (total + margin) / 2, (total - margin) / 2, n_sims=n_sims, seed=2026, params=SimParams()
-    )
-    out = summarize_sim(h, a)
-    out.update(likely_score(h, a, rows["ens_prob"].to_numpy() >= 0.5, margin))
+    """Simulations for the blended ensemble (keys as is) and for the model-only headline (mo_*)."""
+    out: dict[str, np.ndarray] = {}
+    for prefix, tcol, mcol, pcol in (
+        ("", "ens_total", "ens_margin", "ens_prob"),
+        ("mo_", "nomkt_total", "nomkt_margin", "nomkt_prob"),
+    ):
+        total = rows[tcol].to_numpy()
+        margin = rows[mcol].to_numpy()
+        h, a = simulate_games(
+            (total + margin) / 2, (total - margin) / 2, n_sims=n_sims, seed=2026, params=SimParams()
+        )
+        res = summarize_sim(h, a)
+        res.update(likely_score(h, a, rows[pcol].to_numpy() >= 0.5, margin))
+        out.update({prefix + k: v for k, v in res.items()})
     return out
 
 
@@ -131,14 +139,48 @@ def _f(x: float | None, nd: int = 4) -> float | None:
     return None if x is None or (isinstance(x, float) and np.isnan(x)) else round(float(x), nd)
 
 
+def model_only_block(r: pd.Series, sim: dict[str, np.ndarray], i: int) -> dict:
+    """The headline numbers: the stack of Elo, Kalman and LightGBM, with no market input."""
+    m, t = float(r["nomkt_margin"]), float(r["nomkt_total"])
+    return {
+        "home_win_prob": _f(r["nomkt_prob"]),
+        "margin": _f(m, 2),
+        "total": _f(t, 2),
+        "home_points": _f((t + m) / 2, 2),
+        "away_points": _f((t - m) / 2, 2),
+        "sim": {
+            "p_home": _f(sim["mo_p_home"][i]),
+            "home_q10": _f(sim["mo_home_q10"][i], 1),
+            "home_q90": _f(sim["mo_home_q90"][i], 1),
+            "away_q10": _f(sim["mo_away_q10"][i], 1),
+            "away_q90": _f(sim["mo_away_q90"][i], 1),
+            "margin_q10": _f(sim["mo_margin_q10"][i], 1),
+            "margin_q90": _f(sim["mo_margin_q90"][i], 1),
+            "total_q10": _f(sim["mo_total_q10"][i], 1),
+            "total_q90": _f(sim["mo_total_q90"][i], 1),
+        },
+        "example_score": {
+            "home": int(sim["mo_like_home"][i]),
+            "away": int(sim["mo_like_away"][i]),
+            "prob": _f(sim["mo_like_prob"][i]),
+        },
+    }
+
+
 def game_record(
-    r: pd.Series, sim: dict[str, np.ndarray], i: int, now: str, news_adj: dict | None = None
+    r: pd.Series,
+    sim: dict[str, np.ndarray],
+    i: int,
+    now: str,
+    news_adj: dict | None = None,
+    absences: dict[str, list[dict]] | None = None,
 ) -> dict:
     comps = {c: _f(r[f"{c}_prob"]) for c in ("market", "elo", "kf", "lgbm", "lgbm_mkt")}
     comps["ensemble"] = _f(r["ens_prob"])
     if news_adj and news_adj.get("applied"):
         comps["ensemble_pre_news"] = _f(news_adj["prob_home_before"])
     comps["ensemble_model_only"] = _f(r["nomkt_prob"])
+    mo_home = bool(r["nomkt_prob"] >= 0.5)
     return {
         "game_id": r["game_id"],
         "season": int(r["season"]),
@@ -149,11 +191,20 @@ def game_record(
         "generated_at": now,
         "model_version": C.MODEL_VERSION,
         "home_win_prob": comps,
-        "pick": r["home_team"] if r["ens_prob"] >= 0.5 else r["away_team"],
+        # The headline is the model on its own; the blended ensemble is kept for comparison.
+        "headline": "model_only",
+        "pick": r["home_team"] if mo_home else r["away_team"],
+        "ensemble_pick": r["home_team"] if r["ens_prob"] >= 0.5 else r["away_team"],
+        "model_only": model_only_block(r, sim, i),
         "predicted_margin": _f(r["ens_margin"], 2),
         "model_only_margin": _f(r["nomkt_margin"], 2),
         "predicted_total": _f(r["ens_total"], 2),
         "news_adjustment": news_adj or {"applied": False},
+        # Context only: not part of any number (Phase 1 did not show a gain from injuries).
+        "absences": {
+            "home": (absences or {}).get(r["home_team"], []),
+            "away": (absences or {}).get(r["away_team"], []),
+        },
         "most_likely_score": {
             "home": int(sim["like_home"][i]),
             "away": int(sim["like_away"][i]),
@@ -193,6 +244,20 @@ def game_record(
     }
 
 
+def _absences(rows: pd.DataFrame) -> dict[tuple[int, int], dict[str, list[dict]]]:
+    """Notable Out/Doubtful players per (season, week); empty if the inputs are not available."""
+    from ensemblitz import impact as I
+
+    out: dict[tuple[int, int], dict[str, list[dict]]] = {}
+    try:
+        data = I.load_inputs()
+        for s, w in sorted({(int(r.season), int(r.week)) for r in rows.itertuples()}):
+            out[(s, w)] = I.notable_absences(s, w, data=data)
+    except (OSError, KeyError, ValueError) as exc:  # context is optional; never block a pick
+        log.warning("absence context skipped: %s", exc)
+    return out
+
+
 def run_predict(
     season: int, week: int | None = None, n_weeks: int = 1, use_news: bool = True
 ) -> list[Path]:
@@ -208,7 +273,11 @@ def run_predict(
     audits = apply_news(rows, now) if use_news else [None] * len(rows)
     sim = simulate_rows(rows)
     paths = []
-    recs = [game_record(r, sim, i, now, audits[i]) for i, r in rows.iterrows()]
+    ab = _absences(rows)
+    recs = [
+        game_record(r, sim, i, now, audits[i], ab.get((int(r["season"]), int(r["week"]))))
+        for i, r in rows.iterrows()
+    ]
     weights = rows.attrs.get("ensemble_weights", {})
     for w in weeks:
         path = pred_path(season, w)

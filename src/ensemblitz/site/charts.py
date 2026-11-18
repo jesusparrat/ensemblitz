@@ -80,7 +80,7 @@ def histogram(
     return _svg("".join(out), label=label)
 
 
-def calibration(points: list[dict]) -> str:
+def calibration(points: list[dict], x_label: str, y_label: str, aria: str) -> str:
     """Reliability diagram: predicted vs observed frequency, dot area ~ games in the bin."""
     size = 300
     pad = 34
@@ -111,15 +111,15 @@ def calibration(points: list[dict]) -> str:
         )
     out.append(
         f'<text class="side-label" x="{pad + s / 2}" y="{size - 4}" text-anchor="middle">'
-        f"Probabilidad prevista (%)</text>"
+        f"{x_label}</text>"
     )
     out.append(
         f'<text class="side-label" x="10" y="{pad + s / 2}" text-anchor="middle" '
-        f'transform="rotate(-90 10 {pad + s / 2})">Frecuencia real (%)</text>'
+        f'transform="rotate(-90 10 {pad + s / 2})">{y_label}</text>'
     )
     return (
         f'<svg class="chart chart-square" viewBox="0 0 {size} {size}" role="img" '
-        f'aria-label="Calibración del ensemble">{"".join(out)}</svg>'
+        f'aria-label="{aria}">{"".join(out)}</svg>'
     )
 
 

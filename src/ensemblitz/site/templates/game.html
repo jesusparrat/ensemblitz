@@ -1,99 +1,85 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, pbar, key, scroll_start, scroll_end with context %}
+{% from "_macros.html" import icon, pbar, absences, scroll_start, scroll_end with context %}
 {% set nav = 'game' %}
-{% block title %}{{ g.away }} en {{ g.home }}, jornada {{ week }}{% endblock %}
+{% block title %}{{ g.away }} {{ t('card.at') }} {{ g.home }}{% endblock %}
+{% block description %}{{ tx('game.description', away=g.away_name, home=g.home_name, fav=g.fav, p=pct(g.p_win)) }}{% endblock %}
 {% block content %}
 <section class="head matchup" aria-labelledby="h">
   <div>
-    <h1 id="h"><small><a href="{{ rel }}jornada/{{ week }}.html">Jornada {{ week }}</a></small>{{ g.away }} en {{ g.home }}</h1>
-    <p class="when">{{ g.away_name }} en {{ g.home_name }}. {{ g.kick.day_full }} de {{ g.kick.short.split(' ', 1)[1] }}, {{ g.kick.time }} (hora de Madrid){% if g.kick.us_night %}, {{ g.kick.us_night }} noche en EE.&nbsp;UU{% endif %}.</p>
-    <p class="lede">{{ g.summary }}{% if g.adj_text %} {{ g.adj_text }}{% endif %}{% for n in g.notes[:2] %} {{ n.text }}{% endfor %}{% if g.final %} Resultado final: {{ g.away }} {{ g.final.away }}, {{ g.home }} {{ g.final.home }}.{% endif %}</p>
+    <h1 id="h"><small>{{ t('game.kicker', week=week, season=season) }}</small>{{ g.away }} {{ t('card.at') }} {{ g.home }}</h1>
+    <p class="when">{{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.madrid') }}.</p>
+    <p class="lede">{{ why_text(g) }}</p>
   </div>
-  <div class="read four" aria-label="Cifras principales">
-    <div><b>{{ (g.p_pick*100)|round|int }}</b><span>% de que gane {{ g.pick }}</span></div>
-    <div><b>{{ g.margin_txt.split(' ')[-1] if g.margin_txt != 'igualado' else '0' }}</b><span>puntos de margen: {{ g.margin_txt }}</span></div>
-    <div class="s" style="justify-items:start;text-align:left"><b data-v="{{ g.score_away }}">{{ g.score_away }}</b><b data-v="{{ g.score_home }}">{{ g.score_home }}</b><small>{{ g.away }}</small><small>{{ g.home }}</small></div>
-    <div><b>{{ g.total|num(1) }}</b><span>puntos totales previstos{% if g.market.total_line is not none %}, línea {{ g.market.total_line|num(1) }}{% endif %}</span></div>
+  <div class="read four" aria-label="{{ tx('game.read_aria') }}">
+    <div><b role="img" aria-label="{{ tx('card.win_aria', team=g.fav, p=pct(g.p_win)) }}">{{ shown(g.p_win) }}<i>%</i></b><span>{{ t('card.wins', team=g.fav) }}</span></div>
+    <div><b>{% if g.margin_ok %}{{ n(g.margin|abs, 1) }}{% else %}{{ n(0, 1) }}{% endif %}</b><span>{% if g.margin_ok %}{{ t('game.margin_of', txt=fav_txt(g.home, g.away, g.margin)) }}{% else %}{{ t('even') }}{% endif %}</span></div>
+    <div><b>{{ n(g.total, 1) }}</b><span>{{ t('game.total_label') }}</span></div>
+    {% if g.mkt_win is not none %}<div class="{{ 'hot' if g.flag }}"><b>{{ shown(g.mkt_win) }}<i>%</i></b><span>{{ t('game.market_label') }}</span></div>{% endif %}
   </div>
 </section>
 
-{% if g.flag %}
-<section class="flags" aria-labelledby="fl" style="grid-template-columns:1fr">
-  <h2 id="fl">Bandera: el modelo y el mercado no coinciden</h2>
-  <article class="fcard big">
-    {{ pbar(g, 40) }}
-    <div class="vals3"><div><b>{{ g.mkt_pick|pct }}</b>Mercado</div><div><b>{{ g.p_pick|pct }}</b>Ensemble</div><div><b>{{ g.pure_pick|pct }}</b>Solo modelo</div></div>
-    <p>{{ g.flag_text }}</p>
-    {% if g.reasons %}<p class="small">Posibles causas: {{ g.reasons|join('; ') }}.</p>{% endif %}
-  </article>
-</section>
-{% endif %}
+{% if g.legacy %}<p class="note-legacy">{{ icon('info') }}<span>{{ t('game.legacy') }}</span></p>{% endif %}
+{% if g.final %}<p class="empty"><b>{{ t('card.final', away=g.away, a=g.final.away, home=g.home, h=g.final.home) }}</b> {% if g.final.ok %}{{ t('card.hit') }}{% else %}{{ t('card.miss') }}{% endif %}</p>{% endif %}
 
-<h2 id="noticias">Lo que hay que saber</h2>
-{% if g.news %}
-<ul class="newslist">
-{% for n in g.news %}<li><div><span class="tag">{{ n.team }}</span> <b>{{ n.player }}</b>{% if n.position %}, {{ n.position }}{% endif %}. <span class="st">{{ status_es[n.status] }}</span></div>
-<p>{{ n.summary_es }}</p>
-{% if n.impact_note_es %}<p class="impact">{{ n.impact_note_es }}</p>{% endif %}
-<p class="small">Fuente: {% if n.source_url %}<a href="{{ n.source_url }}" rel="noopener">{{ n.source_handle or n.source_url }}</a>{% else %}{{ n.source_handle or 'sin enlace' }}{% endif %}{% if n.posted_at %}. {{ n.posted_at|stamp }}{% endif %}</p></li>{% endfor %}
-</ul>
-{% if g.adj.applied %}
-<p><b>Efecto en el pronóstico.</b> {{ g.adj_text or 'El ajuste es menor de medio punto porcentual.' }} Margen de {{ fav(g.home, g.away, g.adj.margin_before) }} a {{ fav(g.home, g.away, g.adj.margin_after) }}. Cada baja pesa su valor sobre un reemplazo, por su estado (baja 1, muy dudoso 0,75, dudoso 0,25) y por la frescura de la noticia:</p>
-{{ scroll_start('Bajas que mueven el pronóstico') }}<table><thead><tr><th>Jugador</th><th>Valor (pts/partido)</th><th>Estado</th><th>Frescura</th><th>Puntos de margen</th></tr></thead><tbody>
-{% for i in g.adj['items'] %}<tr><td>{{ i.player }} ({{ i.team }}, {{ i.position }})</td><td>{{ i.value_pts|num(2) }}</td><td>{{ status_es[i.status] }}</td><td>{{ i.freshness|num(2) }}</td><td>{{ i.points|num(2) }}</td></tr>{% endfor %}
+<h2>{{ t('game.points_h') }}</h2>
+{{ scroll_start(tx('game.points_h')) }}<table>
+<thead><tr><th>{{ t('game.col_team') }}</th><th>{{ t('game.col_exp') }}</th><th>{{ t('game.col_range') }}</th></tr></thead>
+<tbody>
+{% for side, tm, name, v in (('away', g.away, g.away_name, g.pts_away), ('home', g.home, g.home_name, g.pts_home)) %}
+<tr{% if tm == g.fav %} class="hl"{% endif %}><td>{{ name }}</td><td>{{ n(v, 1) }}</td><td>{% if g.range %}{{ rng(g.range[side][0], g.range[side][1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
+{% endfor %}
+<tr><td>{{ t('game.row_margin') }}</td><td>{% if g.margin_ok %}{{ fav_txt(g.home, g.away, g.margin) }}{% else %}{{ t('even') }}{% endif %}</td><td>{% if g.range %}{{ t('game.margin_range', lo=signed(g.range.margin[0], 0), hi=signed(g.range.margin[1], 0)) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
+<tr><td>{{ t('game.row_total') }}</td><td>{{ n(g.total, 1) }}</td><td>{% if g.range %}{{ rng(g.range.total[0], g.range.total[1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
 </tbody></table>{{ scroll_end() }}
-<p class="small">Valor del jugador: producción (EPA, objetivos, snaps) menos un reemplazo, reducida al 70&nbsp;%. Método y límites en <a href="{{ rel }}metodo.html#noticias">Método</a>. Es un ajuste conservador, no una certeza.</p>
-{% else %}<p class="small">Estas noticias no mueven la probabilidad: solo cuentan las bajas confirmadas, o las dudas con menos peso.</p>{% endif %}
-{% else %}
-<p>Sin ajustes por lesiones para este partido: el pronóstico no incorpora bajas de último momento.</p>
-{% endif %}
+<p class="small">{{ t('game.range_note') }} {{ t('game.example', away=g.away, a=g.example.away, home=g.home, h=g.example.home) }}</p>
 
-<h2>Cómo se reparten los resultados</h2>
-<p class="small">20&nbsp;000 partidos simulados posesión a posesión con los puntos esperados de cada equipo. En negro, el lado del pick; la línea discontinua es la del mercado.</p>
-<div class="charts">
-  <div><h3>Margen (local menos visitante)</h3>{{ charts.margin|safe }}</div>
-  <div><h3>Puntos totales</h3>{{ charts.total|safe }}</div>
+<h2>{{ t('game.market_h') }}</h2>
+<div class="cols2"><div>
+  <dl class="facts">
+    <dt>{{ t('game.ours') }}</dt><dd>{{ t('card.wins', team=g.fav) }}, {{ pct(g.p_win) }}</dd>
+    <dt>{{ t('game.market') }}</dt><dd>{% if g.mkt_win is not none %}{{ pct(g.mkt_win) }}{% else %}{{ t('na') }}{% endif %}</dd>
+    <dt>{{ t('game.diff') }}</dt><dd>{% if g.diff is none %}{{ t('na') }}{% else %}{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span>{% else %}{{ signed(g.diff, 0) }}{% endif %}{% endif %}</dd>
+    {% if g.market.spread_line is not none %}<dt>{{ t('game.line') }}</dt><dd>{{ fav_txt(g.home, g.away, g.market.spread_line) }}, {{ t('game.line_total', v=n(g.market.total_line, 1)) }}</dd>{% endif %}
+  </dl>
+  <p class="small">{% if g.mkt_n %}{{ t('game.market_src_books', n=g.mkt_n) }}{% else %}{{ t('game.market_src_close') }}{% endif %} {{ t('game.market_note') }}</p>
 </div>
-<p class="small">Rango del 80&nbsp;% del margen: de {{ g.sim.margin_q10|num(0) }} a {{ g.sim.margin_q90|num(0) }}. Del total: de {{ g.sim.total_q10|num(0) }} a {{ g.sim.total_q90|num(0) }}. Que el rango sea tan ancho es la realidad de la NFL, no un defecto del gráfico. El marcador típico ({{ g.score_away }} a {{ g.score_home }}) ocurre en el {{ (g.score_prob*100)|num(1) }}&nbsp;% de las simulaciones: es una ilustración, lo informativo es la forma de las distribuciones.</p>
+<div>
+  <p>{% if g.flag %}{{ t('game.flag_text', fav=g.fav, ours=pct(g.p_win), mkt=pct(g.mkt_win), d=g.diff|abs, n=flag_pts) }}{% elif g.diff is not none %}{{ t('game.close_text', fav=g.fav, ours=pct(g.p_win), mkt=pct(g.mkt_win)) }}{% endif %}</p>
+</div></div>
 
-<h2>Probabilidad de que gane {{ g.home }}, por modelo</h2>
-<div class="scroll" role="region" aria-label="Probabilidad por modelo" tabindex="0">
-<table>
-  <thead><tr><th>Modelo</th><th class="bar-cell"><span class="sr">Barra</span></th><th>{{ g.home }}</th><th>{{ g.away }}</th></tr></thead>
-  <tbody>
-  {% for key_, label in comp_labels %}{% set v = g.comps.get(key_) %}{% if v is not none %}
-  <tr {% if key_ == 'ensemble' %}class="hl"{% endif %}><td>{{ label }}</td>
-    <td class="bar-cell"><span class="mini {% if key_ == 'ensemble' %}acc{% endif %}"><i style="width:{{ (v*100)|round(1) }}%"></i></span></td>
-    <td>{{ v|pct(1) }}</td><td>{{ (1-v)|pct(1) }}</td></tr>
-  {% endif %}{% endfor %}
-  </tbody>
-</table></div>
-<p class="hint">Desliza la tabla hacia los lados para ver todas las columnas.</p>
-<p class="small">El ensemble combina los modelos con pesos aprendidos en partidos anteriores. Hoy casi todo el peso lo lleva el mercado, porque es lo más informativo que tenemos.</p>
-
-<h2>Factores del partido</h2>
+<h2>{{ t('game.context_h') }}</h2>
 <dl class="facts">
-  {% for k, v in g.factors %}<dt>{{ k }}</dt><dd>{{ v }}</dd>{% endfor %}
-  <dt>Línea de cierre</dt><dd>{% if g.market.spread_line is not none %}{{ g.spread_txt }}, total {{ g.market.total_line|num(1) }}{% else %}sin línea todavía{% endif %}</dd>
-  {% if g.model_only_margin is not none %}<dt>Margen solo con modelos</dt><dd>{{ g.model_only_margin_txt }}</dd>{% endif %}
+  {% for label, value in facts %}<dt>{{ label }}</dt><dd>{{ value }}</dd>{% endfor %}
 </dl>
-<p class="small">Las bajas se cuentan con el parte de la semana anterior: el de esta semana no existe cuando se generan los picks. Pick congelado el {{ g.generated_at|stamp }}.</p>
-
-<h2 id="cuotas">Cuotas por casa</h2>
-{% if g.books %}
-<p>Consenso sin comisión (Shin): {{ g.home }} <b class="num">{{ (g.books|map(attribute='p_home')|sum / g.books|length)|pct(1) }}</b>, {{ g.books|length }} casas. Nosotros: <b class="num">{{ g.p_home|pct(1) }}</b>.
-{% if g.best %}Mejor precio por {{ g.pick }}: <b class="num">{{ g.best.price|num(2) }}</b> en {{ g.best.name }}, valor esperado <span class="num">{{ g.best.ev|pp }}</span> si nuestra probabilidad fuese la verdadera.{% endif %}</p>
-{% if g.reasons and not g.flag %}<p><b>Posibles causas del desacuerdo:</b></p><ul class="reasons">{% for r in g.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
-{{ scroll_start('Cuotas por casa de apuestas') }}<table class="sortable">
-  <caption class="sr">Cuotas por casa. Cada cabecera es un botón que ordena la tabla.</caption>
-  <thead><tr><th>Casa</th><th>{{ g.home }} (cuota)</th><th>{{ g.away }} (cuota)</th><th>Prob. {{ g.home }} sin comisión</th><th>Nuestra menos la de la casa</th></tr></thead>
-  <tbody>
-  {% for b in g.books %}<tr><td data-v="{{ b.name }}">{{ b.name }}</td><td data-v="{{ b.home_price }}">{{ b.home_price|num(2) }}</td><td data-v="{{ b.away_price }}">{{ b.away_price|num(2) }}</td><td data-v="{{ b.p_home }}">{{ b.p_home|pct(1) }}</td><td data-v="{{ b.edge }}">{{ b.edge|pp }}</td></tr>{% endfor %}
-  </tbody>
-</table>{{ scroll_end() }}
-<p class="small">Cuotas decimales de The Odds API descargadas el {{ g.odds_meta.odds_fetched_at|stamp }}. Pulsa o pulsa con el teclado una cabecera para ordenar. Las cuotas se mueven: compara siempre con el precio actual.</p>
-{% else %}
-<p>Aún no hay cuotas de casas para este partido. Se añaden cuando se ejecuta el informe de cuotas.</p>
+{% if g.absences %}
+<h3 class="sub-h">{{ t('game.absences_h') }}</h3>
+<ul class="reasons">{% for a in g.absences %}<li>{{ t('game.absence', player=a.player, team=a.team, status=news_status(a.status), pts=n(a.points, 1)) }}</li>{% endfor %}</ul>
+<p class="small">{{ t('game.absences_note') }}</p>
 {% endif %}
-<a class="backlink" href="{{ rel }}jornada/{{ week }}.html">Volver a la jornada {{ week }}</a>
+{% if g.news %}
+<h3 class="sub-h">{{ t('news.title') }}</h3>
+<ul class="newslist">{% for x in g.news %}<li><span class="tag">{{ x.team }}</span> <b>{{ x.player }}</b> <span class="st">{{ news_status(x.status) }}</span>. {{ x['summary_' + lang] or x.summary_es }}{% if x.source_url %} <a href="{{ x.source_url }}" rel="noopener">{{ x.source_handle or tx('news.source') }}</a>{% endif %}</li>{% endfor %}</ul>
+<p class="small">{{ t('news.note') }}</p>
+{% endif %}
+
+<h2>{{ t('game.dist_h') }}</h2>
+<div class="charts">
+  <div><h3>{{ t('game.chart_margin') }}</h3>{{ charts.margin|safe }}</div>
+  <div><h3>{{ t('game.chart_total') }}</h3>{{ charts.total|safe }}</div>
+</div>
+<p class="small">{{ t('game.dist_note') }}</p>
+
+<details class="tech">
+  <summary>{{ t('game.tech_h') }}</summary>
+  {{ scroll_start(tx('game.tech_h')) }}<table>
+  <thead><tr><th>{{ t('game.tech_src') }}</th><th>{{ t('game.tech_prob', team=g.fav) }}</th></tr></thead>
+  <tbody>
+  {% for k in ['ensemble_model_only', 'elo', 'kf', 'lgbm', 'market', 'lgbm_mkt', 'ensemble'] %}{% if g.comps[k] is not none %}
+  <tr{% if k == 'ensemble_model_only' %} class="hl"{% endif %}><td>{{ t('comp_' + k) }}</td><td>{{ pct(g.comps[k]) }}</td></tr>
+  {% endif %}{% endfor %}
+  </tbody></table>{{ scroll_end() }}
+  <p class="small">{{ t('game.tech_note') }} <a href="{{ u('method') }}">{{ t('notes.method') }}</a></p>
+</details>
+
+<a class="backlink" href="{{ u('week', week) }}">{{ t('game.back', week=week) }}</a>
 {% endblock %}

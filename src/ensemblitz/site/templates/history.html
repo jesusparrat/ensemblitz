@@ -1,31 +1,53 @@
 {% extends "base.html" %}
 {% from "_macros.html" import scroll_start, scroll_end with context %}
 {% set nav = 'hist' %}
-{% block title %}Historial{% endblock %}
+{% block title %}{{ t('hist.title') }}{% endblock %}
 {% block content %}
 <section class="head" aria-labelledby="h"><div>
-<h1 id="h"><small>Registro público</small>Historial</h1>
-<p class="lede">Solo cuentan los picks guardados antes del saque. Se publican tal cual salen, sin retoques posteriores, y se califican cuando termina el partido.</p></div></section>
-{% set s = hist.summary %}
-{% if s.n %}
-<div class="stat-row">
-  <div><b>{{ s.n }}</b><span>partidos calificados</span></div>
-  <div><b>{{ s.accuracy|pct(1) }}</b><span>acierto del ensemble</span></div>
-  <div><b>{{ s.market_accuracy|pct(1) if s.market_accuracy is not none else 'n/d' }}</b><span>acierto del mercado</span></div>
-  <div><b>{{ s.brier|num(3) }}</b><span>Brier (menor es mejor)</span></div>
-</div>
-{% if hist.chart %}<h2>Acierto acumulado</h2>{{ hist.chart|safe }}{% endif %}
-<h2>Por jornada</h2>
-{{ scroll_start('Aciertos por jornada') }}<table><thead><tr><th>Jornada</th><th>Partidos</th><th>Aciertos</th><th>%</th></tr></thead><tbody>
-{% for w in hist.weeks %}<tr><td>Temporada {{ w.season }}, jornada {{ w.week }}</td><td>{{ w.n }}</td><td>{{ w.ok }}</td><td>{{ (w.ok/w.n)|pct(0) }}</td></tr>{% endfor %}
+<h1 id="h"><small>{{ t('hist.kicker') }}</small>{{ t('hist.title') }}</h1>
+<p class="lede">{{ t('hist.lede') }}</p></div>
+{% if hist.rows %}<div class="read" aria-label="{{ tx('hist.read_aria') }}">
+  <div><b>{{ hist.sources.official.ok }}/{{ hist.sources.official.n }}</b><span>{{ t('hist.read_hits') }}</span></div>
+  <div><b>{{ shown(hist.sources.official.ok / hist.sources.official.n) }}<i>%</i></b><span>{{ t('hist.read_pct') }}</span></div>
+</div>{% endif %}
+</section>
+
+<h2>{{ t('hist.rule_h') }}</h2>
+<ul class="rules">
+  <li>{{ t('hist.rule_1') }}</li>
+  <li>{{ t('hist.rule_2') }}</li>
+  <li>{{ t('hist.rule_3') }}</li>
+  <li>{{ t('hist.rule_4') }}</li>
+</ul>
+
+<h2>{{ t('hist.results_h') }}</h2>
+{% if hist.rows %}
+{{ scroll_start(tx('hist.results_h')) }}<table>
+<thead><tr><th>{{ t('hist.col_source') }}</th><th>{{ t('hist.col_hits') }}</th><th>{{ t('hist.col_pct') }}</th></tr></thead>
+<tbody>
+{% for k in ['official', 'model_only', 'ensemble', 'market'] %}{% set s = hist.sources[k] %}{% if s.n %}
+<tr{% if k == 'official' %} class="hl"{% endif %}><td>{{ t('hist.src_' + k) }}</td><td>{{ s.ok }}/{{ s.n }}</td><td>{{ pct(s.ok / s.n) }}</td></tr>
+{% endif %}{% endfor %}
 </tbody></table>{{ scroll_end() }}
-<h2>Partido a partido</h2>
-{{ scroll_start('Resultado de cada pick') }}<table><thead><tr><th>Partido</th><th>Pick</th><th>Prob.</th><th>Margen final (local menos visitante)</th><th>Acierto</th></tr></thead><tbody>
-{% for r in hist.rows|reverse %}<tr><td>{{ r.away_team }} en {{ r.home_team }}, {{ r.kick.day }}</td><td>{{ r.pick }}</td><td>{{ r.p|pct(0) }}</td><td>{{ r.result|signed(0) }}</td><td>{{ 'sí' if r.ensemble_correct else 'no' }}</td></tr>{% endfor %}
+{% if chart %}<div class="cols2"><div>{{ chart|safe }}</div><div><p>{{ t('hist.chart_note') }}</p></div></div>{% endif %}
+
+<h2>{{ t('hist.games_h') }}</h2>
+{{ scroll_start(tx('hist.games_h')) }}<table class="sortable">
+<thead><tr><th>{{ t('hist.col_date') }}</th><th>{{ t('hist.col_game') }}</th><th>{{ t('hist.col_pick') }}</th><th>{{ t('hist.col_p') }}</th><th>{{ t('hist.col_final') }}</th><th>{{ t('hist.col_ok') }}</th><th>{{ t('hist.col_kind') }}</th></tr></thead>
+<tbody>
+{% for r in hist.rows|reverse %}{% set k = kick(r.kick_utc) %}
+<tr><td data-v="{{ k.date }}">{{ k.short }}</td><td>{{ r.away_team }} {{ t('card.at') }} {{ r.home_team }}</td><td>{{ r.pick }}</td><td data-v="{{ r.p }}">{{ pct(r.p) }}</td><td>{{ r.away_team }} {{ r.away_pts }}, {{ r.home_team }} {{ r.home_pts }}</td><td>{{ t('card.hit_short') if r.ok else t('card.miss_short') }}</td><td>{{ t('hist.kind_' + r.headline) }}</td></tr>
+{% endfor %}
 </tbody></table>{{ scroll_end() }}
 {% else %}
-<div class="empty"><b>Todavía no hay picks calificados.</b><br>Los primeros picks guardados son los de la jornada 11 de 2026 (semana del 19 de noviembre). Esta página se rellena sola cuando terminan los partidos y se ejecuta la calificación semanal.</div>
+<div class="empty"><p>{{ t('hist.empty') }}</p></div>
 {% endif %}
-<h2>Qué cuenta como pick válido</h2>
-<p>Cada partido guarda la hora exacta en que se generó el pronóstico. Si esa hora es posterior al kickoff, no se califica. Los archivos están en el repositorio (<a href="{{ repo }}/tree/main/predictions">predictions/</a> y <a href="{{ repo }}/tree/main/results">results/</a>), así que cualquiera puede comprobar que no se han tocado.</p>
+
+<h2>{{ t('hist.saved_h') }}</h2>
+<p>{{ t('hist.saved_lede') }}</p>
+{{ scroll_start(tx('hist.saved_h')) }}<table>
+<thead><tr><th>{{ t('hist.col_week') }}</th><th>{{ t('hist.col_saved') }}</th><th>{{ t('hist.col_first') }}</th><th>{{ t('hist.col_n') }}</th><th>{{ t('hist.col_headline') }}</th></tr></thead>
+<tbody>
+{% for s in hist.saved %}<tr><td><a href="{{ u('week', s.week) }}">{{ t('hist.week_n', week=s.week, season=s.season) }}</a></td><td>{{ stamp(s.saved_at) }}</td><td>{{ stamp(s.first_kick) }}</td><td>{{ s.n }}</td><td>{{ t('hist.kind_' + s.headline) }}</td></tr>{% endfor %}
+</tbody></table>{{ scroll_end() }}
 {% endblock %}

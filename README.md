@@ -1,185 +1,176 @@
 # ensemblitz
 
-Predicción de partidos de la NFL combinando varios modelos y un simulador de marcadores, con picks congelados antes del kickoff para poder calificarlos de verdad.
+NFL game predictions from several models and a score simulator, with picks frozen before kickoff so they can be graded for real. The site is bilingual (Spanish at the root, English under `/en/`).
 
-**Estado: v0.1 (cimientos).** Pipeline completo y honesto de datos → features → modelos → backtest → predicciones → calificación. Lo ambicioso (simulador jugada a jugada, lesiones en vivo, clima por hora, Rust, web) está en la hoja de ruta, no en el código.
+**Status: v0.1.** A complete, honest pipeline: data, features, models, backtest, predictions, grading and a static site. The ambitious parts (play-by-play simulator, live injuries, hourly weather, Rust) are on the roadmap, not in the code.
 
-## Qué hace
+## What it does
 
-- Descarga datos de [nflverse](https://github.com/nflverse) (calendarios con cuotas, play-by-play, lesiones) con `nflreadpy` y los cachea en Parquet.
-- Calcula ratings **sin fugas de información** (solo usa lo que se sabía antes de cada partido): EPA por jugada (pase y carrera) y success rate ajustados por rival, con decaimiento exponencial y regresión a la media entre temporadas, Elo con margen de victoria, ratings de QB, descanso, viaje, división, techo/clima.
-- Cuatro modelos + mercado:
-  1. **Kalman** (espacio de estados): fuerza ofensiva y defensiva de cada equipo que evoluciona semana a semana, con incertidumbre. Es la versión rápida y exacta de un modelo bayesiano dinámico; hiperparámetros por máxima verosimilitud solo con temporadas pasadas.
-  2. **LightGBM** pequeño y muy regularizado (margen), con y sin la línea de Las Vegas como entrada (la variante con mercado aprende el residuo sobre el spread).
-  3. **Elo** con margen de victoria.
-  4. **Mercado**: probabilidad sin comisión a partir de moneyline/spread de cierre.
-- **Ensemble**: apilado logístico (log loss) con calibración tipo Platt y mezcla de márgenes anclada al spread, reajustado cada semana solo con predicciones fuera de muestra anteriores.
-- **Simulador Monte Carlo** a nivel de posesión (NumPy, vectorizado): probabilidad de victoria, marcador más probable y distribución de spread/total. Interfaz pensada para portarla a Rust (ver `src/ensemblitz/sim/README.md`).
-- **Cuotas de casas de apuestas** (módulo `odds`, opcional): The Odds API, desvig (multiplicativo y Shin), consenso y comparación con nuestro modelo.
+- Downloads [nflverse](https://github.com/nflverse) data (schedules with odds, play-by-play, injuries) with `nflreadpy` and caches it as Parquet.
+- Computes ratings **without information leakage** (only what was known before each game): EPA per play (pass and rush) and success rate adjusted for opponent, with exponential decay and regression to the mean between seasons, margin-of-victory Elo, QB ratings, rest, travel, division, roof and weather.
+- Three models and the market:
+  1. **Kalman** (state space): each team's offensive and defensive strength evolves week by week, with uncertainty. Hyper-parameters by maximum likelihood on past seasons only.
+  2. **LightGBM**, small and heavily regularised (margin), with and without the Las Vegas line as an input (the market variant learns the residual over the spread).
+  3. **Elo** with margin of victory.
+  4. **Market**: probability without the bookmaker margin from the closing moneyline and spread.
+- **Headline number: the model on its own.** A logistic stack of Elo, Kalman and LightGBM (no market input), with a Platt-style bias and a margin and total blend, refitted every week using earlier out-of-sample predictions only. This is what the site shows as the pick.
+- **Blended ensemble** (models plus market): still computed and stored for comparison and for the record of earlier picks, but no longer the headline. In the 2018 to 2025 audit it ties with the market and the model alone trails it (see `reports/BASELINE.md`).
+- **Monte Carlo simulator** at possession level (NumPy, vectorised): expected points per team with an 80% range, margin and total distributions, and an example score. The interface is meant to be ported to Rust (see `src/ensemblitz/sim/README.md`).
+- **Sportsbook odds** (`odds` module, optional): The Odds API, de-vigging (multiplicative and Shin), consensus and comparison with the model. The site shows only the consensus ("Market"), never individual bookmaker prices.
 
 ```mermaid
 flowchart LR
-  NV[nflverse<br/>schedules · pbp · injuries] --> D[data/ Parquet]
-  D --> F[features sin fugas<br/>EPA · Elo · QB · descanso · viaje · clima]
-  F --> K[Kalman<br/>fuerza dinámica]
+  NV[nflverse<br/>schedules, pbp, injuries] --> D[data/ Parquet]
+  D --> F[leak-free features<br/>EPA, Elo, QB, rest, travel, weather]
+  F --> K[Kalman<br/>dynamic strength]
   F --> G[LightGBM]
   F --> E[Elo]
-  D --> M[Mercado<br/>cierre sin vig]
-  K --> S[Ensemble<br/>stack logístico + Platt]
-  G --> S
-  E --> S
+  K --> MO[Model only<br/>logistic stack, no market]
+  G --> MO
+  E --> MO
+  D --> M[Market<br/>closing line, de-vigged]
+  MO --> S[Blended ensemble<br/>comparison only]
   M --> S
-  S --> SIM[Simulador Monte Carlo<br/>marcador · spread · total]
-  S --> P[predictions/*.json<br/>congeladas]
+  MO --> SIM[Monte Carlo simulator<br/>points, margin, total]
+  MO --> P[predictions/*.json<br/>frozen]
+  S --> P
   SIM --> P
-  P --> GR[grade → results/]
-  OA[The Odds API<br/>opcional] --> OD[odds: desvig + discrepancias]
+  P --> GR[grade, results/]
+  OA[The Odds API<br/>optional] --> OD[odds: de-vig + consensus]
   P --> OD
+  P --> W[static site<br/>ES and EN]
 ```
 
-## Cómo se usa
+## Usage
 
 ```bash
-make install                    # uv + dependencias (Python 3.11+)
-ensemblitz update               # descarga nflverse 2015-hoy
-ensemblitz backtest             # backtest walk-forward 2018-2025 → reports/backtest.md/.json
-ensemblitz predict              # próxima semana sin jugar → predictions/<año>/weekXX.json
-ensemblitz predict --week 11    # una semana concreta
-ensemblitz grade                # califica picks con generated_at anterior al kickoff → results/
-ensemblitz odds                 # compara con casas de apuestas (necesita ODDS_API_KEY)
+make install                    # uv + dependencies (Python 3.11+)
+ensemblitz update               # download nflverse 2015 to today
+ensemblitz backtest             # walk-forward backtest 2018-2025 -> reports/backtest.md/.json
+ensemblitz predict              # next unplayed week -> predictions/<year>/weekXX.json
+ensemblitz predict --week 11    # one specific week
+ensemblitz grade                # grade picks saved before kickoff -> results/
+ensemblitz odds                 # compare with sportsbooks (needs ODDS_API_KEY)
+ensemblitz site                 # build the static site into site/_build
 make test lint
 ```
 
-`ensemblitz backtest` tarda unos minutos la primera vez porque ajusta los hiperparámetros del Kalman año a año; luego usa `models/kf_params.json` (`--refit` para recalcular).
+`ensemblitz backtest` takes a few minutes the first time because it fits the Kalman hyper-parameters year by year; afterwards it uses `models/kf_params.json` (`--refit` recomputes).
 
-### Cuotas (opcional)
+### Prediction records
 
-Exporta `ODDS_API_KEY` (plan gratuito de [The Odds API](https://the-odds-api.com), 500 peticiones/mes). Se hace **una** llamada por ejecución, se guarda en `data/odds/` y se respeta la cabecera de cuota restante; sin clave, el comando se salta con un aviso y no falla. El informe sale en `reports/odds/<año>_weekXX.md/.json`: probabilidad nuestra vs cada casa y el consenso, edge, valor esperado al mejor precio y, en desacuerdos grandes (≥ 5 pp), posibles causas sacadas de nuestros datos (cambio de QB, descanso, viento/frío, bajas).
+Each game in `predictions/<year>/weekXX.json` carries:
 
-## Línea base y barrera de CI (Fase 0)
+- `pick` and `headline`: the picked team and which number made it (`model_only` since web v2; older records have no `headline` and were the blended ensemble).
+- `model_only`: win probability, margin, total, expected points per team, a simulation block with 80% range quantiles for each team, margin and total, and an `example_score`.
+- `home_win_prob`: every component (`elo`, `kf`, `lgbm`, `lgbm_mkt`, `market`, `ensemble`, `ensemble_model_only`), kept for comparison.
+- `absences`: notable Out or Doubtful players with their approximate value in points of margin. Context only; never applied to a number.
 
-`ensemblitz baseline` audita 2018-2025 con walk-forward estricto el modelo sin mercado, el cierre del mercado sin comisión y el ensemble publicado (log loss, Brier, acierto, calibración por deciles, ATS, bootstrap del 95 %, extremizar y colinealidad). Resultado en [`reports/BASELINE.md`](reports/BASELINE.md). `python scripts/check_baseline.py` falla si el ensemble o el modelo sin mercado empeoran frente a esa línea base (en CI, contra `main`); `--full` recalcula todo desde nflverse y lo ejecuta cada semana `baseline-full.yml`. Reglas para agentes en [`AGENTS.md`](AGENTS.md).
+Picks of games already kicked off are frozen: re-running `predict` does not rewrite them. `ensemblitz grade` records, per game, which number was the headline (`headline`, `headline_correct`) next to the correctness of every component, so history stays honest across the change of headline.
 
-## Resultados del backtest (walk-forward 2018-2025, 2141 partidos de temporada regular)
+### Odds (optional)
 
-Cada semana todo se reconstruye solo con partidos anteriores. Detalle (por temporada, calibración, MAE del total) en [`reports/backtest.md`](reports/backtest.md).
+Export `ODDS_API_KEY` (free plan of [The Odds API](https://the-odds-api.com), 500 requests a month). One call per run, saved in `data/odds/`, and the remaining-quota header is respected; without a key the command is skipped with a notice. The report lands in `reports/odds/<year>_weekXX.md/.json`.
 
-| Modelo | Acierto | Brier | Log loss | MAE margen | ATS |
+## Baseline and CI gate (Phase 0)
+
+`ensemblitz baseline` audits the model without market, the market close and the blended ensemble over 2018 to 2025 with strict walk-forward (log loss, Brier, accuracy, decile calibration, ATS, 95% bootstrap, extremising and collinearity). Result in [`reports/BASELINE.md`](reports/BASELINE.md). `python scripts/check_baseline.py` fails if the ensemble or the model without market get worse than that baseline (in CI, against `main`); `--full` recomputes everything from nflverse and runs every week in `baseline-full.yml`. Agent rules are in [`AGENTS.md`](AGENTS.md).
+
+## Backtest results (walk-forward 2018 to 2025, 2141 regular-season games)
+
+Each week everything is rebuilt from earlier games only. Detail (by season, calibration, total MAE) in [`reports/backtest.md`](reports/backtest.md).
+
+| Model | Accuracy | Brier | Log loss | Margin MAE | ATS |
 |---|---|---|---|---|---|
-| Mercado (cierre) | 66.4% | 0.211 | 0.610 | 9.83 | — |
+| Market (close) | 66.4% | 0.211 | 0.610 | 9.83 | n/a |
 | Elo (MOV) | 63.2% | 0.223 | 0.638 | 10.23 | 49.6% |
-| Kalman (fuerza dinámica) | 64.4% | 0.224 | 0.638 | 10.21 | 49.7% |
-| LightGBM (sin mercado) | 65.0% | 0.222 | 0.634 | 10.24 | 48.4% |
-| LightGBM (residuo vs mercado) | 66.5% | 0.213 | 0.614 | 9.98 | 49.2% |
-| Simulador (params Kalman) | 64.3% | 0.224 | 0.638 | 10.21 | 50.5% |
-| Ensemble | 66.2% | 0.212 | 0.611 | 9.83 | 49.3% |
+| Kalman (dynamic strength) | 64.4% | 0.224 | 0.638 | 10.21 | 49.7% |
+| LightGBM (no market) | 65.0% | 0.222 | 0.634 | 10.24 | 48.4% |
+| LightGBM (residual vs market) | 66.5% | 0.213 | 0.614 | 9.98 | 49.2% |
+| Simulator (Kalman params) | 64.3% | 0.224 | 0.638 | 10.21 | 50.5% |
+| Blended ensemble | 66.2% | 0.212 | 0.611 | 9.83 | 49.3% |
 
-Ensemble frente a mercado por temporada:
+The model alone (the headline since web v2), over the same games in the Phase 0 audit: 64.8% accuracy, Brier 0.222, log loss 0.634 (see `reports/BASELINE.md`).
 
-| Temporada | Acierto mercado | Acierto ensemble | Log loss mercado | Log loss ensemble |
-|---|---|---|---|---|
-| 2018 | 66.3% | 65.5% | 0.615 | 0.618 |
-| 2019 | 63.7% | 63.7% | 0.619 | 0.623 |
-| 2020 | 67.8% | 66.7% | 0.589 | 0.588 |
-| 2021 | 62.4% | 62.4% | 0.622 | 0.624 |
-| 2022 | 65.8% | 66.5% | 0.609 | 0.610 |
-| 2023 | 68.4% | 67.6% | 0.627 | 0.629 |
-| 2024 | 71.3% | 72.1% | 0.587 | 0.587 |
-| 2025 | 65.7% | 65.3% | 0.609 | 0.611 |
+**Honest reading:**
 
-**Lectura honesta:**
+- The closing market is the rival to beat and it is very good: about 66% accuracy and log loss 0.610. Models without the market sit at 63 to 65% (log loss 0.634 to 0.638), what public models on nflverse data can be expected to reach.
+- The blended ensemble ties with the market, it does not beat it (66.2% and 0.611): the stack gives the market almost all the weight because our models add no information it lacks. That is why the market is shown as a reference and the headline is the model alone, which is worse in the record and says so.
+- Against the spread nobody clears the 52.4% needed to cover a -110 fee. With disagreement thresholds (3, 5, 8 points) and flat staking no edge appears either (see `reports/backtest.md`).
+- Probabilities are well calibrated bucket by bucket (table in the report).
+- The simulator, fed with the Kalman expected points, reproduces the Kalman's performance (64%), so the score distribution is coherent; its value is the ranges and the example score, not accuracy.
 
-- El mercado de cierre es el rival a batir y es muy bueno: ~66 % de acierto y log loss 0,610. Los modelos sin mercado quedan en 63-65 % (log loss 0,634-0,638), el nivel que cabe esperar de modelos públicos con datos de nflverse.
-- El ensemble queda **igual que el mercado, no mejor** (66,2 % y 0,611): el apilado le da casi todo el peso al mercado porque nuestros modelos no aportan información que él no tenga.
-- Contra el spread (ATS) nadie supera el 52,4 % necesario para cubrir la comisión de −110. Con umbrales de desacuerdo (3, 5, 8 pp) y apuesta plana tampoco aparece ventaja: ver la tabla "¿Le ganamos a la línea de cierre?" en `reports/backtest.md`. Los subconjuntos con ROI positivo son pocos partidos y compatibles con el azar.
-- Está bien calibrado: las probabilidades del ensemble coinciden con la frecuencia real por tramos (tabla en el informe).
-- El simulador, alimentado con los puntos esperados del Kalman, reproduce el rendimiento del Kalman (64 %), así que la distribución de marcadores es coherente; su valor es dar marcador más probable y rangos, no mejorar el acierto.
+### Example score
 
-## Primeras predicciones congeladas (2026, semana 11)
+The single most frequent exact score of a simulation is almost always 24-17 (the lattice of 7s and 3s). So the example score is the **most frequent score near the mean of the simulations in which the pick wins by about the predicted margin (within 3.5)**; its exact probability stays around 1% and is stored as is (`example_score.prob`). The site shows it only on the game page, labelled as an example.
 
-Generadas con datos hasta la semana 10. Ver `predictions/2026/week11.json` (y `week12.json`, con horizonte de dos semanas).
+## News and absences (optional)
 
-| Partido | Pick | Prob. local | Margen | Marcador típico (visitante-local) |
-|---|---|---|---|---|
-| IND @ HOU | HOU | 85% | +12.5 | 17-28 |
-| ARI @ KC | KC | 91% | +16.5 | 13-27 |
-| BAL @ CAR | CAR | 56% | +2.5 | 20-23 |
-| JAX @ NYG | JAX | 29% | -6.0 | 27-20 |
-| MIA @ BUF | BUF | 90% | +16.5 | 14-31 |
-| NO @ CHI | CHI | 85% | +11.5 | 17-30 |
-| TB @ DET | DET | 71% | +6.5 | 20-24 |
-| TEN @ DAL | DAL | 78% | +8.5 | 23-31 |
-| NYJ @ LAC | LAC | 60% | +3.5 | 17-24 |
-| LV @ DEN | DEN | 82% | +10.0 | 14-24 |
-| PIT @ PHI | PIT | 31% | -4.5 | 21-17 |
-| MIN @ SF | SF | 60% | +3.0 | 21-24 |
-| CIN @ WAS | CIN | 25% | -6.5 | 30-24 |
-
-### Marcador típico
-
-El marcador exacto más frecuente de una simulación casi siempre es 24-17 (la red de 7 y 3 puntos). Por eso el marcador que se publica es el **más frecuente cercano al promedio de las simulaciones en las que gana el pick con un margen parecido al previsto (±3,5)**; su probabilidad exacta sigue siendo ~1 % y se guarda tal cual (`most_likely_score.prob`), junto con el modo bruto (`raw_mode`).
-
-## Noticias y bajas (opcional)
-
-Si existe `news/<año>/weekXX.json`, el sitio muestra "Última hora" en la jornada y "Lo que hay que saber" en cada partido, con enlace a la fuente, y `ensemblitz predict` ajusta la fuerza de los equipos por las bajas. Sin archivo todo funciona igual. Solo afecta a las predicciones, **nunca al backtest** (no hay archivo histórico de noticias con el que validarlo). Cada partido guarda el ajuste en `news_adjustment`.
+If `news/<year>/weekXX.json` exists, the site shows a "Latest news" block with a link to the source, and `ensemblitz predict` adjusts the **blended ensemble** (not the headline number) for the absences. It never affects the backtest (there is no historical news archive to validate against). Each game stores the adjustment in `news_adjustment`.
 
 ```json
 [
   {
-    "team": "DET",                       // abreviatura nflverse (obligatorio)
-    "player": "Aidan Hutchinson",        // obligatorio
+    "team": "DET",                       // nflverse abbreviation (required)
+    "player": "Aidan Hutchinson",        // required
     "position": "DE",                    // QB, RB, WR, TE, T/G/C/OL, DE/EDGE/OLB, DT, LB, CB, S...
-    "status": "out",                     // out | doubtful | questionable | returning | other (obligatorio)
+    "status": "out",                     // out | doubtful | questionable | returning | other (required)
     "summary_es": "Se pierde el partido por una lesión de tobillo.",
+    "summary_en": "Misses the game with an ankle injury.",   // optional, falls back to the Spanish text
     "source_handle": "@AdamSchefter",
     "source_url": "https://x.com/...",
     "posted_at": "2026-11-17T19:00:00Z", // UTC
-    "impact_note_es": "Sin su mejor presionador, la defensa pierde presión sobre el QB.",
-    "starter": true                      // opcional; false = no se valora
+    "starter": true                      // optional; false = not valued
   }
 ]
 ```
 
-**Cómo se valora un jugador** (`src/ensemblitz/players.py`, datos de nflverse de la temporada y la anterior con la mitad de peso). Puntos de margen por partido frente a un reemplazo, multiplicados por 0,7 (el volumen se reparte entre compañeros y el EPA es ruidoso):
+**How a player is valued** (`src/ensemblitz/players.py`, nflverse data of the season and the previous one at half weight): points of margin per game over a replacement, multiplied by 0.7 (volume moves to teammates and EPA is noisy).
 
-- **QB, RB, WR, TE:** volumen por partido × (eficiencia EPA reducida hacia la media de la posición − eficiencia del reemplazo). Reemplazo = eficiencia agregada de los jugadores de poco volumen de la misma posición. Ejemplo: JSN vale unos 2,5 puntos, un QB titular de 3 a 6.
-- **Línea ofensiva:** no hay datos individuales; snaps × 0,9 puntos por titular.
-- **Defensa:** no hay EPA individual público; prior de posición (EDGE 1,3, CB 0,9, DT 0,8, LB 0,6, S 0,6) × porcentaje de snaps × índice de producción (sacks, presiones, TFL, INT, pases defendidos por partido frente a los titulares de su posición, reducido hacia 1 y acotado a 0,6-1,8). Los priors son criterio propio, no están ajustados con datos.
-- Si el jugador no aparece en la tabla (novato, nombre distinto), se usa la mitad del prior de su posición. Nombres con sufijos (III, Jr.) y fichajes recientes funcionan: se busca por nombre y posición, no por equipo.
+- **QB, RB, WR, TE:** volume per game x (EPA efficiency shrunk towards the position mean minus replacement efficiency). Replacement = pooled efficiency of low-volume players at the position.
+- **Offensive line:** no individual data; snaps x 0.9 points per starter.
+- **Defence:** no public individual EPA; position prior (EDGE 1.3, CB 0.9, DT 0.8, LB 0.6, S 0.6) x snap share x production index (sacks, hits, TFL, INT, passes defended per game against the position's starters, shrunk towards 1 and clipped to 0.6 to 1.8). The priors are judgement, not fitted.
+- A player missing from the table (rookie, name mismatch) gets half of the position prior.
 
-**Estado y frescura:** baja = 1, muy dudoso = 0,75, dudoso = 0,25, regresa/otro = 0. Como la línea del mercado ya descuenta las noticias públicas, una noticia publicada hasta 12 h antes del pick cuenta entera, hasta 48 h la mitad y más antigua un cuarto. Un equipo no pierde más de 7 puntos en total. El cambio de margen mueve la probabilidad con desviación 13,5.
+**Status and freshness:** out = 1, doubtful = 0.75, questionable = 0.25, returning/other = 0. The market line already prices in public news, so an item posted up to 12 h before the pick counts fully, up to 48 h half, older a quarter. A team never loses more than 7 points in total.
 
-## Limitaciones
+The per-game "notable absences" on the site come from a different, walk-forward module (`src/ensemblitz/impact.py`, Phase 1): players listed Out or Doubtful whose value is at least 1.0 point. They are shown as context and are not applied to any number: Phase 1 found no significant gain from injuries (`reports/PHASE1.md`).
 
-- Objetivo realista: **65-70 % de acierto directo**. No hay modelo público que ande cerca del 90 %, y quien lo promete suele estar mirando el futuro (fuga de datos).
-- v0.1 **no tiene ventaja demostrada sobre la línea de cierre**; si quieres ganar dinero, hace falta información que el mercado no tenga (lesiones de última hora, clima por hora, rotaciones) y validarla fuera de muestra.
-- El QB titular sale del calendario de nflverse (para partidos futuros es el titular previsto); las bajas se usan solo con un retraso de una semana (parte anterior), porque el parte de la semana en curso no está el martes.
-- Modelo y datos desde 2015: pocas temporadas para LightGBM; el backtest pesa más de lo que parece un par de años raros (2021, 2023).
-- El simulador es a nivel de posesión: no modela safeties, touchdowns defensivos, reloj, lesiones durante el partido ni clima. Es un esqueleto con interfaz estable, no el simulador final.
-- No se usa `depth_charts` ni rosters todavía.
+## Site
 
-## Hoja de ruta
+`ensemblitz site` renders `predictions/`, `results/` and `reports/` into `site/_build`: Spanish at the root, English under `/en/`. All user-facing strings live in `src/ensemblitz/site/strings.py`; team names are the official English ones in both languages. The language switch is a plain link between twin pages; the choice is remembered in `localStorage` like the theme. Visual rules are in [`DESIGN.md`](DESIGN.md).
 
-1. Simulador jugada a jugada con lesiones **durante** el partido.
-2. Modelo de salud de jugadores y recaídas (IR).
-3. Clima por hora y por cuarto (Open-Meteo; ya hay tabla de estadios con coordenadas en `data/stadiums.py`).
-4. Port del motor a Rust con PyO3 (la interfaz de `sim/` está pensada para eso).
-5. JAX/GPU para simular millones de partidos en paralelo.
-6. Web editorial en GitHub Pages (estilo The Athletic / 538, sobria, sin estética de IA).
-7. Modelo bayesiano jerárquico completo (NumPyro/PyMC) como sustituto del filtro de Kalman.
+## Limitations
 
-## Estructura
+- Realistic target: **65 to 70% straight-up accuracy**. No public model is near 90%, and whoever promises it is usually looking at the future (data leakage).
+- v0.1 has **no demonstrated edge over the closing line**; beating it takes information the market lacks (late injuries, hourly weather, rotations) and validating it out of sample.
+- The starting QB comes from the nflverse schedule (for future games it is the expected starter); absences are used with a one-week lag, because the current week's report is not there on Tuesday.
+- Data since 2015: few seasons for LightGBM; a couple of odd years (2021, 2023) weigh more in the backtest than they look.
+- The simulator works at possession level: no safeties, defensive touchdowns, clock, in-game injuries or weather. A skeleton with a stable interface, not the final simulator.
+- `depth_charts` and rosters are not used yet.
+
+## Roadmap
+
+1. Play-by-play simulator with injuries **during** the game.
+2. Player health and relapse model (IR).
+3. Hourly and per-quarter weather (Open-Meteo; a stadium table with coordinates exists in `data/stadiums.py`).
+4. Port the engine to Rust with PyO3 (the `sim/` interface is designed for it).
+5. JAX/GPU to simulate millions of games in parallel.
+6. Full hierarchical Bayesian model (NumPyro/PyMC) in place of the Kalman filter.
+
+## Layout
 
 ```
 src/ensemblitz/
-  data/       descarga, agregación de pbp, estadios
-  features/   ratings sin fugas (EPA, Elo, QB) y tabla de features
+  data/       download, pbp aggregation, stadiums
+  features/   leak-free ratings (EPA, Elo, QB) and the feature table
   models/     kalman, gbm, market, ensemble
-  sim/        simulador por posesión (interfaz portable a Rust)
-  odds/       The Odds API, desvig, informe de discrepancias, validación contra el cierre
+  sim/        possession-level simulator (interface portable to Rust)
+  odds/       The Odds API, de-vig, discrepancy report, closing-line validation
+  site/       static site: build.py, i18n.py, strings.py, templates/, static/
   backtest.py predict.py grade.py cli.py
-models/kf_params.json   hiperparámetros del Kalman por temporada (solo datos anteriores)
+models/kf_params.json   Kalman hyper-parameters per season (earlier data only)
 predictions/ results/ reports/
 ```
 
-Licencia MIT.
+MIT license.

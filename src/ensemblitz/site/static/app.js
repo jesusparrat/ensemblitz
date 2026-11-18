@@ -1,15 +1,21 @@
-// Comportamiento mínimo y opcional: tema, filtros, tablas ordenables, cuenta atrás. Sin JS la página se lee entera.
+// Minimal, optional behaviour: theme, language memory, filters, sortable tables, countdown.
+// Without JavaScript every page reads in full.
 (() => {
   const root = document.documentElement;
 
-  // Tema: respeta el del sistema; el botón fija la elección.
+  // Theme: follows the system; the button stores the choice.
   document.querySelector(".theme")?.addEventListener("click", () => {
     const next = getComputedStyle(root).colorScheme === "dark" ? "light" : "dark";
     root.dataset.theme = next;
-    try { localStorage.setItem("ens-theme", next); } catch (e) { /* modo privado */ }
+    try { localStorage.setItem("ens-theme", next); } catch (e) { /* private mode */ }
   });
 
-  // Indicador deslizante de la navegación (decorativo).
+  // Language: the switch is a plain link; remember the choice so the next visit opens in it.
+  document.querySelector(".lang")?.addEventListener("click", (e) => {
+    try { localStorage.setItem("ens-lang", e.currentTarget.dataset.lang); } catch (err) { /* private mode */ }
+  });
+
+  // Sliding indicator of the navigation (decorative).
   const nav = document.querySelector(".nav");
   const ind = nav && nav.querySelector(".ind");
   const cur = nav && nav.querySelector('[aria-current="page"], .parent');
@@ -28,7 +34,7 @@
     window.addEventListener("resize", () => place(cur));
   }
 
-  // Filtros de la jornada.
+  // Week filters (the markup only exists when there is something to filter).
   const chips = Array.from(document.querySelectorAll(".chip"));
   const games = Array.from(document.querySelectorAll(".game"));
   const groups = Array.from(document.querySelectorAll(".daygroup"));
@@ -41,7 +47,8 @@
     groups.forEach((d) => { d.hidden = !Array.from(d.querySelectorAll(".game")).some((g) => !g.hidden); });
   }));
 
-  // Tablas ordenables con botones reales (teclado y lector de pantalla).
+  // Sortable tables with real buttons (keyboard and screen reader).
+  const es = document.documentElement.lang === "es";
   document.querySelectorAll("table.sortable").forEach((table) => {
     const heads = Array.from(table.querySelectorAll("thead th"));
     heads.forEach((th, i) => {
@@ -51,7 +58,7 @@
       b.type = "button";
       b.className = "sort";
       b.textContent = label;
-      b.setAttribute("aria-label", "Ordenar por " + label);
+      b.setAttribute("aria-label", (es ? "Ordenar por " : "Sort by ") + label);
       th.appendChild(b);
       b.addEventListener("click", () => {
         const dir = th.getAttribute("aria-sort") === "ascending" ? -1 : 1;
@@ -68,12 +75,16 @@
           .sort((a, b2) => (val(a) > val(b2) ? dir : val(a) < val(b2) ? -dir : 0))
           .forEach((r) => body.appendChild(r));
         const live = document.getElementById("sort-live");
-        if (live) live.textContent = "Tabla ordenada por " + label + (dir === 1 ? ", de menor a mayor." : ", de mayor a menor.");
+        if (live) {
+          live.textContent = es
+            ? "Tabla ordenada por " + label + (dir === 1 ? ", de menor a mayor." : ", de mayor a menor.")
+            : "Table sorted by " + label + (dir === 1 ? ", ascending." : ", descending.");
+        }
       });
     });
   });
 
-  // Cuenta atrás al próximo partido (el HTML ya trae la hora de saque).
+  // Countdown to the next kickoff (the HTML already carries the kickoff time).
   const cd = document.querySelector("[data-kick]");
   if (cd) {
     const ms = new Date(cd.dataset.kick) - Date.now();
@@ -84,22 +95,5 @@
       const lab = document.querySelector("[data-kick-label]");
       if (lab) lab.textContent = lab.dataset.kickLabel;
     }
-  }
-
-  // Marcador: los dígitos giran una vez al entrar en pantalla, como un tablero de estadio.
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => {
-      if (!e.isIntersecting) return;
-      io.unobserve(e.target);
-      e.target.querySelectorAll("b[data-v]").forEach((b, k) => {
-        const end = b.dataset.v;
-        let n = 0;
-        const t = setInterval(() => {
-          b.textContent = ++n < 6 ? String(Math.floor(Math.random() * 40)) : end;
-          if (n >= 6) clearInterval(t);
-        }, 45 + k * 15);
-      });
-    }), { threshold: 0.6 });
-    document.querySelectorAll(".s").forEach((s) => io.observe(s));
   }
 })();

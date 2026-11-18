@@ -103,6 +103,7 @@ def load_news(path: Path) -> list[dict]:
                 "position": str(it.get("position") or "").upper()[:6],
                 "status": status if status in STATUSES else "other",
                 "summary_es": _text(it.get("summary_es", "")),
+                "summary_en": _text(it.get("summary_en")),
                 "source_handle": _text(it.get("source_handle"), 60),
                 "source_url": safe_url(it.get("source_url")),
                 "posted_at": posted,
