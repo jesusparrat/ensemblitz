@@ -182,7 +182,7 @@ cython_debug/
 # ensemblitz
 /data/
 /scratch/
-PR_DESCRIPTION.md
+PR_DESCRIPTION*.md
 
 # built website
 /site/_build/
