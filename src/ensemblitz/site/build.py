@@ -80,6 +80,25 @@ def fpp(x: float | None) -> str:
     return NA if x is None else f"{fsigned(x * 100, 0 if abs(x) >= 0.095 else 1)}\u202fpp"
 
 
+def shown_pct(x: float) -> int:
+    """The whole percentage the page prints for a probability (same rounding as ``fpct``)."""
+    return int(f"{x * 100:.0f}")
+
+
+def gap_pp(model: float | None, market: float | None) -> int | None:
+    """Gap in whole points computed from the two numbers the reader sees (66 % and 67 % -> +1).
+
+    Rounding after subtracting would show +0,7 next to 66 % and 67 %; this cannot disagree
+    with the displayed values. The flag threshold uses the same integer.
+    """
+    return None if model is None or market is None else shown_pct(model) - shown_pct(market)
+
+
+def fgap(x: float | None) -> str:
+    """Gap stored as a fraction of whole points, printed as a signed integer in pp."""
+    return NA if x is None else f"{fsigned(round(x * 100), 0)}\u202fpp"
+
+
 def fav(home: str, away: str, margin_home: float | None, nd: int = 1) -> str:
     """One margin convention everywhere: the favourite, minus the points it gives ('HOU \u221212,5')."""
     if margin_home is None:
@@ -176,7 +195,8 @@ def _game(
     pure_pick = None if pure_home is None else (pure_home if pick_home else 1 - pure_home)
     # Flag: our models on their own against the market. The published ensemble leans on the
     # market, so its own distance to it says little.
-    gap = None if pure_pick is None or mkt_pick is None else pure_pick - mkt_pick
+    gpp = gap_pp(pure_pick, mkt_pick)
+    gap = None if gpp is None else gpp / 100
     best = None
     if odds_game:
         side = "best_home_price" if pick_home else "best_away_price"
@@ -191,7 +211,7 @@ def _game(
         tot, mar = result["total"], result["result"]
         hs, as_ = int(round((tot + mar) / 2)), int(round((tot - mar) / 2))
         final = {"home": hs, "away": as_, "ok": bool(result.get("ensemble_correct"))}
-    flag = gap is not None and abs(gap) >= FLAG_PP
+    flag = gpp is not None and abs(gpp) >= round(FLAG_PP * 100)
     notes = _notes(g, adj, pick_home)
     return {
         "id": g["game_id"],
@@ -490,7 +510,7 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
     env = Environment(
         loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
     )
-    env.filters.update(num=fnum, signed=fsigned, pct=fpct, pp=fpp, stamp=stamp)
+    env.filters.update(num=fnum, signed=fsigned, pct=fpct, pp=fpp, gappp=fgap, stamp=stamp)
     env.globals["fav"] = fav
     env.globals["status_es"] = STATUS_ES
     now = datetime.now(UTC)

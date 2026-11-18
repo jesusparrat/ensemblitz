@@ -45,6 +45,27 @@ def backtest(refit: bool = typer.Option(False, help="Re-tune Kalman hyper-parame
 
 
 @app.command()
+def baseline(
+    full: bool = typer.Option(False, help="Recompute components from nflverse data in data/"),
+    boot: int = typer.Option(10_000, help="Bootstrap resamples"),
+) -> None:
+    """Phase 0 audit: model-only vs market vs ensemble, walk-forward 2018-2025."""
+    from ensemblitz import baseline as B
+    from ensemblitz import baseline_report as R
+
+    if full:
+        comps = B.components_from_pipeline()
+        B.save_cache(comps)
+    else:
+        comps = B.load_cache()
+    res, _ = B.audit(comps, boot)
+    B.write_json(res)
+    B.reliability_plot(res)
+    R.write_markdown(res)
+    typer.echo(f"baseline written to {C.REPORTS_DIR}")
+
+
+@app.command()
 def predict(
     season: int = typer.Option(0, help="0 = current season"),
     week: int = typer.Option(0, help="0 = next unplayed week(s)"),
