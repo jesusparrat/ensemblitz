@@ -200,6 +200,57 @@ def load_manifest(root: Path | None = None) -> dict[str, str]:
     return {str(k): str(v) for k, v in artifacts.items()}
 
 
+def resolve_ref(root: Path, ref: str) -> str:
+    """Return the resolved SHA of ``ref``. Raise if it cannot be resolved."""
+    proc = _git(["rev-parse", "--verify", ref], cwd=root.resolve(), check=False)
+    if proc.returncode != 0:
+        detail = proc.stderr.decode().strip() or proc.stdout.decode().strip()
+        raise LedgerError(
+            f"base ref {ref!r} could not be resolved" + (f": {detail}" if detail else "")
+        )
+    return proc.stdout.decode().strip()
+
+
+def manifest_entries_at_ref(root: Path, ref: str) -> dict:
+    """Return the manifest artifacts map at ``ref``.
+
+    The ref is validated first. If it cannot be resolved, raise rather than
+    treating the base as empty. If ``predictions/MANIFEST.json`` is absent at
+    that ref, return ``{}`` (bootstrap). Entry values are left as parsed JSON
+    so the whole entry object can be compared, not only a SHA-256 string.
+    """
+    root = root.resolve()
+    resolve_ref(root, ref)
+    probe = _git(["cat-file", "-e", f"{ref}:{MANIFEST_REL}"], cwd=root, check=False)
+    if probe.returncode != 0:
+        return {}
+    proc = _git(["show", f"{ref}:{MANIFEST_REL}"], cwd=root, check=False)
+    if proc.returncode != 0:
+        detail = proc.stderr.decode().strip()
+        raise LedgerError(
+            f"failed to read {MANIFEST_REL} at {ref!r}" + (f": {detail}" if detail else "")
+        )
+    try:
+        doc = json.loads(proc.stdout.decode())
+    except json.JSONDecodeError as exc:
+        raise LedgerError(f"{MANIFEST_REL} at {ref!r}: invalid JSON ({exc})") from exc
+    artifacts = doc.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise LedgerError(f"{MANIFEST_REL} at {ref!r}: missing artifacts map")
+    return artifacts
+
+
+def append_only_violations(current: dict, base: dict) -> list[str]:
+    """The manifest may only grow: every base entry must still exist unchanged."""
+    errors: list[str] = []
+    for key, base_value in base.items():
+        if key not in current:
+            errors.append(f"{key}: deleted from the manifest (append-only)")
+        elif current[key] != base_value:
+            errors.append(f"{key}: historical manifest entry changed")
+    return errors
+
+
 def write_manifest(artifacts: dict[str, str], root: Path | None = None) -> Path:
     """Write the manifest with only the SHA-256 of each artifact, sorted by path."""
     path = manifest_path(root)

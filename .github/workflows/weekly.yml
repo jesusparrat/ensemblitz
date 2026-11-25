@@ -39,7 +39,7 @@ jobs:
       - name: Validate outputs and integrity (no NaN, no empty weeks, no secrets, hashes)
         run: uv run python scripts/validate_outputs.py
       - name: Verify prediction integrity
-        run: uv run python scripts/verify_integrity.py
+        run: uv run python scripts/verify_integrity.py --base-ref HEAD
       - name: Commit predictions and results
         run: |
           git config user.name "ensemblitz-bot"
