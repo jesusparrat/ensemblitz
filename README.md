@@ -44,7 +44,8 @@ flowchart LR
 ## Usage
 
 ```bash
-make install                    # uv + dependencies (Python 3.11+)
+make install                    # uv sync --frozen: Python 3.12 (.python-version) + uv.lock
+source .venv/bin/activate       # or prefix each command with `uv run --frozen`
 ensemblitz update               # download nflverse 2015 to today
 ensemblitz backtest             # walk-forward backtest 2018-2025 -> reports/backtest.md/.json
 ensemblitz predict              # next unplayed week -> predictions/<year>/weekXX.json
