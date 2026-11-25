@@ -437,9 +437,7 @@ def _season_bootstrap_plan(seasons: np.ndarray, n: int, seed: int) -> dict:
 
 
 def _season_bootstrap_mean(values: np.ndarray, plan: dict) -> np.ndarray:
-    sums = np.bincount(
-        plan["codes"], weights=np.asarray(values, float), minlength=plan["n_blocks"]
-    )
+    sums = np.bincount(plan["codes"], weights=np.asarray(values, float), minlength=plan["n_blocks"])
     return (plan["draws"] @ sums) / plan["denominator"]
 
 
@@ -610,9 +608,7 @@ def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
             )
             fav[k].update(intervals)
 
-    source_ids = {
-        k: set(d.loc[d[f"{k}_prob"].notna(), "game_id"].astype(str)) for k in SCORED
-    }
+    source_ids = {k: set(d.loc[d[f"{k}_prob"].notna(), "game_id"].astype(str)) for k in SCORED}
     paired_ids = sorted(source_ids["market"])
     paired = {
         "sources": SCORED,
@@ -638,9 +634,7 @@ def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
         "per_season": {},
         "deciles": {k: deciles(d[f"{k}_prob"].to_numpy(float), y) for k in SCORED},
         "favourite_bins": {
-            k: favourite_bins(
-                d[f"{k}_prob"].to_numpy(float), y, d["season"].to_numpy(), n_boot
-            )
+            k: favourite_bins(d[f"{k}_prob"].to_numpy(float), y, d["season"].to_numpy(), n_boot)
             for k in keys
         },
         "heavy_favourites_75": fav,

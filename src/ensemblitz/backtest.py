@@ -195,10 +195,7 @@ def write_report(results: dict, extra_md: str = "") -> None:
             "|---|---|---|---|",
         ]
         for r in results["calibration"][c]:
-            lines.append(
-                f"| {r['bin']} | {r['n']} | {r['pred'] * 100:.1f}% | "
-                f"{r['actual'] * 100:.1f}% |"
-            )
+            lines.append(f"| {r['bin']} | {r['n']} | {r['pred'] * 100:.1f}% | {r['actual'] * 100:.1f}% |")
         lines.append("")
     if extra_md:
         lines += ["", extra_md]

@@ -82,7 +82,6 @@ def test_kalman_predictions_use_only_past(league):
     pd.testing.assert_frame_equal(a, b)
 
 
-
 def test_kalman_tuning_truncates_at_the_requested_season(monkeypatch, league):
     games, _, _ = league
     seen = {}
@@ -102,7 +101,4 @@ def test_lightgbm_training_mask_excludes_current_and_future_weeks(league):
     train = games.loc[mask]
     assert not train.empty
     assert train["played"].all() and train["result"].notna().all()
-    assert (
-        (train["season"] < CUT[0])
-        | ((train["season"] == CUT[0]) & (train["week"] < CUT[1]))
-    ).all()
+    assert ((train["season"] < CUT[0]) | ((train["season"] == CUT[0]) & (train["week"] < CUT[1]))).all()

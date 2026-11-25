@@ -277,9 +277,7 @@ def main() -> int:
     payload = B.finite(result)
     JSON_OUT.parent.mkdir(parents=True, exist_ok=True)
     MD_OUT.parent.mkdir(parents=True, exist_ok=True)
-    JSON_OUT.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
-    )
+    JSON_OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
     MD_OUT.write_text(render(payload))
     print(
         f"PR2 audit written: {JSON_OUT.relative_to(ROOT)} and {MD_OUT.relative_to(ROOT)}; "

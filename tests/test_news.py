@@ -92,7 +92,6 @@ def test_likely_score_agrees_with_pick_and_margin():
         assert 0 < r["like_prob"][i] < 0.1
 
 
-
 def test_apply_news_changes_ensemble_but_not_model_only_headline(monkeypatch):
     from ensemblitz import predict
 

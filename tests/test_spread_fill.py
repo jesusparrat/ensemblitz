@@ -28,7 +28,6 @@ def test_fill_missing_spread_only_touches_unplayed_games_without_spread():
     assert np.isnan(df.loc[0, "spread_line"])  # no muta la entrada
 
 
-
 def test_nflverse_spread_sign_fallback_is_home_minus_away():
     lines = pd.DataFrame(
         {
@@ -40,7 +39,6 @@ def test_nflverse_spread_sign_fallback_is_home_minus_away():
     probabilities = market_prob(lines)
     assert probabilities[0] > 0.5
     assert probabilities[1] < 0.5
-
 
 
 def test_ats_grading_uses_home_margin_spread_convention():

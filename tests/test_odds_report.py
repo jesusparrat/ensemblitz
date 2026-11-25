@@ -99,7 +99,6 @@ def test_missing_key_skips_politely(monkeypatch, tmp_path):
     assert df is None and "skipped" in msg
 
 
-
 def test_consensus_quote_exposes_only_aggregate_probability_and_count():
     from ensemblitz.odds.report import consensus_for_teams
 
@@ -107,7 +106,6 @@ def test_consensus_quote_exposes_only_aggregate_probability_and_count():
     assert quote is not None
     assert set(quote) == {"consensus_home_prob_shin", "n_books", "fetched_at"}
     assert quote["n_books"] == 2
-
 
 
 def test_prediction_market_quote_publishes_only_aggregate_h2h_fields():

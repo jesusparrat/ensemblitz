@@ -212,7 +212,6 @@ def test_gate_passes_on_identical_numbers_and_fails_on_regression(monkeypatch, c
     assert gate.main() == 0
 
 
-
 def test_population_audit_identifies_ties_and_missing_predictions(walked):
     wf, _ = walked
     d = wf[(wf["season"] >= 2018) & (wf["week"] <= 18)].copy()
@@ -227,7 +226,6 @@ def test_population_audit_identifies_ties_and_missing_predictions(walked):
     reasons = {x["game_id"]: x["reasons"] for x in population["excluded_games"]}
     assert "tie" in reasons[d.iloc[0]["game_id"]]
     assert "missing_predictions" in reasons[d.iloc[1]["game_id"]]
-
 
 
 def test_backtest_pipeline_exposes_independent_model_only_source(frame):
