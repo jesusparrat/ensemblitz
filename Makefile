@@ -1,23 +1,26 @@
-.PHONY: install update backtest baseline check predict grade odds test lint all
+.PHONY: install lock-check update backtest baseline check predict grade odds test lint all
+# Python version comes from .python-version (3.12, the same as CI); dependencies from uv.lock.
 install:
-	uv venv --python 3.13 .venv || true
-	uv pip install -e ".[dev]"
+	uv lock --check
+	uv sync --frozen --extra dev
+lock-check:
+	uv lock --check
 update:
-	ensemblitz update
+	uv run --frozen ensemblitz update
 backtest:
-	ensemblitz backtest
+	uv run --frozen ensemblitz backtest
 baseline:
-	ensemblitz baseline --full
-check:
-	ruff check . && ruff format --check . && pytest -q && ensemblitz site && python scripts/check_site.py && python scripts/validate_outputs.py --site site/_build && python scripts/check_baseline.py
+	uv run --frozen ensemblitz baseline --full
+check: lock-check
+	uv run --frozen ruff check . && uv run --frozen ruff format --check . && uv run --frozen pytest -q && uv run --frozen ensemblitz site && uv run --frozen python scripts/check_site.py && uv run --frozen python scripts/validate_outputs.py --site site/_build && uv run --frozen python scripts/check_baseline.py
 predict:
-	ensemblitz predict
+	uv run --frozen ensemblitz predict
 grade:
-	ensemblitz grade
+	uv run --frozen ensemblitz grade
 odds:
-	ensemblitz odds
+	uv run --frozen ensemblitz odds
 test:
-	pytest -q
+	uv run --frozen pytest -q
 lint:
-	ruff check . && ruff format --check .
+	uv run --frozen ruff check . && uv run --frozen ruff format --check .
 all: update backtest predict grade

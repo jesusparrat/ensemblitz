@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jesusparrat/ensemblitz/schemas/predictions.v1.schema.json",
+  "title": "ensemblitz predictions, contract v1",
+  "description": "One prediction snapshot for one (season, week). See docs/CONTRACT.md for conventions. Every margin is home points minus away points; every probability is the home team's; every timestamp is UTC with a trailing Z.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "model_version",
+    "git_sha",
+    "reproducible",
+    "generated_at_utc",
+    "data_cutoff_utc",
+    "data_snapshot",
+    "season",
+    "week",
+    "ensemble_weights",
+    "games"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "model_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+-][0-9A-Za-z.]+)?$"},
+    "git_sha": {"$ref": "#/$defs/sha1"},
+    "reproducible": {
+      "type": "boolean",
+      "description": "true only if git_sha was read from a clean working tree in production mode. Development artifacts are false."
+    },
+    "generated_at_utc": {"$ref": "#/$defs/utc"},
+    "data_cutoff_utc": {"$ref": "#/$defs/utc"},
+    "data_snapshot": {
+      "type": "object",
+      "description": "SHA-256 of every input parquet file, keyed by its path relative to the repository root (for example data/raw/schedules.parquet).",
+      "minProperties": 1,
+      "patternProperties": {"^data/[A-Za-z0-9_./-]+\\.parquet$": {"$ref": "#/$defs/sha256"}},
+      "additionalProperties": false
+    },
+    "season": {"type": "integer", "minimum": 1999, "maximum": 2100},
+    "week": {"type": "integer", "minimum": 1, "maximum": 22},
+    "ensemble_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["with_market", "no_market"],
+      "properties": {
+        "with_market": {"$ref": "#/$defs/stack"},
+        "no_market": {"$ref": "#/$defs/stack"}
+      }
+    },
+    "games": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/game"}}
+  },
+  "$defs": {
+    "utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "team": {"type": "string", "pattern": "^[A-Z]{2,3}$"},
+    "prob": {"type": "number", "minimum": 0, "maximum": 1},
+    "points": {"type": "number", "minimum": 0, "maximum": 100},
+    "margin": {"type": "number", "minimum": -100, "maximum": 100},
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["components", "prob_weights", "bias", "margin_weights"],
+      "properties": {
+        "components": {"type": "array", "minItems": 1, "items": {"enum": ["market", "elo", "kf", "lgbm", "lgbm_mkt"]}},
+        "prob_weights": {"type": "array", "minItems": 1, "items": {"type": "number"}},
+        "bias": {"type": "number"},
+        "margin_weights": {"type": "array", "minItems": 1, "items": {"type": "number"}}
+      }
+    },
+    "range": {
+      "type": "array",
+      "description": "[q10, q90] of the simulations: the 80% range.",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "number"}
+    },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["n_sims", "seed", "p_home", "home_points", "away_points", "margin_home", "total"],
+      "properties": {
+        "n_sims": {"type": "integer", "minimum": 1},
+        "seed": {"type": "integer"},
+        "p_home": {"$ref": "#/$defs/prob"},
+        "home_points": {"$ref": "#/$defs/range"},
+        "away_points": {"$ref": "#/$defs/range"},
+        "margin_home": {"$ref": "#/$defs/range"},
+        "total": {"$ref": "#/$defs/range"},
+        "histogram": {
+          "type": "object",
+          "description": "Optional pre-computed histograms so the site never re-simulates (filled from PR 1b).",
+          "additionalProperties": false,
+          "required": ["margin_home", "total"],
+          "properties": {
+            "margin_home": {"$ref": "#/$defs/histogram"},
+            "total": {"$ref": "#/$defs/histogram"}
+          }
+        }
+      }
+    },
+    "histogram": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lo", "width", "counts"],
+      "properties": {
+        "lo": {"type": "number"},
+        "width": {"type": "number", "minimum": 0},
+        "counts": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}}
+      }
+    },
+    "example_score": {
+      "type": "object",
+      "description": "Illustrative score only: one plausible score near the expected points, never a forecast of the exact result.",
+      "additionalProperties": false,
+      "required": ["home", "away", "prob"],
+      "properties": {
+        "home": {"type": "integer", "minimum": 0},
+        "away": {"type": "integer", "minimum": 0},
+        "prob": {"$ref": "#/$defs/prob"}
+      }
+    },
+    "headline": {
+      "type": "object",
+      "description": "The published number: the model on its own (Elo, Kalman and LightGBM stacked, no market input). Margin and total are derived from the two expected points.",
+      "additionalProperties": false,
+      "required": ["home_win_prob", "home_points", "away_points", "distribution", "example_score"],
+      "properties": {
+        "home_win_prob": {"$ref": "#/$defs/prob"},
+        "home_points": {"$ref": "#/$defs/points"},
+        "away_points": {"$ref": "#/$defs/points"},
+        "distribution": {"$ref": "#/$defs/distribution"},
+        "example_score": {"$ref": "#/$defs/example_score"}
+      }
+    },
+    "ensemble": {
+      "type": "object",
+      "description": "Reference only: the model blended with the market. With a market line its margin is anchored on the spread (see docs/CONTRACT.md).",
+      "additionalProperties": false,
+      "required": ["home_win_prob", "margin_home", "total"],
+      "properties": {
+        "home_win_prob": {"$ref": "#/$defs/prob"},
+        "margin_home": {"$ref": "#/$defs/margin"},
+        "total": {"$ref": "#/$defs/points"}
+      }
+    },
+    "components": {
+      "type": "object",
+      "description": "Home win probability of each fitted model component. The market is not here: it lives in the market list.",
+      "additionalProperties": false,
+      "required": ["elo", "kf", "lgbm"],
+      "properties": {
+        "elo": {"$ref": "#/$defs/prob"},
+        "kf": {"$ref": "#/$defs/prob"},
+        "lgbm": {"$ref": "#/$defs/prob"},
+        "lgbm_mkt": {"anyOf": [{"$ref": "#/$defs/prob"}, {"type": "null"}]}
+      }
+    },
+    "market_quote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "captured_at_utc", "is_closing", "home_win_prob", "margin_home", "total_line"],
+      "properties": {
+        "source": {"enum": ["nflverse_line", "odds_api_consensus"]},
+        "captured_at_utc": {"$ref": "#/$defs/utc"},
+        "is_closing": {"type": "boolean", "description": "true only for the last line before kickoff (the closing line). A line saved together with a pre-game prediction is false."},
+        "home_win_prob": {"anyOf": [{"$ref": "#/$defs/prob"}, {"type": "null"}]},
+        "margin_home": {"anyOf": [{"$ref": "#/$defs/margin"}, {"type": "null"}], "description": "Home margin implied by the spread, home minus away (nflverse spread_line sign; the Odds API point is negated)."},
+        "total_line": {"anyOf": [{"$ref": "#/$defs/points"}, {"type": "null"}]},
+        "home_moneyline": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+        "away_moneyline": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+        "n_books": {"type": "integer", "minimum": 1}
+      }
+    },
+    "absence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["player", "position", "status", "points"],
+      "properties": {
+        "player": {"type": "string", "minLength": 1},
+        "position": {"type": "string"},
+        "status": {"enum": ["out", "doubtful"]},
+        "points": {"type": "number", "minimum": 0}
+      }
+    },
+    "news_adjustment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applied", "applies_to"],
+      "properties": {
+        "applied": {"type": "boolean"},
+        "applies_to": {"enum": ["ensemble", "headline"], "description": "Which block the adjustment moved. Since web v2 it is the ensemble only (audit finding C12)."},
+        "margin_points": {"type": "number"},
+        "home_points_lost": {"type": "number", "minimum": 0},
+        "away_points_lost": {"type": "number", "minimum": 0},
+        "home_win_prob_before": {"$ref": "#/$defs/prob"},
+        "margin_home_before": {"$ref": "#/$defs/margin"},
+        "items": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["home_qb_change", "away_qb_change", "home_rest_days", "away_rest_days", "dome", "weather_known", "temp_f", "wind_mph", "home_out_lag", "away_out_lag"],
+      "properties": {
+        "home_qb_change": {"type": "boolean"},
+        "away_qb_change": {"type": "boolean"},
+        "home_rest_days": {"type": "integer", "minimum": 0},
+        "away_rest_days": {"type": "integer", "minimum": 0},
+        "dome": {"type": "boolean"},
+        "weather_known": {"type": "boolean"},
+        "temp_f": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+        "wind_mph": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "home_out_lag": {"type": "integer", "minimum": 0},
+        "away_out_lag": {"type": "integer", "minimum": 0}
+      }
+    },
+    "game": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["game_id", "home_team", "away_team", "kickoff_utc", "generated_at_utc", "headline", "ensemble", "components", "market", "context", "absences", "news_adjustment"],
+      "properties": {
+        "game_id": {"type": "string", "pattern": "^[0-9]{4}_[0-9]{2}_[A-Z]{2,3}_[A-Z]{2,3}$"},
+        "home_team": {"$ref": "#/$defs/team"},
+        "away_team": {"$ref": "#/$defs/team"},
+        "kickoff_utc": {"$ref": "#/$defs/utc"},
+        "generated_at_utc": {"$ref": "#/$defs/utc"},
+        "headline": {"$ref": "#/$defs/headline"},
+        "ensemble": {"$ref": "#/$defs/ensemble"},
+        "components": {"$ref": "#/$defs/components"},
+        "market": {"type": "array", "items": {"$ref": "#/$defs/market_quote"}},
+        "context": {"$ref": "#/$defs/context"},
+        "absences": {
+          "type": "object",
+          "description": "Context only: not part of any number.",
+          "additionalProperties": false,
+          "required": ["home", "away"],
+          "properties": {
+            "home": {"type": "array", "items": {"$ref": "#/$defs/absence"}},
+            "away": {"type": "array", "items": {"$ref": "#/$defs/absence"}}
+          }
+        },
+        "news_adjustment": {"$ref": "#/$defs/news_adjustment"}
+      }
+    }
+  }
+}
