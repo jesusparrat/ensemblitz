@@ -531,7 +531,6 @@ def bootstrap(d: pd.DataFrame, y: np.ndarray, n: int = BOOT_N, seed: int = BOOT_
 
 
 def ats_block(d: pd.DataFrame, margin_col: str) -> dict:
-def ats_block(d: pd.DataFrame, margin_col: str) -> dict:
     """ATS against the closing spread betting the side the model prefers."""
 
     def one(x: pd.DataFrame) -> dict:
@@ -671,7 +670,6 @@ def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
     return res, d
 
 
-def extremizing_verdict(res: dict) -> dict:
 def extremizing_verdict(res: dict) -> dict:
     o, hf = res["overall"], res["heavy_favourites_on_ens_games"]
     bd = res["bootstrap"]["diff_vs_market"]

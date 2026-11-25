@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ensemblitz import baseline as B, pipeline
+from ensemblitz import baseline as B
+from ensemblitz import pipeline
 from ensemblitz.models.market import margin_to_prob
 
 ROOT = Path(__file__).resolve().parents[1]

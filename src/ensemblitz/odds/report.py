@@ -7,7 +7,6 @@ from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
-from scipy.special import ndtr
 
 from ensemblitz import config as C
 from ensemblitz.odds import client, devig
