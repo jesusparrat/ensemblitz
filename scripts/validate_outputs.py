@@ -37,7 +37,10 @@ def prob_ok(x) -> bool:
 
 
 def check_predictions() -> None:
-    files = sorted((ROOT / "predictions").glob("*/week*.json"))
+    from ensemblitz import contract as K
+    from ensemblitz import ledger as L
+
+    files = L.iter_snapshot_paths(ROOT)
     if not files:
         errors.append("predictions/: no files")
     for p in files:
@@ -47,16 +50,26 @@ def check_predictions() -> None:
         rel = p.relative_to(ROOT)
         if not d.get("games"):
             errors.append(f"{rel}: empty week")
+            continue
+        try:
+            version = K.detect_version(d)
+        except K.ContractError as exc:
+            errors.append(f"{rel}: {exc}")
+            continue
+        if version == K.SCHEMA_VERSION:
+            for e in K.validate_week(d):
+                errors.append(f"{rel}: {e}")
+            continue
         for g in d.get("games", []):
-            for k, v in g.get("home_win_prob", {}).items():
-                if not prob_ok(v):
-                    errors.append(f"{rel}: {g.get('game_id')} home_win_prob.{k}={v}")
+            for k, val in g.get("home_win_prob", {}).items():
+                if not prob_ok(val):
+                    errors.append(f"{rel}: {g.get('game_id')} home_win_prob.{k}={val}")
             m = g.get("predicted_margin")
             if m is not None and abs(m) > 60:
                 errors.append(f"{rel}: {g.get('game_id')} absurd margin {m}")
-            t = g.get("predicted_total")
-            if t is not None and not 10 <= t <= 100:
-                errors.append(f"{rel}: {g.get('game_id')} absurd total {t}")
+            tot = g.get("predicted_total")
+            if tot is not None and not 10 <= tot <= 100:
+                errors.append(f"{rel}: {g.get('game_id')} absurd total {tot}")
 
 
 def check_json_tree() -> None:
@@ -82,9 +95,22 @@ def scan_secrets(folders: list[Path]) -> None:
                     )
 
 
+def check_integrity() -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "verify_integrity", ROOT / "scripts" / "verify_integrity.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    errors.extend(mod.verify(ROOT))
+
+
 def main() -> int:
     check_predictions()
     check_json_tree()
+    check_integrity()
     folders = [ROOT / f for f in ("predictions", "reports", "results", "models")]
     if "--site" in sys.argv:
         folders.append(Path(sys.argv[sys.argv.index("--site") + 1]))

@@ -100,12 +100,27 @@ def predict(
     week: int = typer.Option(0, help="0 = next unplayed week(s)"),
     weeks: int = typer.Option(1, help="How many upcoming weeks when --week is 0"),
     news: bool = typer.Option(True, help="Apply confirmed-out players from news/<season>/"),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Write a new snapshot for a week that already has one (refused after first kickoff)",
+    ),
+    production: bool = typer.Option(
+        False, "--production", help="Require a clean git tree and mark the snapshot reproducible"
+    ),
 ) -> None:
-    """Write frozen predictions to predictions/<season>/weekXX.json."""
+    """Write a new immutable snapshot under predictions/<season>/weekXX/."""
     from ensemblitz.data.download import current_season
     from ensemblitz.predict import run_predict
 
-    for p in run_predict(season or current_season(), week or None, weeks, news):
+    for p in run_predict(
+        season or current_season(),
+        week or None,
+        weeks,
+        news,
+        force=force,
+        production=production,
+    ):
         typer.echo(f"wrote {p}")
 
 
@@ -123,12 +138,18 @@ def odds(
     season: int = typer.Option(0, help="0 = current season"),
     week: int = typer.Option(0, help="0 = next predicted week"),
     fetch: bool = typer.Option(True, help="Call The Odds API if ODDS_API_KEY is set"),
+    report: bool = typer.Option(True, help="Write the comparison report (needs predictions)"),
 ) -> None:
-    """Compare our picks with sportsbook odds (needs ODDS_API_KEY; skips politely without it)."""
+    """Fetch sportsbook odds and/or compare them with our picks.
+
+    Fetching does not need predictions, so the weekly job can run this before
+    ``ensemblitz predict``. Without a key it skips politely. ``--no-report`` only
+    refreshes the cache; ``--no-fetch`` writes the report from the cache.
+    """
     from ensemblitz.data.download import current_season
     from ensemblitz.odds.report import run_odds
 
-    msg = run_odds(season or current_season(), week or None, fetch=fetch)
+    msg = run_odds(season or current_season(), week or None, fetch=fetch, report=report)
     typer.echo(msg)
 
 

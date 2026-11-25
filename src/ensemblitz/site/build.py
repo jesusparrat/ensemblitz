@@ -12,14 +12,14 @@ import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
-import numpy as np
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
 from ensemblitz import config as C
+from ensemblitz import contract_io
+from ensemblitz import ledger as L
 from ensemblitz import news as N
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
-from ensemblitz.sim import SimParams, simulate_games
 from ensemblitz.site import charts
 from ensemblitz.site.i18n import LANGS, Lang
 from ensemblitz.site.names import full
@@ -68,9 +68,20 @@ def _read(path: Path) -> dict | list | None:
 
 def load_inputs(root: Path) -> dict:
     preds = {}
-    for p in sorted((root / "predictions").glob("*/week*.json")):
-        d = json.loads(p.read_text())
-        preds[(d["season"], d["week"])] = d
+    pred_meta = {}
+    for art in L.iter_latest(root):
+        loaded = contract_io.load_week(art.path)
+        key = (loaded.doc["season"], loaded.doc["week"])
+        doc = dict(loaded.doc)
+        doc["generated_at"] = doc["generated_at_utc"]  # alias for existing templates
+        preds[key] = doc
+        pred_meta[key] = {
+            "headline_kind": loaded.headline_kind,
+            "headline_kinds": loaded.headline_kinds,
+            "version": loaded.version,
+            "path": art.rel,
+            "sha256": loaded.sha256,
+        }
     odds = {}
     for p in sorted((root / "reports" / "odds").glob("*_week*.json")):
         d = json.loads(p.read_text())
@@ -80,6 +91,7 @@ def load_inputs(root: Path) -> dict:
         graded += json.loads(p.read_text())
     return {
         "preds": preds,
+        "pred_meta": pred_meta,
         "odds": odds,
         "graded": graded,
         "backtest": _read(root / "reports" / "backtest.json"),
@@ -99,14 +111,19 @@ def _why(g: dict, home: str, away: str, pick_home: bool, margin: float) -> dict:
     changed = [t for t, k in ((home, "home_qb_change"), (away, "away_qb_change")) if c[k]]
     if changed:
         return {"key": "why_qb", "team": changed[0], "other": dog if changed[0] == fav else fav}
-    fr, dr = (c["home_rest"], c["away_rest"]) if pick_home else (c["away_rest"], c["home_rest"])
+    fr, dr = (
+        (c["home_rest_days"], c["away_rest_days"])
+        if pick_home
+        else (c["away_rest_days"], c["home_rest_days"])
+    )
     if fr - dr >= 3:
         return {"key": "why_rest", "team": fav, "n": fr, "m": dr}
     km = haversine_km(*HOME_STADIUMS[away], *HOME_STADIUMS[home])
     if pick_home and km >= 3000:
         return {"key": "why_trip", "team": dog, "km": km, "home": home}
-    if not c["dome"] and c.get("weather_known") and (c["wind"] or 0) * 1.609 >= 30:
-        return {"key": "why_wind", "wind": c["wind"]}
+    wind = c.get("wind_mph", c.get("wind"))
+    if not c["dome"] and c.get("weather_known") and (wind or 0) * 1.609 >= 30:
+        return {"key": "why_wind", "wind": wind}
     if pick_home and margin <= 2 * HFA:
         return {"key": "why_home", "team": home}
     if not pick_home and margin < 3:
@@ -123,11 +140,21 @@ def _facts(g: dict) -> list[dict]:
     if c["dome"]:
         venue = {"v": "dome"}
     elif c.get("weather_known"):
-        venue = {"v": "open", "temp": c["temp"], "wind": c["wind"]}
+        venue = {
+            "v": "open",
+            "temp": c.get("temp_f", c.get("temp")),
+            "wind": c.get("wind_mph", c.get("wind")),
+        }
     else:
         venue = {"v": "open_nowx"}
     return [
-        {"k": "rest", "home": home, "away": away, "h": c["home_rest"], "a": c["away_rest"]},
+        {
+            "k": "rest",
+            "home": home,
+            "away": away,
+            "h": c.get("home_rest_days", c.get("home_rest")),
+            "a": c.get("away_rest_days", c.get("away_rest")),
+        },
         {"k": "trip", "away": away, "km": km},
         {"k": "qb", "teams": chg},
         {"k": "venue", **venue},
@@ -139,38 +166,40 @@ def _game(
     odds_game: dict | None,
     result: dict | None,
     news_items: list[dict] | None = None,
+    headline_kind: str = "model_only",
 ) -> dict:
-    """Language independent view of one game; the headline is the model on its own."""
+    """Language independent view of one game; the headline is the published number."""
     home, away = g["home_team"], g["away_team"]
-    probs = g["home_win_prob"]
-    mo = g.get("model_only")
-    legacy = mo is None  # frozen before web v2: its headline was the blended ensemble
-    if legacy:
-        ph, margin, total = probs["ensemble"], g["predicted_margin"], g["predicted_total"]
-        sim, example = None, g["most_likely_score"]
-    else:
-        ph, margin, total = mo["home_win_prob"], mo["margin"], mo["total"]
-        sim, example = mo["sim"], mo["example_score"]
-    hp, ap = round((total + margin) / 2, 1), round((total - margin) / 2, 1)
+    h = g["headline"]
+    legacy = headline_kind == "ensemble"
+    ph, hp, ap = h["home_win_prob"], h["home_points"], h["away_points"]
+    hp, ap = round(hp, 1), round(ap, 1)
     margin_d, total_d = round(hp - ap, 1), round(hp + ap, 1)
     pick_home = ph >= 0.5
     fav = home if pick_home else away
     p_win = ph if pick_home else 1 - ph
     agree = (margin_d > 0) == pick_home and abs(margin_d) >= 0.05
+    nfl = contract_io.market_quote(g, "nflverse_line") or {}
+    cons = contract_io.market_quote(g, "odds_api_consensus")
     if odds_game:
         mkt_home, mkt_n = odds_game["consensus_home_prob_shin"], odds_game["n_books"]
+    elif cons and cons.get("home_win_prob") is not None:
+        mkt_home, mkt_n = cons["home_win_prob"], cons.get("n_books") or 0
     else:
-        mkt_home, mkt_n = probs.get("market"), 0
+        mkt_home, mkt_n = nfl.get("home_win_prob"), 0
     mkt_win = None if mkt_home is None else (mkt_home if pick_home else 1 - mkt_home)
     diff = gap_pts(p_win, mkt_win)
-    ens = probs["ensemble"] if pick_home else 1 - probs["ensemble"]
+    ens_p = g["ensemble"]["home_win_prob"]
+    ens = ens_p if pick_home else 1 - ens_p
+    dist = h.get("distribution") or {}
     rng = None
-    if sim:
+    # Legacy (pre-web-v2) picks never showed a range: they had no model_only.sim.
+    if (not legacy) and dist.get("margin_home") and dist["margin_home"][0] is not None:
         rng = {
-            "home": (sim["home_q10"], sim["home_q90"]),
-            "away": (sim["away_q10"], sim["away_q90"]),
-            "margin": (sim["margin_q10"], sim["margin_q90"]),
-            "total": (sim["total_q10"], sim["total_q90"]),
+            "home": (dist["home_points"][0], dist["home_points"][1]),
+            "away": (dist["away_points"][0], dist["away_points"][1]),
+            "margin": (dist["margin_home"][0], dist["margin_home"][1]),
+            "total": (dist["total"][0], dist["total"][1]),
         }
     final = None
     if result:
@@ -180,14 +209,21 @@ def _game(
             "away": int(round((tot - mar) / 2)),
             "ok": bool(result.get("headline_correct", result.get("ensemble_correct"))),
         }
-    comps = {k: probs.get(k) for k in ("market", "elo", "kf", "lgbm", "lgbm_mkt")}
-    comps["ensemble_model_only"] = probs.get("ensemble_model_only")
-    comps["ensemble"] = probs["ensemble"]
+    comps = {k: g["components"].get(k) for k in ("elo", "kf", "lgbm", "lgbm_mkt")}
+    comps["market"] = nfl.get("home_win_prob")
+    comps["ensemble_model_only"] = h["home_win_prob"]
+    comps["ensemble"] = ens_p
 
     def side(p: float | None) -> float | None:
         return None if p is None else (p if pick_home else 1 - p)
 
     ab = g.get("absences") or {"home": [], "away": []}
+    market_view = {
+        "spread_line": nfl.get("margin_home"),
+        "total_line": nfl.get("total_line"),
+        "home_moneyline": nfl.get("home_moneyline"),
+        "away_moneyline": nfl.get("away_moneyline"),
+    }
     return {
         "id": g["game_id"],
         "home": home,
@@ -211,7 +247,7 @@ def _game(
         "flag": diff is not None and abs(diff) >= FLAG_PP,
         "ens_win": ens,
         "comps": {k: side(v) for k, v in comps.items()},
-        "market": g["market"],
+        "market": market_view,
         "why": _why(g, home, away, pick_home, abs(margin_d)),
         "facts": _facts(g),
         "absences": [
@@ -219,29 +255,23 @@ def _game(
             for team, key in ((home, "home"), (away, "away"))
             for a in ab.get(key, [])
         ],
-        "example": example,
-        "saved_at": g["generated_at"],
+        "example": h["example_score"],
+        "saved_at": g["generated_at_utc"],
         "final": final,
         "news": [x for x in (news_items or []) if x["team"] in (home, away)],
+        "histogram": (dist.get("histogram") if dist else None),
     }
 
 
 def game_charts(g: dict, L: Lang) -> dict[str, str]:
-    """Margin and total distributions from a fresh deterministic simulation of the shown means."""
-    h, a = simulate_games(
-        np.array([g["pts_home"]]),
-        np.array([g["pts_away"]]),
-        n_sims=20000,
-        seed=11,
-        params=SimParams(),
-    )
-    margin, total = (h - a)[0], (h + a)[0]
+    """Margin and total distributions from the stored histogram. Never re-simulates."""
+    hist = g.get("histogram")
+    if not hist:
+        return {"margin": "", "total": ""}
     side = "home" if g["pick_home"] else "away"
     spread, tl = g["market"]["spread_line"], g["market"]["total_line"]
-    m_chart = charts.histogram(
-        margin,
-        -35,
-        35,
+    m_chart = charts.histogram_from_counts(
+        hist["margin_home"],
         side,
         spread,
         L.text("chart.line", v=L.signed(spread)) if spread is not None else "",
@@ -249,10 +279,8 @@ def game_charts(g: dict, L: Lang) -> dict[str, str]:
         L.text("chart.wins", team=g["home"]),
         L.text("chart.margin_aria"),
     )
-    t_chart = charts.histogram(
-        total,
-        10,
-        80,
+    t_chart = charts.histogram_from_counts(
+        hist["total"],
         None,
         tl,
         L.text("chart.line", v=L.n(tl)) if tl is not None else "",
@@ -276,25 +304,37 @@ def _history(inputs: dict) -> dict:
     series = {"official": [], "market": []}
     ok_n = mk_n = 0
     sources = {"official": [0, 0], "model_only": [0, 0], "market": [0, 0], "ensemble": [0, 0]}
+    kinds = {}
+    for meta in inputs.get("pred_meta", {}).values():
+        kinds.update(meta.get("headline_kinds") or {})
     for r in rows:
         p = by_id[r["game_id"]]
-        headline = r.get("headline") or p.get("headline", "ensemble")
+        headline = r.get("headline")
+        if not headline or isinstance(headline, dict):
+            headline = kinds.get(p["game_id"]) or "ensemble"
         ok = r.get("headline_correct", r.get("ensemble_correct"))
         if ok is None:
             continue
-        mo = p.get("model_only")
-        ph = (
-            mo["home_win_prob"]
-            if (headline == "model_only" and mo)
-            else p["home_win_prob"]["ensemble"]
-        )
+        if isinstance(p.get("headline"), dict):
+            ph = (
+                p["headline"]["home_win_prob"]
+                if headline == "model_only"
+                else p["ensemble"]["home_win_prob"]
+            )
+        else:
+            mo = p.get("model_only")
+            ph = (
+                mo["home_win_prob"]
+                if (headline == "model_only" and mo)
+                else p["home_win_prob"]["ensemble"]
+            )
         out.append(
             {
                 **r,
                 "headline": headline,
                 "p": ph if r["pick"] == r["home_team"] else 1 - ph,
                 "ok": bool(ok),
-                "saved_at": p["generated_at"],
+                "saved_at": p.get("generated_at_utc") or p.get("generated_at"),
                 "kick_utc": p["kickoff_utc"],
                 "home_pts": int(round((r["total"] + r["result"]) / 2)),
                 "away_pts": int(round((r["total"] - r["result"]) / 2)),
@@ -329,10 +369,15 @@ def _history(inputs: dict) -> dict:
         {
             "season": k[0],
             "week": k[1],
-            "saved_at": d["generated_at"],
+            "saved_at": d.get("generated_at_utc") or d.get("generated_at"),
             "n": len(d["games"]),
             "first_kick": min(g["kickoff_utc"] for g in d["games"]),
-            "headline": d["games"][0].get("headline", "ensemble") if d["games"] else "ensemble",
+            "headline": inputs["pred_meta"].get(k, {}).get("headline_kind")
+            or (
+                "model_only"
+                if isinstance((d["games"] or [{}])[0].get("headline"), dict)
+                else (d["games"] or [{}])[0].get("headline") or "ensemble"
+            ),
         }
         for k, d in sorted(inputs["preds"].items(), reverse=True)
     ]
@@ -356,6 +401,11 @@ class Site:
             loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
         )
         self.now = datetime.now(UTC)
+        stamps = [
+            d.get("generated_at_utc") or d.get("generated_at")
+            for d in self.inputs["preds"].values()
+        ]
+        self.data_stamp = max(stamps) if stamps else "1970-01-01T00:00:00Z"
 
     def render(self, L: Lang, tpl: str, kind: str, key: object = None, **ctx: object) -> None:
         dest = ROUTES[L.code][kind].format(key)
@@ -390,7 +440,7 @@ class Site:
             alt=alt,
             other=next(c for c in LANGS if c != L.code),
             page_kind=kind,
-            generated_at=L.stamp(self.now.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            generated_at=L.stamp(self.data_stamp),
             repo=REPO_URL,
             flag_pts=FLAG_PP,
             weeks=sorted(self.inputs["preds"]),
@@ -411,9 +461,17 @@ class Site:
         for key, d in inputs["preds"].items():
             og = {x["game_id"]: x for x in (inputs["odds"].get(key) or {}).get("games", [])}
             graded = {r["game_id"]: r for r in inputs["graded"]}
+            kinds = inputs["pred_meta"].get(key, {}).get("headline_kinds") or {}
+            default_kind = inputs["pred_meta"].get(key, {}).get("headline_kind", "model_only")
             week_pages[key] = sorted(
                 (
-                    _game(g, og.get(g["game_id"]), graded.get(g["game_id"]), news_by_week[key])
+                    _game(
+                        g,
+                        og.get(g["game_id"]),
+                        graded.get(g["game_id"]),
+                        news_by_week[key],
+                        kinds.get(g["game_id"], default_kind),
+                    )
                     for g in d["games"]
                 ),
                 key=lambda x: x["kick_utc"],

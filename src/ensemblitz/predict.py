@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,6 +10,8 @@ import numpy as np
 import pandas as pd
 
 from ensemblitz import config as C
+from ensemblitz import contract as K
+from ensemblitz import ledger as L
 from ensemblitz import news as N
 from ensemblitz import pipeline as P
 from ensemblitz.features.build import feature_columns
@@ -86,8 +87,12 @@ def predict_frame(frame: pd.DataFrame, season: int, weeks: list[int]) -> pd.Data
 
 
 def simulate_rows(rows: pd.DataFrame, n_sims: int = 20000) -> dict[str, np.ndarray]:
-    """Simulations for the blended ensemble (keys as is) and for the model-only headline (mo_*)."""
-    out: dict[str, np.ndarray] = {}
+    """Simulations for the blended ensemble (keys as is) and for the model-only headline (mo_*).
+
+    Also stores the raw model-only margin and total draws so the snapshot can include
+    a histogram and the site never has to re-simulate.
+    """
+    out: dict[str, object] = {"n_sims": n_sims, "seed": 2026}
     for prefix, tcol, mcol, pcol in (
         ("", "ens_total", "ens_margin", "ens_prob"),
         ("mo_", "nomkt_total", "nomkt_margin", "nomkt_prob"),
@@ -100,6 +105,9 @@ def simulate_rows(rows: pd.DataFrame, n_sims: int = 20000) -> dict[str, np.ndarr
         res = summarize_sim(h, a)
         res.update(likely_score(h, a, rows[pcol].to_numpy() >= 0.5, margin))
         out.update({prefix + k: v for k, v in res.items()})
+        if prefix == "mo_":
+            out["mo_margin_draws"] = h - a
+            out["mo_total_draws"] = h + a
     return out
 
 
@@ -258,10 +266,176 @@ def _absences(rows: pd.DataFrame) -> dict[tuple[int, int], dict[str, list[dict]]
     return out
 
 
+def _binned_counts(values, lo: int, hi: int, width: int = 1) -> dict:
+    import numpy as np
+
+    v = np.clip(np.rint(np.asarray(values, float)), lo, hi)
+    bins = np.arange(lo, hi + 1, width)
+    counts = [int((v == b).sum()) for b in bins]
+    return {"lo": lo, "width": width, "counts": counts}
+
+
+def _odds_quotes() -> dict[tuple[str, str], dict]:
+    """Latest cached Odds API consensus, keyed by (home, away). Empty if there is no cache."""
+    from ensemblitz.odds import client
+    from ensemblitz.odds.report import consensus_for_teams
+
+    odds = client.latest_cache()
+    if odds is None or odds.empty:
+        return {}
+    fetched = str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds.columns else None
+    out: dict[tuple[str, str], dict] = {}
+    # unique matchups in the cache
+    if "home_name" not in getattr(odds, "columns", []):
+        # flatten() uses home_name; book_probs maps to home/away abbreviations
+        pass
+    from ensemblitz.odds.report import book_probs
+
+    bp = book_probs(odds)
+    if bp.empty:
+        return {}
+    for home, away in bp[["home", "away"]].drop_duplicates().itertuples(index=False):
+        rec = consensus_for_teams(odds, home, away)
+        if rec:
+            rec = {**rec, "fetched_at": rec.get("fetched_at") or fetched}
+            out[(home, away)] = rec
+    return out
+
+
+def _market_block(r: pd.Series, now: str, quotes: dict[tuple[str, str], dict]) -> list[dict]:
+    market = [
+        {
+            "source": "nflverse_line",
+            "captured_at_utc": now,
+            "is_closing": False,
+            "home_win_prob": _f(r["market_prob"]),
+            "margin_home": _f(r["spread_line"], 1),
+            "total_line": _f(r["total_line"], 1),
+            "home_moneyline": _f(r["home_moneyline"], 0),
+            "away_moneyline": _f(r["away_moneyline"], 0),
+        }
+    ]
+    rec = quotes.get((r["home_team"], r["away_team"]))
+    if rec and rec.get("consensus_home_prob_shin") is not None:
+        market.append(
+            {
+                "source": "odds_api_consensus",
+                "captured_at_utc": rec.get("fetched_at") or now,
+                "is_closing": False,
+                "home_win_prob": rec["consensus_home_prob_shin"],
+                "margin_home": K.odds_api_margin_home(rec.get("book_spread_home")),
+                "total_line": rec.get("book_total"),
+                "n_books": rec.get("n_books"),
+            }
+        )
+    return market
+
+
+def _news_v1(news_adj: dict | None) -> dict:
+    na = news_adj or {"applied": False}
+    out = {"applied": bool(na.get("applied")), "applies_to": "ensemble"}
+    if not na.get("applied") and "margin_points" not in na:
+        return out
+    for src, dst in (
+        ("margin_points", "margin_points"),
+        ("home_points_lost", "home_points_lost"),
+        ("away_points_lost", "away_points_lost"),
+        ("prob_home_before", "home_win_prob_before"),
+        ("margin_before", "margin_home_before"),
+    ):
+        if src in na:
+            out[dst] = na[src]
+    if "items" in na:
+        out["items"] = na["items"]
+    return out
+
+
+def v1_game_record(
+    r: pd.Series,
+    sim: dict[str, np.ndarray],
+    i: int,
+    now: str,
+    news_adj: dict | None,
+    absences: dict[str, list[dict]] | None,
+    quotes: dict[tuple[str, str], dict],
+) -> dict:
+    """One v1 game record. The headline is the model on its own."""
+    components = {c: _f(r[f"{c}_prob"]) for c in ("elo", "kf", "lgbm", "lgbm_mkt")}
+    hist = None
+    if "mo_margin_draws" in sim:
+        hist = {
+            "margin_home": _binned_counts(sim["mo_margin_draws"][i], -35, 35),
+            "total": _binned_counts(sim["mo_total_draws"][i], 10, 80),
+        }
+    distribution = {
+        "n_sims": int(sim.get("n_sims", 20000)),
+        "seed": int(sim.get("seed", 2026)),
+        "p_home": _f(sim["mo_p_home"][i]),
+        "home_points": [_f(sim["mo_home_q10"][i], 1), _f(sim["mo_home_q90"][i], 1)],
+        "away_points": [_f(sim["mo_away_q10"][i], 1), _f(sim["mo_away_q90"][i], 1)],
+        "margin_home": [_f(sim["mo_margin_q10"][i], 1), _f(sim["mo_margin_q90"][i], 1)],
+        "total": [_f(sim["mo_total_q10"][i], 1), _f(sim["mo_total_q90"][i], 1)],
+    }
+    if hist is not None:
+        distribution["histogram"] = hist
+    m, tot = float(r["nomkt_margin"]), float(r["nomkt_total"])
+    return {
+        "game_id": r["game_id"],
+        "home_team": r["home_team"],
+        "away_team": r["away_team"],
+        "kickoff_utc": r["kickoff_utc"].strftime("%Y-%m-%dT%H:%M:%SZ")
+        if hasattr(r["kickoff_utc"], "strftime")
+        else str(r["kickoff_utc"]),
+        "generated_at_utc": now,
+        "headline": {
+            "home_win_prob": _f(r["nomkt_prob"]),
+            "home_points": _f((tot + m) / 2, 2),
+            "away_points": _f((tot - m) / 2, 2),
+            "distribution": distribution,
+            "example_score": {
+                "home": int(sim["mo_like_home"][i]),
+                "away": int(sim["mo_like_away"][i]),
+                "prob": _f(sim["mo_like_prob"][i]),
+            },
+        },
+        "ensemble": {
+            "home_win_prob": _f(r["ens_prob"]),
+            "margin_home": _f(r["ens_margin"], 2),
+            "total": _f(r["ens_total"], 2),
+        },
+        "components": components,
+        "market": _market_block(r, now, quotes),
+        "context": {
+            "home_qb_change": bool(r["h_qb_change"]),
+            "away_qb_change": bool(r["a_qb_change"]),
+            "home_rest_days": int(r["h_rest"]),
+            "away_rest_days": int(r["a_rest"]),
+            "dome": bool(r["dome"]),
+            "weather_known": bool(r["weather_known"]),
+            "temp_f": _f(r["temp"], 0) if r["weather_known"] else None,
+            "wind_mph": _f(r["wind"], 0) if r["weather_known"] else None,
+            "home_out_lag": int(r["h_out_lag"]),
+            "away_out_lag": int(r["a_out_lag"]),
+        },
+        "absences": {
+            "home": (absences or {}).get(r["home_team"], []),
+            "away": (absences or {}).get(r["away_team"], []),
+        },
+        "news_adjustment": _news_v1(news_adj),
+    }
+
+
 def run_predict(
-    season: int, week: int | None = None, n_weeks: int = 1, use_news: bool = True
+    season: int,
+    week: int | None = None,
+    n_weeks: int = 1,
+    use_news: bool = True,
+    *,
+    force: bool = False,
+    production: bool = False,
+    root: Path | None = None,
 ) -> list[Path]:
-    """Write ``predictions/<season>/weekXX.json``. Picks of games already kicked off stay frozen."""
+    """Write a new immutable v1 snapshot for each requested week (never overwrites)."""
     frame = build_frame(season)
     weeks = [week] if week else next_weeks(frame, season, n_weeks)
     if not weeks:
@@ -272,36 +446,46 @@ def run_predict(
     rows = rows.reset_index(drop=True)
     audits = apply_news(rows, now) if use_news else [None] * len(rows)
     sim = simulate_rows(rows)
-    paths = []
     ab = _absences(rows)
+    quotes = _odds_quotes()
     recs = [
-        game_record(r, sim, i, now, audits[i], ab.get((int(r["season"]), int(r["week"]))))
+        v1_game_record(
+            r, sim, i, now, audits[i], ab.get((int(r["season"]), int(r["week"]))), quotes
+        )
         for i, r in rows.iterrows()
     ]
     weights = rows.attrs.get("ensemble_weights", {})
+    prov = K.provenance(root, production=production)
+    cutoff = K.data_cutoff_utc(root=root)
+    snapshot = K.data_snapshot(root=root)
+    # data_cutoff cannot be later than the run; clamp only if equal clocks differ by rounding
+    if cutoff > now:
+        raise K.ContractError(f"data_cutoff_utc {cutoff} is later than generated_at_utc {now}")
+    paths = []
     for w in weeks:
-        path = pred_path(season, w)
-        old = json.loads(path.read_text()) if path.exists() else None
-        frozen = {}
-        if old:
-            frozen = {g["game_id"]: g for g in old["games"] if g["kickoff_utc"] <= now}
-        games = [frozen.get(g["game_id"], g) for g in recs if g["week"] == w]
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(
-                {
-                    "season": season,
-                    "week": w,
-                    "generated_at": now,
-                    "model_version": C.MODEL_VERSION,
-                    "ensemble_weights": weights,
-                    "games": games,
-                },
-                indent=1,
-            )
-        )
-        paths.append(path)
+        week_games = [g for g in recs if _week_of(g) == w]
+        doc = {
+            "schema_version": K.SCHEMA_VERSION,
+            "model_version": C.MODEL_VERSION,
+            "git_sha": prov["git_sha"],
+            "reproducible": prov["reproducible"],
+            "generated_at_utc": now,
+            "data_cutoff_utc": cutoff,
+            "data_snapshot": snapshot,
+            "season": season,
+            "week": w,
+            "ensemble_weights": weights,
+            "games": week_games,
+        }
+        errors = K.validate_week(doc)
+        if errors:
+            raise K.ContractError("invalid v1 snapshot: " + "; ".join(errors[:8]))
+        paths.append(L.write_snapshot(doc, root=root, force=force))
     return paths
 
 
-__all__ = ["run_predict"]
+def _week_of(g: dict) -> int:
+    return int(g["game_id"].split("_")[1])
+
+
+__all__ = ["pred_path", "run_predict"]

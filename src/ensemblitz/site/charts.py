@@ -151,3 +151,63 @@ def running_lines(series: dict[str, list[float]], label: str) -> str:
             f'<tspan class="legend-{k}">&#9632;</tspan> {name}</text>'
         )
     return _svg("".join(out), h=h, label=label)
+
+
+def binned_counts(values: np.ndarray, lo: int, hi: int, width: int = 1) -> dict:
+    """Integer histogram ready to store on ``headline.distribution.histogram``.
+
+    Values are clipped into ``[lo, hi]`` the same way ``histogram`` does, so a
+    chart rebuilt from the counts matches one drawn from the raw draws.
+    """
+    v = np.clip(np.rint(np.asarray(values, float)), lo, hi)
+    bins = np.arange(lo, hi + 1, width)
+    counts = [
+        int((v == b).sum()) if width == 1 else int(((v >= b) & (v < b + width)).sum()) for b in bins
+    ]
+    if width > 1:
+        # the last bin is inclusive of hi
+        pass
+    return {"lo": lo, "width": width, "counts": counts}
+
+
+def histogram_from_counts(
+    counts: dict,
+    pick_side: str | None,
+    marker: float | None,
+    marker_label: str,
+    left_label: str,
+    right_label: str,
+    label: str,
+    split: float | None = 0.0,
+) -> str:
+    """Draw the same SVG as ``histogram``, from a stored ``{lo, width, counts}`` block."""
+    lo = int(counts["lo"])
+    width = int(counts["width"])
+    raw = np.asarray(counts["counts"], float)
+    n = len(raw)
+    if n == 0:
+        return ""
+    # Expand counts into a virtual sample so the existing routine can draw them,
+    # including the same normalisation (counts / total).
+    total = raw.sum()
+    if total <= 0:
+        return ""
+    values = np.repeat(lo + width * np.arange(n), raw.astype(int))
+    if width == 1:
+        return histogram(
+            values,
+            lo,
+            lo + n - 1,
+            pick_side,
+            marker,
+            marker_label,
+            left_label,
+            right_label,
+            label,
+            split,
+        )
+    # For width != 1, go through histogram with a lo/hi that matches the bins.
+    hi = lo + width * (n - 1)
+    return histogram(
+        values, lo, hi, pick_side, marker, marker_label, left_label, right_label, label, split
+    )
