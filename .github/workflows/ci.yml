@@ -58,6 +58,7 @@ jobs:
           name: pr2-statistical-audit
           path: |
             reports/pr2_statistical_audit.json
+            reports/pr2_statistical_audit_summary.json
             docs/audit/pr2-statistical-audit.md
           if-no-files-found: error
           retention-days: 7
