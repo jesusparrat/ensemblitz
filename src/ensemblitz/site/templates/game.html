@@ -62,12 +62,14 @@
 <p class="small">{{ t('news.note') }}</p>
 {% endif %}
 
+{% if charts.margin or charts.total %}
 <h2>{{ t('game.dist_h') }}</h2>
 <div class="charts">
-  <div><h3>{{ t('game.chart_margin') }}</h3>{{ charts.margin|safe }}</div>
-  <div><h3>{{ t('game.chart_total') }}</h3>{{ charts.total|safe }}</div>
+  {% if charts.margin %}<div><h3>{{ t('game.chart_margin') }}</h3>{{ charts.margin|safe }}</div>{% endif %}
+  {% if charts.total %}<div><h3>{{ t('game.chart_total') }}</h3>{{ charts.total|safe }}</div>{% endif %}
 </div>
 <p class="small">{{ t('game.dist_note') }}</p>
+{% endif %}
 
 <details class="tech">
   <summary>{{ t('game.tech_h') }}</summary>

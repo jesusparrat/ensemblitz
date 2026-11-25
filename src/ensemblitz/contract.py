@@ -5,7 +5,7 @@ The single source of truth for the shape of ``predictions/`` is
 (a small JSON Schema subset, so no new dependency) and adds the checks a schema cannot express.
 Conventions are explained in ``docs/CONTRACT.md``.
 
-Nothing here writes predictions: wiring the writer, the reader and the ledger is PR 1b.
+The reader, the ledger and the writer live in ``contract_io.py`` and ``ledger.py``.
 """
 
 from __future__ import annotations
@@ -281,6 +281,90 @@ def data_snapshot(paths: Iterable[Path] | None = None, root: Path | None = None)
     return dict(sorted(out.items()))
 
 
+def _as_utc_timestamp(value: object):
+    """Parse a parquet cell into an aware UTC datetime, or None."""
+    from datetime import UTC, date, datetime
+
+    if value is None:
+        return None
+    try:
+        import pandas as pd
+    except ImportError:
+        pd = None
+    if pd is not None and pd.isna(value):
+        return None
+    if isinstance(value, datetime):
+        dt = value
+        return (dt if dt.tzinfo else dt.replace(tzinfo=UTC)).astimezone(UTC)
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return datetime(value.year, value.month, value.day, tzinfo=UTC)
+    if pd is not None:
+        ts = pd.to_datetime(value, utc=True, errors="coerce")
+        if pd.isna(ts):
+            return None
+        return ts.to_pydatetime()
+    return None
+
+
+def data_cutoff_utc(
+    paths: Iterable[Path] | None = None, root: Path | None = None, now: object | None = None
+) -> str:
+    """Latest timestamp *inside* the input parquets, never the run clock.
+
+    Used as ``data_cutoff_utc`` on a v1 snapshot. Future scheduled kickoffs are
+    ignored: only already-observed times count (datetime columns such as
+    ``date_modified``, and the kickoff of games that already have a result).
+    ``generated_at_utc`` still records when the run happened.
+    """
+    from datetime import UTC, datetime
+
+    import pandas as pd
+
+    from ensemblitz.data.load import kickoff_utc as _kickoff_utc
+
+    root = (root or C.ROOT).resolve()
+    files = sorted(root.glob(DEFAULT_SNAPSHOT_GLOB)) if paths is None else list(paths)
+    if not files:
+        raise ContractError(f"no input files to hash under {root / DEFAULT_SNAPSHOT_GLOB}")
+    clock = now or datetime.now(UTC)
+    if not isinstance(clock, datetime):
+        raise ContractError("now must be a datetime")
+    clock = clock.replace(tzinfo=UTC) if clock.tzinfo is None else clock.astimezone(UTC)
+    latest = None
+    for f in files:
+        f = Path(f).resolve()
+        if f.suffix != ".parquet":
+            continue
+        df = pd.read_parquet(f)
+        for col in df.columns:
+            series = df[col]
+            if not (
+                pd.api.types.is_datetime64_any_dtype(series)
+                or pd.api.types.is_datetime64tz_dtype(series)
+            ):
+                continue
+            converted = pd.to_datetime(series, utc=True, errors="coerce")
+            value = converted.max()
+            if pd.isna(value):
+                continue
+            dt = value.to_pydatetime()
+            if dt <= clock:
+                latest = dt if latest is None else max(latest, dt)
+        # Played games: their kickoff is an observed time, unlike future gamedays.
+        if "result" in df.columns and "gameday" in df.columns:
+            played = df[df["result"].notna()].copy()
+            if not played.empty:
+                kicks = pd.to_datetime(_kickoff_utc(played), utc=True, errors="coerce")
+                value = kicks.max()
+                if not pd.isna(value):
+                    dt = value.to_pydatetime()
+                    if dt <= clock:
+                        latest = dt if latest is None else max(latest, dt)
+    if latest is None:
+        raise ContractError("no observed timestamps found in the input parquets")
+    return latest.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 __all__ = [
     "DISPLAY_TZ",
     "MARGIN_CONVENTION",
@@ -288,6 +372,7 @@ __all__ = [
     "SCHEMA_VERSION",
     "ContractError",
     "DirtyTreeError",
+    "data_cutoff_utc",
     "data_snapshot",
     "detect_version",
     "git_state",

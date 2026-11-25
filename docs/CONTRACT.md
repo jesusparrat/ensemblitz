@@ -2,7 +2,7 @@
 
 This is the canonical definition of what ensemblitz publishes in `predictions/`. The machine-readable source of truth is [`schemas/predictions.v1.schema.json`](../schemas/predictions.v1.schema.json). [`src/ensemblitz/contract.py`](../src/ensemblitz/contract.py) validates against it and adds the rules a schema cannot express. If this document and the schema disagree, the schema wins and this document is fixed.
 
-Status: **defined in PR 1a, not yet written by the pipeline.** `predict.py`, `grade.py` and `site/build.py` still read and write the legacy shape (v0) until PR 1b.
+Status: **defined in PR 1a, written and read by the pipeline since PR 1b.** Legacy v0 files stay on disk unchanged and are read through `contract_io.load_week`.
 
 ## 1. One file, one snapshot
 
@@ -90,6 +90,7 @@ errors = contract.validate_week(doc)  # [] when valid
   - `q10 <= q90`;
   - one market quote per source;
   - `data_cutoff_utc <= generated_at_utc`.
+  - `data_cutoff_utc` is the latest observed time in the input data, not the clock of `ensemblitz update`.
 - `tests/test_contract.py` maps the real 2026 week 12 output (16 games, with its Odds API consensus) into v1 and validates it. This proves the schema describes what the pipeline actually produces.
 
 ## 6. Mapping from v0 (2026 weeks 11 and 12)
@@ -114,22 +115,16 @@ errors = contract.validate_week(doc)  # [] when valid
 | `news_adjustment.{prob_home_before,margin_before}` | `news_adjustment.{home_win_prob_before,margin_home_before}` | The "after" values are the `ensemble` block |
 | `context.{home_rest,away_rest,temp,wind}` | `context.{home_rest_days,away_rest_days,temp_f,wind_mph}` | Units in the name. 0/1 flags become booleans |
 
-`contract.detect_version(doc)` returns `"0"` for the legacy files and `"1"` for v1, and raises on anything else. The v0 → v1 reader itself is PR 1b.
+`contract.detect_version(doc)` returns `"0"` for the legacy files and `"1"` for v1, and raises on anything else. `contract_io.load_week(path)` maps both to the v1 model without rewriting the file.
 
-## 7. Plan for PR 1b (documented here, not implemented)
+## 7. Ledger, integrity and the reader (PR 1b)
 
-1. **Ledger.** Every run writes a new, never-overwritten snapshot, for example `predictions/<season>/week<WW>/<generated_at_utc>.json`.
-   - A game whose kickoff has passed is carried over unchanged from the latest snapshot saved before its kickoff.
-   - The writer refuses to overwrite an existing snapshot.
-2. **Historical snapshots.** The ledger rebuilds the five historical versions of `predictions/2026/week12.json` from git, **byte for byte, without altering their content**: commits `22f65ff`, `081affe`, `475a36a`, `ae9f088` and `7690ac8`. They stay v0 and are read through the v0 reader. Week 11 is rebuilt the same way from its own commits.
-3. **Manifest.** `predictions/MANIFEST` stores **only the SHA-256 of each artifact** (path → hash).
-   - There is **no `first_commit` field and no commit SHA inside the manifest**. Writing the commit that contains the manifest into the manifest is circular in CI.
-   - The time of publication is proven by **git history**: `scripts/verify_integrity.py` finds, with `git log`, the commit that first added each hash and checks that its committer time is before the kickoff of every game it contains.
-4. **Integrity check.** `verify_integrity.py` recomputes every hash, fails on any changed or missing artifact and validates v1 files with `contract.validate_week`. It runs in `ci.yml` and in `weekly.yml` before the commit.
-5. **Reader.** `contract_io.load_week(path)` returns the v1 model for v0 and v1 files, and `grade.py` and `site/build.py` read only through it.
-   - `site/build.py` stops calling the simulator: histograms come from `headline.distribution.histogram`.
-6. **Writer.** `predict.py` writes v1 with `contract.provenance(production=True)` in the weekly workflow and `production=False` locally, plus `contract.data_snapshot()`.
+The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 
-Open points for PR 1b review:
-- The Odds API consensus is fetched after `predict` today (`odds_fetched_at` 18:26:48Z against predictions at 18:26:45Z in week 12). Either the odds step runs before the snapshot is written, or a quote's `captured_at_utc` may be later than `generated_at_utc`. The schema allows both for now.
-- The exact source of `data_cutoff_utc` (time of `ensemblitz update`, or the latest timestamp inside the data).
+1. **Ledger.** Every run writes a new, never-overwritten snapshot at `predictions/<season>/week<WW>/<generated_at_utc>.json`. Re-doing a week requires `--force`. No option, including `--force`, writes a new snapshot after the week's first kickoff. Historical corrections follow the rectification procedure in `LEDGER.md`.
+2. **Historical snapshots.** The five versions of `predictions/2026/week12.json` from commits `22f65ff`, `081affe`, `475a36a`, `ae9f088` and `7690ac8` are stored byte for byte under `predictions/2026/week12/`. Week 11 is stored the same way from its own commits. They stay v0 on disk and are read through the v0 reader. The original `week11.json` and `week12.json` are not rewritten.
+3. **Manifest.** `predictions/MANIFEST.json` stores **only the SHA-256 of each artifact** (path → hash). There is **no `first_commit` field and no self-hash**. Publication time is proven by git history: `scripts/verify_integrity.py` finds the first commit that contained those bytes (by blob) and checks that its committer time is before kickoff.
+4. **Integrity check.** `verify_integrity.py` recomputes every hash, fails on a modified, deleted or substituted artifact, and validates v1 files with `contract.validate_week`. It runs in `ci.yml` and in `weekly.yml` before the commit. Adding a new week only extends the manifest.
+5. **Reader.** `contract_io.load_week(path)` returns the v1 model for v0 and v1 files. `grade.py` and `site/build.py` read only through it. The site does not call the simulator: printed ranges come from the stored quantiles, and charts come from `headline.distribution.histogram` when it is present (v0 files have no histogram, so those game pages have no chart).
+6. **Writer.** `predict.py` writes v1 with `contract.provenance(production=True)` in the weekly workflow and `production=False` locally, plus `contract.data_snapshot()` and `contract.data_cutoff_utc()`.
+7. **Odds.** The weekly job fetches The Odds API *before* `predict`, so the consensus line is frozen in `market[]` with the snapshot. The comparison report is written afterwards from the cache, without a second API call.

@@ -1,0 +1,1636 @@
+{
+ "season": 2026,
+ "week": 12,
+ "generated_at": "2026-11-24T18:26:45Z",
+ "model_version": "0.1.0",
+ "ensemble_weights": {
+  "with_market": {
+   "components": [
+    "market",
+    "elo",
+    "kf",
+    "lgbm",
+    "lgbm_mkt"
+   ],
+   "prob_weights": [
+    0.825,
+    0.057,
+    0.0,
+    0.0,
+    0.201
+   ],
+   "bias": -0.049,
+   "margin_weights": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "no_market": {
+   "components": [
+    "elo",
+    "kf",
+    "lgbm"
+   ],
+   "prob_weights": [
+    0.423,
+    0.144,
+    0.482
+   ],
+   "bias": -0.058,
+   "margin_weights": [
+    0.264,
+    0.338,
+    0.43
+   ]
+  }
+ },
+ "games": [
+  {
+   "game_id": "2026_12_GB_LA",
+   "season": 2026,
+   "week": 12,
+   "home_team": "LA",
+   "away_team": "GB",
+   "kickoff_utc": "2026-11-26T01:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.5514,
+    "elo": 0.6703,
+    "kf": 0.6811,
+    "lgbm": 0.6695,
+    "lgbm_mkt": 0.6382,
+    "ensemble": 0.5686,
+    "ensemble_model_only": 0.6663
+   },
+   "headline": "model_only",
+   "pick": "LA",
+   "ensemble_pick": "LA",
+   "model_only": {
+    "home_win_prob": 0.6663,
+    "margin": 5.93,
+    "total": 44.93,
+    "home_points": 25.43,
+    "away_points": 19.5,
+    "sim": {
+     "p_home": 0.663,
+     "home_q10": 13.0,
+     "home_q90": 39.0,
+     "away_q10": 7.0,
+     "away_q90": 32.0,
+     "margin_q10": -12.0,
+     "margin_q90": 24.0,
+     "total_q10": 27.0,
+     "total_q90": 64.0
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.0061
+    }
+   },
+   "predicted_margin": 2.5,
+   "model_only_margin": 5.93,
+   "predicted_total": 44.91,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.5686,
+    "prob_home_after": 0.5686,
+    "margin_before": 2.5,
+    "margin_after": 2.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 24,
+    "away": 20,
+    "prob": 0.0066,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0097
+    }
+   },
+   "sim": {
+    "p_home": 0.5704,
+    "margin_q10": -15.0,
+    "margin_q90": 21.0,
+    "total_q10": 27.0,
+    "total_q90": 65.0
+   },
+   "market": {
+    "spread_line": 2.5,
+    "total_line": 44.5,
+    "home_moneyline": -135.0,
+    "away_moneyline": 114.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 10,
+    "away_rest": 10,
+    "dome": 1,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 5
+   }
+  },
+  {
+   "game_id": "2026_12_CHI_DET",
+   "season": 2026,
+   "week": 12,
+   "home_team": "DET",
+   "away_team": "CHI",
+   "kickoff_utc": "2026-11-26T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.4365,
+    "elo": 0.5688,
+    "kf": 0.5956,
+    "lgbm": 0.6189,
+    "lgbm_mkt": 0.4512,
+    "ensemble": 0.4297,
+    "ensemble_model_only": 0.5863
+   },
+   "headline": "model_only",
+   "pick": "DET",
+   "ensemble_pick": "CHI",
+   "model_only": {
+    "home_win_prob": 0.5863,
+    "margin": 3.33,
+    "total": 50.79,
+    "home_points": 27.06,
+    "away_points": 23.73,
+    "sim": {
+     "p_home": 0.5954,
+     "home_q10": 13.0,
+     "home_q90": 41.0,
+     "away_q10": 10.0,
+     "away_q90": 38.0,
+     "margin_q10": -15.0,
+     "margin_q90": 22.0,
+     "total_q10": 31.0,
+     "total_q90": 71.0
+    },
+    "example_score": {
+     "home": 27,
+     "away": 23,
+     "prob": 0.0029
+    }
+   },
+   "predicted_margin": -2.5,
+   "model_only_margin": 3.33,
+   "predicted_total": 56.01,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.4297,
+    "prob_home_after": 0.4297,
+    "margin_before": -2.5,
+    "margin_after": -2.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 27,
+    "away": 30,
+    "prob": 0.0034,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 31,
+     "prob": 0.0068
+    }
+   },
+   "sim": {
+    "p_home": 0.4352,
+    "margin_q10": -22.0,
+    "margin_q90": 17.0,
+    "total_q10": 37.0,
+    "total_q90": 77.0
+   },
+   "market": {
+    "spread_line": -2.5,
+    "total_line": 55.5,
+    "home_moneyline": 120.0,
+    "away_moneyline": -142.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 4,
+    "away_rest": 4,
+    "dome": 1,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 1,
+    "away_out_lag": 1
+   }
+  },
+  {
+   "game_id": "2026_12_PHI_DAL",
+   "season": 2026,
+   "week": 12,
+   "home_team": "DAL",
+   "away_team": "PHI",
+   "kickoff_utc": "2026-11-26T21:30:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.7924,
+    "elo": 0.6399,
+    "kf": 0.6508,
+    "lgbm": 0.6859,
+    "lgbm_mkt": 0.7384,
+    "ensemble": 0.7855,
+    "ensemble_model_only": 0.6573
+   },
+   "headline": "model_only",
+   "pick": "DAL",
+   "ensemble_pick": "DAL",
+   "model_only": {
+    "home_win_prob": 0.6573,
+    "margin": 5.57,
+    "total": 51.08,
+    "home_points": 28.33,
+    "away_points": 22.76,
+    "sim": {
+     "p_home": 0.6499,
+     "home_q10": 14.0,
+     "home_q90": 42.0,
+     "away_q10": 10.0,
+     "away_q90": 37.0,
+     "margin_q10": -13.0,
+     "margin_q90": 24.0,
+     "total_q10": 32.0,
+     "total_q90": 71.0
+    },
+    "example_score": {
+     "home": 28,
+     "away": 24,
+     "prob": 0.0032
+    }
+   },
+   "predicted_margin": 8.5,
+   "model_only_margin": 5.57,
+   "predicted_total": 47.94,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.7855,
+    "prob_home_after": 0.7855,
+    "margin_before": 8.5,
+    "margin_after": 8.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 27,
+    "away": 20,
+    "prob": 0.0065,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0078
+    }
+   },
+   "sim": {
+    "p_home": 0.7256,
+    "margin_q10": -10.0,
+    "margin_q90": 27.0,
+    "total_q10": 30.0,
+    "total_q90": 68.0
+   },
+   "market": {
+    "spread_line": 8.5,
+    "total_line": 47.5,
+    "home_moneyline": -469.0,
+    "away_moneyline": 363.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 4,
+    "away_rest": 4,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 5,
+    "away_out_lag": 3
+   }
+  },
+  {
+   "game_id": "2026_12_KC_BUF",
+   "season": 2026,
+   "week": 12,
+   "home_team": "BUF",
+   "away_team": "KC",
+   "kickoff_utc": "2026-11-27T01:20:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.5756,
+    "elo": 0.7124,
+    "kf": 0.6211,
+    "lgbm": 0.6764,
+    "lgbm_mkt": 0.6373,
+    "ensemble": 0.5908,
+    "ensemble_model_only": 0.6796
+   },
+   "headline": "model_only",
+   "pick": "BUF",
+   "ensemble_pick": "BUF",
+   "model_only": {
+    "home_win_prob": 0.6796,
+    "margin": 5.68,
+    "total": 47.34,
+    "home_points": 26.51,
+    "away_points": 20.83,
+    "sim": {
+     "p_home": 0.6572,
+     "home_q10": 13.0,
+     "home_q90": 41.0,
+     "away_q10": 9.0,
+     "away_q90": 34.0,
+     "margin_q10": -13.0,
+     "margin_q90": 24.0,
+     "total_q10": 29.0,
+     "total_q90": 67.0
+    },
+    "example_score": {
+     "home": 27,
+     "away": 20,
+     "prob": 0.0059
+    }
+   },
+   "predicted_margin": 3.0,
+   "model_only_margin": 5.68,
+   "predicted_total": 47.94,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.5908,
+    "prob_home_after": 0.5908,
+    "margin_before": 3.0,
+    "margin_after": 3.0,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 24,
+    "away": 21,
+    "prob": 0.0042,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0081
+    }
+   },
+   "sim": {
+    "p_home": 0.5841,
+    "margin_q10": -15.0,
+    "margin_q90": 21.0,
+    "total_q10": 30.0,
+    "total_q90": 68.0
+   },
+   "market": {
+    "spread_line": 3.0,
+    "total_line": 47.5,
+    "home_moneyline": -150.0,
+    "away_moneyline": 126.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 4,
+    "away_rest": 4,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 3,
+    "away_out_lag": 3
+   }
+  },
+  {
+   "game_id": "2026_12_DEN_PIT",
+   "season": 2026,
+   "week": 12,
+   "home_team": "PIT",
+   "away_team": "DEN",
+   "kickoff_utc": "2026-11-27T20:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.4143,
+    "elo": 0.395,
+    "kf": 0.4481,
+    "lgbm": 0.4155,
+    "lgbm_mkt": 0.4591,
+    "ensemble": 0.4033,
+    "ensemble_model_only": 0.3934
+   },
+   "headline": "model_only",
+   "pick": "DEN",
+   "ensemble_pick": "DEN",
+   "model_only": {
+    "home_win_prob": 0.3934,
+    "margin": -2.6,
+    "total": 42.08,
+    "home_points": 19.74,
+    "away_points": 22.34,
+    "sim": {
+     "p_home": 0.4239,
+     "home_q10": 7.0,
+     "home_q90": 33.0,
+     "away_q10": 10.0,
+     "away_q90": 35.0,
+     "margin_q10": -20.0,
+     "margin_q90": 14.0,
+     "total_q10": 24.0,
+     "total_q90": 61.0
+    },
+    "example_score": {
+     "home": 17,
+     "away": 21,
+     "prob": 0.0047
+    }
+   },
+   "predicted_margin": -3.0,
+   "model_only_margin": -2.6,
+   "predicted_total": 38.85,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.4033,
+    "prob_home_after": 0.4033,
+    "margin_before": -3.0,
+    "margin_after": -3.0,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 17,
+    "away": 20,
+    "prob": 0.0086,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0105
+    }
+   },
+   "sim": {
+    "p_home": 0.4113,
+    "margin_q10": -20.0,
+    "margin_q90": 14.0,
+    "total_q10": 23.0,
+    "total_q90": 57.0
+   },
+   "market": {
+    "spread_line": -3.0,
+    "total_line": 38.5,
+    "home_moneyline": 132.0,
+    "away_moneyline": -156.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 5,
+    "away_rest": 5,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 0,
+    "away_out_lag": 1
+   }
+  },
+  {
+   "game_id": "2026_12_ATL_MIN",
+   "season": 2026,
+   "week": 12,
+   "home_team": "MIN",
+   "away_team": "ATL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.7478,
+    "elo": 0.7821,
+    "kf": 0.718,
+    "lgbm": 0.676,
+    "lgbm_mkt": 0.6797,
+    "ensemble": 0.745,
+    "ensemble_model_only": 0.7254
+   },
+   "headline": "model_only",
+   "pick": "MIN",
+   "ensemble_pick": "MIN",
+   "model_only": {
+    "home_win_prob": 0.7254,
+    "margin": 7.54,
+    "total": 36.47,
+    "home_points": 22.0,
+    "away_points": 14.46,
+    "sim": {
+     "p_home": 0.7285,
+     "home_q10": 10.0,
+     "home_q90": 35.0,
+     "away_q10": 3.0,
+     "away_q90": 27.0,
+     "margin_q10": -9.0,
+     "margin_q90": 24.0,
+     "total_q10": 20.0,
+     "total_q90": 54.0
+    },
+    "example_score": {
+     "home": 21,
+     "away": 14,
+     "prob": 0.0048
+    }
+   },
+   "predicted_margin": 7.0,
+   "model_only_margin": 7.54,
+   "predicted_total": 42.89,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.745,
+    "prob_home_after": 0.745,
+    "margin_before": 7.0,
+    "margin_after": 7.0,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 24,
+    "away": 17,
+    "prob": 0.0095,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0095
+    }
+   },
+   "sim": {
+    "p_home": 0.7024,
+    "margin_q10": -10.0,
+    "margin_q90": 24.0,
+    "total_q10": 25.0,
+    "total_q90": 62.0
+   },
+   "market": {
+    "spread_line": 7.0,
+    "total_line": 42.5,
+    "home_moneyline": -351.0,
+    "away_moneyline": 281.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 14,
+    "dome": 1,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   }
+  },
+  {
+   "game_id": "2026_12_BAL_HOU",
+   "season": 2026,
+   "week": 12,
+   "home_team": "HOU",
+   "away_team": "BAL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.7231,
+    "elo": 0.6938,
+    "kf": 0.7421,
+    "lgbm": 0.6993,
+    "lgbm_mkt": 0.6665,
+    "ensemble": 0.7169,
+    "ensemble_model_only": 0.6999
+   },
+   "headline": "model_only",
+   "pick": "HOU",
+   "ensemble_pick": "HOU",
+   "model_only": {
+    "home_win_prob": 0.6999,
+    "margin": 7.4,
+    "total": 46.71,
+    "home_points": 27.05,
+    "away_points": 19.66,
+    "sim": {
+     "p_home": 0.7118,
+     "home_q10": 14.0,
+     "home_q90": 41.0,
+     "away_q10": 7.0,
+     "away_q90": 33.0,
+     "margin_q10": -10.0,
+     "margin_q90": 25.0,
+     "total_q10": 29.0,
+     "total_q90": 66.0
+    },
+    "example_score": {
+     "home": 27,
+     "away": 20,
+     "prob": 0.0052
+    }
+   },
+   "predicted_margin": 6.5,
+   "model_only_margin": 7.4,
+   "predicted_total": 46.93,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.7169,
+    "prob_home_after": 0.7169,
+    "margin_before": 6.5,
+    "margin_after": 6.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 27,
+    "away": 20,
+    "prob": 0.005,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0089
+    }
+   },
+   "sim": {
+    "p_home": 0.6882,
+    "margin_q10": -11.0,
+    "margin_q90": 25.0,
+    "total_q10": 29.0,
+    "total_q90": 66.0
+   },
+   "market": {
+    "spread_line": 6.5,
+    "total_line": 46.5,
+    "home_moneyline": -304.0,
+    "away_moneyline": 247.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 10,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   }
+  },
+  {
+   "game_id": "2026_12_NO_CIN",
+   "season": 2026,
+   "week": 12,
+   "home_team": "CIN",
+   "away_team": "NO",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.8248,
+    "elo": 0.8087,
+    "kf": 0.7666,
+    "lgbm": 0.8547,
+    "lgbm_mkt": 0.8026,
+    "ensemble": 0.8312,
+    "ensemble_model_only": 0.8288
+   },
+   "headline": "model_only",
+   "pick": "CIN",
+   "ensemble_pick": "CIN",
+   "model_only": {
+    "home_win_prob": 0.8288,
+    "margin": 11.99,
+    "total": 49.95,
+    "home_points": 30.97,
+    "away_points": 18.98,
+    "sim": {
+     "p_home": 0.8032,
+     "home_q10": 17.0,
+     "home_q90": 45.0,
+     "away_q10": 7.0,
+     "away_q90": 31.0,
+     "margin_q10": -7.0,
+     "margin_q90": 30.0,
+     "total_q10": 31.0,
+     "total_q90": 69.0
+    },
+    "example_score": {
+     "home": 30,
+     "away": 17,
+     "prob": 0.0046
+    }
+   },
+   "predicted_margin": 9.5,
+   "model_only_margin": 11.99,
+   "predicted_total": 50.96,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.8312,
+    "prob_home_after": 0.8312,
+    "margin_before": 9.5,
+    "margin_after": 9.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 30,
+    "away": 20,
+    "prob": 0.0033,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0078
+    }
+   },
+   "sim": {
+    "p_home": 0.7503,
+    "margin_q10": -9.0,
+    "margin_q90": 28.0,
+    "total_q10": 32.0,
+    "total_q90": 71.0
+   },
+   "market": {
+    "spread_line": 9.5,
+    "total_line": 50.5,
+    "home_moneyline": -610.0,
+    "away_moneyline": 448.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 6,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 4,
+    "away_out_lag": 5
+   }
+  },
+  {
+   "game_id": "2026_12_NYG_IND",
+   "season": 2026,
+   "week": 12,
+   "home_team": "IND",
+   "away_team": "NYG",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.2676,
+    "elo": 0.4097,
+    "kf": 0.422,
+    "lgbm": 0.4747,
+    "lgbm_mkt": 0.2921,
+    "ensemble": 0.2537,
+    "ensemble_model_only": 0.4239
+   },
+   "headline": "model_only",
+   "pick": "NYG",
+   "ensemble_pick": "NYG",
+   "model_only": {
+    "home_win_prob": 0.4239,
+    "margin": -1.91,
+    "total": 45.6,
+    "home_points": 21.85,
+    "away_points": 23.75,
+    "sim": {
+     "p_home": 0.4449,
+     "home_q10": 10.0,
+     "home_q90": 35.0,
+     "away_q10": 10.0,
+     "away_q90": 38.0,
+     "margin_q10": -20.0,
+     "margin_q90": 16.0,
+     "total_q10": 27.0,
+     "total_q90": 65.0
+    },
+    "example_score": {
+     "home": 20,
+     "away": 24,
+     "prob": 0.0061
+    }
+   },
+   "predicted_margin": -6.5,
+   "model_only_margin": -1.91,
+   "predicted_total": 41.88,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.2537,
+    "prob_home_after": 0.2537,
+    "margin_before": -6.5,
+    "margin_after": -6.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 17,
+    "away": 24,
+    "prob": 0.0098,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0098
+    }
+   },
+   "sim": {
+    "p_home": 0.3126,
+    "margin_q10": -24.0,
+    "margin_q90": 11.0,
+    "total_q10": 24.0,
+    "total_q90": 61.0
+   },
+   "market": {
+    "spread_line": -6.5,
+    "total_line": 41.5,
+    "home_moneyline": 259.0,
+    "away_moneyline": -321.0
+   },
+   "context": {
+    "home_qb_change": 1,
+    "away_qb_change": 0,
+    "home_rest": 10,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 5,
+    "away_out_lag": 0
+   }
+  },
+  {
+   "game_id": "2026_12_NYJ_MIA",
+   "season": 2026,
+   "week": 12,
+   "home_team": "MIA",
+   "away_team": "NYJ",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.347,
+    "elo": 0.578,
+    "kf": 0.5869,
+    "lgbm": 0.472,
+    "lgbm_mkt": 0.4606,
+    "ensemble": 0.3578,
+    "ensemble_model_only": 0.5178
+   },
+   "headline": "model_only",
+   "pick": "MIA",
+   "ensemble_pick": "NYJ",
+   "model_only": {
+    "home_win_prob": 0.5178,
+    "margin": 1.13,
+    "total": 42.12,
+    "home_points": 21.63,
+    "away_points": 20.49,
+    "sim": {
+     "p_home": 0.533,
+     "home_q10": 10.0,
+     "home_q90": 35.0,
+     "away_q10": 9.0,
+     "away_q90": 34.0,
+     "margin_q10": -17.0,
+     "margin_q90": 18.0,
+     "total_q10": 24.0,
+     "total_q90": 61.0
+    },
+    "example_score": {
+     "home": 21,
+     "away": 20,
+     "prob": 0.0032
+    }
+   },
+   "predicted_margin": -3.5,
+   "model_only_margin": 1.13,
+   "predicted_total": 40.87,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.3578,
+    "prob_home_after": 0.3578,
+    "margin_before": -3.5,
+    "margin_after": -3.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 17,
+    "away": 21,
+    "prob": 0.0046,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0105
+    }
+   },
+   "sim": {
+    "p_home": 0.3935,
+    "margin_q10": -21.0,
+    "margin_q90": 14.0,
+    "total_q10": 24.0,
+    "total_q90": 59.0
+   },
+   "market": {
+    "spread_line": -3.5,
+    "total_line": 40.5,
+    "home_moneyline": 177.0,
+    "away_moneyline": -212.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   }
+  },
+  {
+   "game_id": "2026_12_TEN_JAX",
+   "season": 2026,
+   "week": 12,
+   "home_team": "JAX",
+   "away_team": "TEN",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.8895,
+    "elo": 0.9031,
+    "kf": 0.906,
+    "lgbm": 0.7994,
+    "lgbm_mkt": 0.8405,
+    "ensemble": 0.8942,
+    "ensemble_model_only": 0.8675
+   },
+   "headline": "model_only",
+   "pick": "JAX",
+   "ensemble_pick": "JAX",
+   "model_only": {
+    "home_win_prob": 0.8675,
+    "margin": 14.75,
+    "total": 49.27,
+    "home_points": 32.01,
+    "away_points": 17.26,
+    "sim": {
+     "p_home": 0.8585,
+     "home_q10": 17.0,
+     "home_q90": 47.0,
+     "away_q10": 6.0,
+     "away_q90": 30.0,
+     "margin_q10": -4.0,
+     "margin_q90": 32.0,
+     "total_q10": 31.0,
+     "total_q90": 69.0
+    },
+    "example_score": {
+     "home": 31,
+     "away": 16,
+     "prob": 0.0026
+    }
+   },
+   "predicted_margin": 14.5,
+   "model_only_margin": 14.75,
+   "predicted_total": 47.94,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.8942,
+    "prob_home_after": 0.8942,
+    "margin_before": 14.5,
+    "margin_after": 14.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 31,
+    "away": 17,
+    "prob": 0.0057,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0076
+    }
+   },
+   "sim": {
+    "p_home": 0.8545,
+    "margin_q10": -4.0,
+    "margin_q90": 32.0,
+    "total_q10": 30.0,
+    "total_q90": 67.0
+   },
+   "market": {
+    "spread_line": 14.5,
+    "total_line": 47.5,
+    "home_moneyline": -1240.0,
+    "away_moneyline": 770.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 1
+   }
+  },
+  {
+   "game_id": "2026_12_NE_LAC",
+   "season": 2026,
+   "week": 12,
+   "home_team": "LAC",
+   "away_team": "NE",
+   "kickoff_utc": "2026-11-29T21:05:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.5122,
+    "elo": 0.3426,
+    "kf": 0.3997,
+    "lgbm": 0.2584,
+    "lgbm_mkt": 0.495,
+    "ensemble": 0.4876,
+    "ensemble_model_only": 0.2889
+   },
+   "headline": "model_only",
+   "pick": "NE",
+   "ensemble_pick": "NE",
+   "model_only": {
+    "home_win_prob": 0.2889,
+    "margin": -6.08,
+    "total": 43.64,
+    "home_points": 18.78,
+    "away_points": 24.86,
+    "sim": {
+     "p_home": 0.3253,
+     "home_q10": 7.0,
+     "home_q90": 31.0,
+     "away_q10": 13.0,
+     "away_q90": 38.0,
+     "margin_q10": -24.0,
+     "margin_q90": 11.0,
+     "total_q10": 26.0,
+     "total_q90": 62.0
+    },
+    "example_score": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0095
+    }
+   },
+   "predicted_margin": 1.5,
+   "model_only_margin": -6.08,
+   "predicted_total": 35.83,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.4876,
+    "prob_home_after": 0.4876,
+    "margin_before": 1.5,
+    "margin_after": 1.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 16,
+    "away": 17,
+    "prob": 0.0032,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 10,
+     "prob": 0.012
+    }
+   },
+   "sim": {
+    "p_home": 0.545,
+    "margin_q10": -15.0,
+    "margin_q90": 18.0,
+    "total_q10": 20.0,
+    "total_q90": 54.0
+   },
+   "market": {
+    "spread_line": 1.5,
+    "total_line": 35.5,
+    "home_moneyline": -114.0,
+    "away_moneyline": -103.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 14,
+    "dome": 1,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   }
+  },
+  {
+   "game_id": "2026_12_SEA_SF",
+   "season": 2026,
+   "week": 12,
+   "home_team": "SF",
+   "away_team": "SEA",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.6126,
+    "elo": 0.6105,
+    "kf": 0.5902,
+    "lgbm": 0.6239,
+    "lgbm_mkt": 0.5852,
+    "ensemble": 0.6045,
+    "ensemble_model_only": 0.6055
+   },
+   "headline": "model_only",
+   "pick": "SF",
+   "ensemble_pick": "SF",
+   "model_only": {
+    "home_win_prob": 0.6055,
+    "margin": 3.66,
+    "total": 46.18,
+    "home_points": 24.92,
+    "away_points": 21.26,
+    "sim": {
+     "p_home": 0.6,
+     "home_q10": 13.0,
+     "home_q90": 38.0,
+     "away_q10": 10.0,
+     "away_q90": 34.0,
+     "margin_q10": -14.0,
+     "margin_q90": 21.0,
+     "total_q10": 27.0,
+     "total_q90": 66.0
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.0049
+    }
+   },
+   "predicted_margin": 3.0,
+   "model_only_margin": 3.66,
+   "predicted_total": 46.93,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.6045,
+    "prob_home_after": 0.6045,
+    "margin_before": 3.0,
+    "margin_after": 3.0,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 24,
+    "away": 21,
+    "prob": 0.0043,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0091
+    }
+   },
+   "sim": {
+    "p_home": 0.5822,
+    "margin_q10": -15.0,
+    "margin_q90": 21.0,
+    "total_q10": 29.0,
+    "total_q90": 67.0
+   },
+   "market": {
+    "spread_line": 3.0,
+    "total_line": 46.5,
+    "home_moneyline": -176.0,
+    "away_moneyline": 148.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 14,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 1,
+    "away_out_lag": 4
+   }
+  },
+  {
+   "game_id": "2026_12_WAS_ARI",
+   "season": 2026,
+   "week": 12,
+   "home_team": "ARI",
+   "away_team": "WAS",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.2262,
+    "elo": 0.4266,
+    "kf": 0.3916,
+    "lgbm": 0.357,
+    "lgbm_mkt": 0.2276,
+    "ensemble": 0.2097,
+    "ensemble_model_only": 0.3704
+   },
+   "headline": "model_only",
+   "pick": "WAS",
+   "ensemble_pick": "WAS",
+   "model_only": {
+    "home_win_prob": 0.3704,
+    "margin": -3.88,
+    "total": 46.0,
+    "home_points": 21.06,
+    "away_points": 24.94,
+    "sim": {
+     "p_home": 0.3872,
+     "home_q10": 9.0,
+     "home_q90": 34.0,
+     "away_q10": 13.0,
+     "away_q90": 38.0,
+     "margin_q10": -22.0,
+     "margin_q90": 14.0,
+     "total_q10": 27.0,
+     "total_q90": 65.0
+    },
+    "example_score": {
+     "home": 20,
+     "away": 24,
+     "prob": 0.0065
+    }
+   },
+   "predicted_margin": -7.5,
+   "model_only_margin": -3.88,
+   "predicted_total": 42.89,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.2097,
+    "prob_home_after": 0.2097,
+    "margin_before": -7.5,
+    "margin_after": -7.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 17,
+    "away": 24,
+    "prob": 0.0095,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0095
+    }
+   },
+   "sim": {
+    "p_home": 0.2896,
+    "margin_q10": -25.0,
+    "margin_q90": 10.0,
+    "total_q10": 26.0,
+    "total_q90": 62.0
+   },
+   "market": {
+    "spread_line": -7.5,
+    "total_line": 42.5,
+    "home_moneyline": 325.0,
+    "away_moneyline": -413.0
+   },
+   "context": {
+    "home_qb_change": 1,
+    "away_qb_change": 0,
+    "home_rest": 7,
+    "away_rest": 6,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   }
+  },
+  {
+   "game_id": "2026_12_LV_CLE",
+   "season": 2026,
+   "week": 12,
+   "home_team": "CLE",
+   "away_team": "LV",
+   "kickoff_utc": "2026-11-30T01:20:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.6605,
+    "elo": 0.6617,
+    "kf": 0.594,
+    "lgbm": 0.6406,
+    "lgbm_mkt": 0.6298,
+    "ensemble": 0.656,
+    "ensemble_model_only": 0.6362
+   },
+   "headline": "model_only",
+   "pick": "CLE",
+   "ensemble_pick": "CLE",
+   "model_only": {
+    "home_win_prob": 0.6362,
+    "margin": 4.37,
+    "total": 45.99,
+    "home_points": 25.18,
+    "away_points": 20.81,
+    "sim": {
+     "p_home": 0.6226,
+     "home_q10": 13.0,
+     "home_q90": 38.0,
+     "away_q10": 9.0,
+     "away_q90": 34.0,
+     "margin_q10": -14.0,
+     "margin_q90": 22.0,
+     "total_q10": 27.0,
+     "total_q90": 65.0
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.0066
+    }
+   },
+   "predicted_margin": 4.5,
+   "model_only_margin": 4.37,
+   "predicted_total": 41.88,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.656,
+    "prob_home_after": 0.656,
+    "margin_before": 4.5,
+    "margin_after": 4.5,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 23,
+    "away": 17,
+    "prob": 0.0046,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0092
+    }
+   },
+   "sim": {
+    "p_home": 0.6296,
+    "margin_q10": -13.0,
+    "margin_q90": 21.0,
+    "total_q10": 24.0,
+    "total_q90": 61.0
+   },
+   "market": {
+    "spread_line": 4.5,
+    "total_line": 41.5,
+    "home_moneyline": -220.0,
+    "away_moneyline": 183.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 14,
+    "away_rest": 7,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 1
+   }
+  },
+  {
+   "game_id": "2026_12_CAR_TB",
+   "season": 2026,
+   "week": 12,
+   "home_team": "TB",
+   "away_team": "CAR",
+   "kickoff_utc": "2026-12-01T01:15:00Z",
+   "generated_at": "2026-11-24T18:26:45Z",
+   "model_version": "0.1.0",
+   "home_win_prob": {
+    "market": 0.5824,
+    "elo": 0.6097,
+    "kf": 0.6512,
+    "lgbm": 0.6112,
+    "lgbm_mkt": 0.5482,
+    "ensemble": 0.572,
+    "ensemble_model_only": 0.6079
+   },
+   "headline": "model_only",
+   "pick": "TB",
+   "ensemble_pick": "TB",
+   "model_only": {
+    "home_win_prob": 0.6079,
+    "margin": 4.17,
+    "total": 46.94,
+    "home_points": 25.56,
+    "away_points": 21.39,
+    "sim": {
+     "p_home": 0.6124,
+     "home_q10": 13.0,
+     "home_q90": 40.0,
+     "away_q10": 10.0,
+     "away_q90": 35.0,
+     "margin_q10": -14.0,
+     "margin_q90": 22.0,
+     "total_q10": 29.0,
+     "total_q90": 66.0
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.0047
+    }
+   },
+   "predicted_margin": 3.0,
+   "model_only_margin": 4.17,
+   "predicted_total": 43.9,
+   "news_adjustment": {
+    "applied": false,
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "prob_home_before": 0.572,
+    "prob_home_after": 0.572,
+    "margin_before": 3.0,
+    "margin_after": 3.0,
+    "items": []
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "most_likely_score": {
+    "home": 23,
+    "away": 20,
+    "prob": 0.0034,
+    "method": "nearest frequent score to the mean of simulations that match the pick and margin band",
+    "raw_mode": {
+     "home": 24,
+     "away": 17,
+     "prob": 0.0093
+    }
+   },
+   "sim": {
+    "p_home": 0.5852,
+    "margin_q10": -15.0,
+    "margin_q90": 21.0,
+    "total_q10": 27.0,
+    "total_q90": 63.0
+   },
+   "market": {
+    "spread_line": 3.0,
+    "total_line": 43.5,
+    "home_moneyline": -154.0,
+    "away_moneyline": 130.0
+   },
+   "context": {
+    "home_qb_change": 0,
+    "away_qb_change": 0,
+    "home_rest": 8,
+    "away_rest": 8,
+    "dome": 0,
+    "weather_known": 0,
+    "temp": null,
+    "wind": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   }
+  }
+ ]
+}

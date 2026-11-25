@@ -12,7 +12,6 @@ from scipy.special import ndtr
 from ensemblitz import config as C
 from ensemblitz.odds import client, devig
 from ensemblitz.odds.teams import NAME_TO_ABBR
-from ensemblitz.predict import pred_path
 
 BIG_EDGE = 0.05
 MARGIN_SD = 13.0
@@ -58,6 +57,31 @@ def lines(odds: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([a, b], axis=1).reset_index()
 
 
+def consensus_for_teams(odds: pd.DataFrame, home: str, away: str) -> dict | None:
+    """Shin consensus and median lines for one matchup, with no need for a prediction file."""
+    bp = book_probs(odds)
+    if bp.empty:
+        return None
+    m = bp[(bp["home"] == home) & (bp["away"] == away)]
+    if m.empty:
+        return None
+    ln = lines(odds)
+    ev = m["event_id"].iloc[0]
+    ln_g = ln[ln["event_id"] == ev]
+    rec = {
+        "consensus_home_prob_shin": round(float(m["p_home_shin"].mean()), 4),
+        "n_books": int(len(m)),
+        "fetched_at": str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds.columns else None,
+    }
+    if not ln_g.empty:
+        bs = ln_g["book_spread_home"].iloc[0]
+        rec["book_spread_home"] = None if pd.isna(bs) else float(bs)
+        rec["book_total"] = (
+            None if pd.isna(ln_g["book_total"].iloc[0]) else float(ln_g["book_total"].iloc[0])
+        )
+    return rec
+
+
 def explain(g: dict, edge: float) -> list[str]:
     """Plausible reasons for a disagreement, using only data we hold."""
     c = g["context"]
@@ -91,11 +115,44 @@ def explain(g: dict, edge: float) -> list[str]:
     return why
 
 
+def _game_view(g: dict) -> dict:
+    """v0 or v1 game → the fields ``build`` and ``explain`` already use."""
+    if "home_win_prob" in g and isinstance(g["home_win_prob"], dict):
+        return g
+    # v1
+    c = g["context"]
+    return {
+        "game_id": g["game_id"],
+        "home_team": g["home_team"],
+        "away_team": g["away_team"],
+        "kickoff_utc": g["kickoff_utc"],
+        "predicted_margin": g["ensemble"]["margin_home"],
+        "home_win_prob": {
+            "ensemble": g["ensemble"]["home_win_prob"],
+            "ensemble_model_only": g["headline"]["home_win_prob"],
+            **{k: g["components"].get(k) for k in ("elo", "kf", "lgbm", "lgbm_mkt")},
+        },
+        "context": {
+            "home_qb_change": int(c["home_qb_change"]),
+            "away_qb_change": int(c["away_qb_change"]),
+            "home_rest": int(c["home_rest_days"]),
+            "away_rest": int(c["away_rest_days"]),
+            "dome": int(c["dome"]),
+            "weather_known": int(c["weather_known"]),
+            "temp": c["temp_f"],
+            "wind": c["wind_mph"],
+            "home_out_lag": int(c["home_out_lag"]),
+            "away_out_lag": int(c["away_out_lag"]),
+        },
+    }
+
+
 def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
     bp = book_probs(odds)
     ln = lines(odds)
     games = []
-    for g in pred["games"]:
+    for raw in pred["games"]:
+        g = _game_view(raw)
         m = bp[(bp["home"] == g["home_team"]) & (bp["away"] == g["away_team"])]
         if m.empty:
             continue
@@ -166,7 +223,7 @@ def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
         "season": pred["season"],
         "week": pred["week"],
         "odds_fetched_at": fetched_at,
-        "predictions_generated_at": pred["generated_at"],
+        "predictions_generated_at": pred.get("generated_at_utc") or pred.get("generated_at"),
         "games": games,
     }
 
@@ -212,40 +269,66 @@ def to_markdown(rep: dict) -> str:
     return "\n".join(L) + "\n"
 
 
+def _latest_pred(season: int, week: int) -> dict | None:
+    """Load the current snapshot for a week (legacy path or ledger), or None."""
+    from ensemblitz import ledger as L
+
+    art = L.latest_artifact(season, week)
+    path = art.path if art is not None else L.legacy_week_path(season, week)
+    if not path.exists():
+        return None
+    return json.loads(path.read_text())
+
+
 def _weeks_to_report(season: int, week: int | None, now: str) -> list[int]:
     """The requested week, or every predicted week that still has a game to play."""
-    files = sorted((C.PRED_DIR / str(season)).glob("week*.json"))
+    from ensemblitz import ledger as L
+
     if week is not None:
         return [week]
     out = []
-    for f in files:
-        d = json.loads(f.read_text())
+    for art in L.iter_latest():
+        if art.season != season:
+            continue
+        d = json.loads(art.path.read_text())
         if any(g["kickoff_utc"] > now for g in d["games"]):
-            out.append(int(d["week"]))
+            out.append(int(d.get("week", art.week)))
     return out
 
 
-def run_odds(season: int, week: int | None, fetch: bool = True) -> str:
-    """One download feeds a report for every upcoming predicted week (the feed spans ~10 days)."""
+def run_odds(season: int, week: int | None, fetch: bool = True, report: bool = True) -> str:
+    """Fetch (optional) then, if predictions exist, write the comparison report.
+
+    Fetching does not need predictions, so the weekly job can call this *before*
+    ``ensemblitz predict`` and freeze the consensus with the snapshot. The report
+    is written afterwards from the cache (``fetch=False``), without a second API call.
+    """
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    weeks = _weeks_to_report(season, week, now)
-    if not weeks:
-        return "No predictions found: run `ensemblitz predict` first."
-    missing = [w for w in weeks if not pred_path(season, w).exists()]
-    if missing:
-        return f"No predictions for {season} week {missing[0]}: run `ensemblitz predict` first."
     if fetch:
         odds, status = client.fetch_odds()
     else:
         odds, status = client.latest_cache(), "live fetch disabled"
-    if odds is None or odds.empty:
+    if odds is None or (hasattr(odds, "empty") and odds.empty):
         return f"Odds report skipped: {status}."
-    fetched = str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds else None
+    if not report:
+        n = (
+            0
+            if odds is None
+            else (odds["event_id"].nunique() if "event_id" in odds.columns else len(odds))
+        )
+        return f"{status}. Cache ready ({n} events); report skipped."
+    weeks = _weeks_to_report(season, week, now)
+    if not weeks:
+        return f"{status}. No predictions found: report skipped (run `ensemblitz predict` then `ensemblitz odds --no-fetch`)."
+    fetched = str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds.columns else None
     out = C.REPORTS_DIR / "odds"
     out.mkdir(parents=True, exist_ok=True)
     msgs = []
     for w in weeks:
-        pred = json.loads(pred_path(season, w).read_text())
+        pred = _latest_pred(season, w)
+        if pred is None:
+            msgs.append(f"week {w}: no snapshot")
+            continue
         rep = build(pred, odds, fetched)
         if not rep["games"]:
             continue
