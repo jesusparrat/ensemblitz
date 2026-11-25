@@ -14,6 +14,7 @@ from ensemblitz import baseline as B
 
 ROOT = Path(__file__).resolve().parents[1]
 JSON_OUT = ROOT / "reports" / "pr2_statistical_audit.json"
+SUMMARY_OUT = ROOT / "reports" / "pr2_statistical_audit_summary.json"
 MD_OUT = ROOT / "docs" / "audit" / "pr2-statistical-audit.md"
 
 
@@ -97,6 +98,93 @@ def _code_review() -> dict:
             "week. This avoids direct same-week injury-report leakage, although source publication "
             "timestamps are not retained in the historical feature cache."
         ),
+    }
+
+
+def summary_payload(res: dict) -> dict:
+    """Stable compact summary for review tools; the full JSON retains folds and per-season detail."""
+    overall = {
+        key: {
+            metric: res["overall"][key][metric]
+            for metric in (
+                "n",
+                "accuracy",
+                "brier",
+                "log_loss",
+                "calibration_intercept",
+                "calibration_slope",
+            )
+        }
+        for key in ("model_only", "market", "ens")
+    }
+    favourite = {}
+    for key in ("model_only", "market", "ens"):
+        row = res["heavy_favourites_75"][key]
+        favourite[key] = {
+            "n": row.get("n", 0),
+            "predicted": row.get("pred"),
+            "actual": row.get("actual"),
+            "overconfidence_pp": row.get("overconfidence_pp"),
+            "overconfidence_ci95_pp": row.get("overconfidence_pp_ci95"),
+        }
+    same = res["heavy_favourites_on_ens_games"]
+    same_games = {
+        "n": same["n"],
+        "actual": same.get("actual"),
+        "actual_ci95": same.get("actual_ci95"),
+        "sources": {
+            key: {
+                "predicted": same[key].get("pred_mean"),
+                "overconfidence_pp": same[key].get("overconfidence_pp"),
+            }
+            for key in ("model_only", "market", "ens")
+        },
+    }
+    boot = res["bootstrap"]
+    differences = {
+        key: {
+            metric: boot["diff_vs_market"][key][metric]
+            for metric in (
+                "log_loss",
+                "log_loss_ci",
+                "brier",
+                "brier_ci",
+                "bootstrap_share_log_loss_better_than_market",
+            )
+        }
+        for key in ("model_only", "ens")
+    }
+    return {
+        "audit_version": 1,
+        "generated_at_utc": res["generated_at"],
+        "model_version": res["model_version"],
+        "method": {
+            "season_range": res["seasons"],
+            "bootstrap_unit": boot["block_unit"],
+            "independent_blocks": boot["n_blocks"],
+            "replicates": boot["n_boot"],
+            "seed": boot["seed"],
+            "confidence_level": boot["confidence_level"],
+            "interval_method": boot["interval_method"],
+            "paired": True,
+        },
+        "population": res["population"],
+        "paired_comparison": res["paired_comparison"],
+        "overall": overall,
+        "paired_differences_vs_market": differences,
+        "high_confidence_favourites_75": favourite,
+        "ensemble_favourites_same_games": same_games,
+        "stack_weight_diagnostics": res["stack_coefficients"],
+        "ats_model_only": res["ats_model_only"]["all"],
+        "market_case_study": res["market_case_study"],
+        "code_review": res["code_review"],
+        "limitations": [
+            "Only eight independent season clusters; intervals are informative but coarse.",
+            "Historical QB identity and weather features lack point-in-time availability timestamps.",
+            "Stored Kalman parameters and manual LightGBM/model-selection history lack per-season provenance.",
+            "Processed team_games and qb_games caches are derived inputs but are not directly hashed.",
+            "No model weights or hyperparameters were retuned; frozen snapshots were not rewritten; no Odds API calls were made.",
+        ],
     }
 
 
@@ -278,9 +366,13 @@ def main() -> int:
     JSON_OUT.parent.mkdir(parents=True, exist_ok=True)
     MD_OUT.parent.mkdir(parents=True, exist_ok=True)
     JSON_OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+    SUMMARY_OUT.write_text(
+        json.dumps(summary_payload(payload), indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    )
     MD_OUT.write_text(render(payload))
     print(
-        f"PR2 audit written: {JSON_OUT.relative_to(ROOT)} and {MD_OUT.relative_to(ROOT)}; "
+        f"PR2 audit written: {JSON_OUT.relative_to(ROOT)}, "
+        f"{SUMMARY_OUT.relative_to(ROOT)} and {MD_OUT.relative_to(ROOT)}; "
         f"N={result['n_games']}, seasons={result['bootstrap']['n_blocks']}, "
         f"bootstrap={result['bootstrap']['n_boot']}"
     )

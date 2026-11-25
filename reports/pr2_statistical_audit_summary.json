@@ -1,0 +1,257 @@
+{
+  "audit_version": 1,
+  "generated_at_utc": "2026-11-25T23:46:51Z",
+  "model_version": "0.1.0",
+  "method": {
+    "season_range": [
+      2018,
+      2025
+    ],
+    "bootstrap_unit": "season",
+    "independent_blocks": 8,
+    "replicates": 10000,
+    "seed": 20260,
+    "confidence_level": 0.95,
+    "interval_method": "percentile",
+    "paired": true
+  },
+  "population": {
+    "n_rows_in_scope": 2141,
+    "n_played": 2141,
+    "n_valid_probability_rows": 2141,
+    "n_ties": 8,
+    "n_missing_prediction_rows": 0,
+    "n_invalid_probability_rows": 0,
+    "n_scored": 2133,
+    "n_excluded_from_scoring": 8,
+    "n_seasons": 8,
+    "excluded_games": [
+      {
+        "game_id": "2018_01_PIT_CLE",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2018_02_MIN_GB",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2019_01_DET_ARI",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2020_03_CIN_PHI",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2021_10_DET_PIT",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2022_01_IND_HOU",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2022_13_WAS_NYG",
+        "reason": "tie"
+      },
+      {
+        "game_id": "2025_04_GB_DAL",
+        "reason": "tie"
+      }
+    ]
+  },
+  "paired_comparison": {
+    "sources": [
+      "market",
+      "model_only",
+      "ens"
+    ],
+    "n_games": 2133,
+    "same_game_ids": true,
+    "game_ids_sha256": "6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144",
+    "difference_sign": "source minus MARKET; positive loss difference means worse."
+  },
+  "overall": {
+    "model_only": {
+      "n": 2133,
+      "accuracy": 0.6479137365,
+      "brier": 0.2216782466,
+      "log_loss": 0.6343967389,
+      "calibration_intercept": -0.0502617803,
+      "calibration_slope": 0.9283764886
+    },
+    "market": {
+      "n": 2133,
+      "accuracy": 0.6643225504,
+      "brier": 0.2110840486,
+      "log_loss": 0.6096814788,
+      "calibration_intercept": -0.0640850222,
+      "calibration_slope": 1.0564378041
+    },
+    "ens": {
+      "n": 2133,
+      "accuracy": 0.6624472574,
+      "brier": 0.2116532888,
+      "log_loss": 0.6112502607,
+      "calibration_intercept": -0.0357709191,
+      "calibration_slope": 0.9907998831
+    }
+  },
+  "paired_differences_vs_market": {
+    "model_only": {
+      "log_loss": 0.0247152601,
+      "log_loss_ci": [
+        0.0214869833,
+        0.0275501717
+      ],
+      "brier": 0.010594198,
+      "brier_ci": [
+        0.0095223048,
+        0.0116631299
+      ],
+      "bootstrap_share_log_loss_better_than_market": 0
+    },
+    "ens": {
+      "log_loss": 0.0015687819,
+      "log_loss_ci": [
+        0.0004652313,
+        0.0026596408
+      ],
+      "brier": 0.0005692402,
+      "brier_ci": [
+        0.0000780442,
+        0.0010827716
+      ],
+      "bootstrap_share_log_loss_better_than_market": 0.0022
+    }
+  },
+  "high_confidence_favourites_75": {
+    "model_only": {
+      "n": 396,
+      "predicted": 0.8086334026,
+      "actual": 0.7651515152,
+      "overconfidence_pp": 4.3481887412,
+      "overconfidence_ci95_pp": [
+        0.8626902127,
+        7.768456116
+      ]
+    },
+    "market": {
+      "n": 470,
+      "predicted": 0.8092973242,
+      "actual": 0.8234042553,
+      "overconfidence_pp": -1.4106931141,
+      "overconfidence_ci95_pp": [
+        -4.6284421132,
+        1.5681435617
+      ]
+    },
+    "ens": {
+      "n": 525,
+      "predicted": 0.8131219921,
+      "actual": 0.8057142857,
+      "overconfidence_pp": 0.7407706416,
+      "overconfidence_ci95_pp": [
+        -2.1814984433,
+        3.8517029249
+      ]
+    }
+  },
+  "ensemble_favourites_same_games": {
+    "n": 525,
+    "actual": 0.8057142857,
+    "actual_ci95": [
+      0.7760869565,
+      0.8319188626
+    ],
+    "model_only": {
+      "predicted": 0.7682491608,
+      "overconfidence_pp": -3.7465124959
+    },
+    "market": {
+      "predicted": 0.8008077053,
+      "overconfidence_pp": -0.490658038
+    },
+    "ens": {
+      "predicted": 0.8131219921,
+      "overconfidence_pp": 0.7407706416
+    }
+  },
+  "stack_weight_diagnostics": {
+    "ens": {
+      "mean_sum": 1.0913243056,
+      "min_sum": 1.0321,
+      "max_sum": 1.2402,
+      "share_folds_sum_gt_1": 1
+    },
+    "model_only": {
+      "mean_sum": 1.0744708333,
+      "min_sum": 0.9909,
+      "max_sum": 1.2331,
+      "share_folds_sum_gt_1": 0.9722222222
+    },
+    "ens_cap1": {
+      "delta_log_loss_vs_ens": -0.0006224589,
+      "delta_log_loss_ci95": [
+        -0.0017697952,
+        0.0005684188
+      ],
+      "delta_brier_vs_ens": -0.0002602017,
+      "delta_brier_ci95": [
+        -0.0007428843,
+        0.0002382976
+      ]
+    },
+    "ens_pool": {
+      "delta_log_loss_vs_ens": -0.0008654355,
+      "delta_log_loss_ci95": [
+        -0.0020992692,
+        0.0004538958
+      ],
+      "delta_brier_vs_ens": -0.0003111087,
+      "delta_brier_ci95": [
+        -0.0008528728,
+        0.0002414697
+      ]
+    }
+  },
+  "ats_model_only": {
+    "wins": 1024,
+    "losses": 1057,
+    "pushes": 52,
+    "win_rate": 0.4920711197,
+    "ci95": [
+      0.4706254671,
+      0.5135459923
+    ],
+    "p_vs_breakeven_52_38": 0.0040303928
+  },
+  "market_case_study": {
+    "game_id": "2026_11_IND_HOU",
+    "home": "HOU",
+    "away": "IND",
+    "kickoff_utc": "2026-11-20T01:15:00Z",
+    "nflverse_no_vig_home_probability": 0.84,
+    "home_moneyline": -700,
+    "away_moneyline": 500,
+    "odds_api_mean_shin_home_probability": 0.8577,
+    "odds_api_operator_count": 42,
+    "odds_api_fetched_at": "2026-11-17T20:54:38Z",
+    "prediction_generated_at": "2026-11-17T22:07:57Z",
+    "legacy_mean_multiplicative_probability": 0.8407,
+    "model_only_home_probability": 0.7452
+  },
+  "conclusions": [
+    "MARKET outperforms MODEL_ONLY on accuracy, Brier and log loss; paired season-block intervals exclude zero for both loss metrics.",
+    "MARKET also slightly outperforms ENSEMBLE on Brier and log loss; the absolute differences are small but both paired intervals are above zero.",
+    "The +4.35 pp overconfidence hypothesis reproduces for MODEL_ONLY's own 75%+ favourites; ENSEMBLE's own 75%+ segment is +0.74 pp with an interval spanning zero.",
+    "Weight-constrained ensemble variants do not show a statistically clear improvement over the published ensemble; no retuning is recommended in PR2."
+  ],
+  "limitations": [
+    "Only eight independent season clusters; confidence intervals are informative but coarse.",
+    "Historical QB identity and weather features lack point-in-time availability timestamps; potential availability leakage is not quantified.",
+    "Stored Kalman parameters and manual LightGBM/model-selection history lack per-season provenance.",
+    "Processed team_games and qb_games caches are derived inputs but are not directly hashed.",
+    "No weights or hyperparameters were retuned; frozen snapshots were not rewritten; no Odds API calls were made."
+  ]
+}

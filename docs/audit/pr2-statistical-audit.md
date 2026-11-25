@@ -1,69 +1,148 @@
 # PR2 Statistical Audit
 
-Status: implementation and static code review recorded; the season-block statistical report must be regenerated from the committed component cache before its confidence intervals are treated as final.
+**Estado: CI verificada.** Generado el **25 de noviembre de 2026, 23:46:51 UTC**, con el modelo `0.1.0`.
 
-Run offline from the repository root:
+El informe completo, incluido el JSON con folds y métricas por temporada, se generó offline en CI y se adjunta como artefacto. Este documento conserva los resultados principales y las conclusiones.
 
-```bash
-uv run python scripts/audit_pr2.py
-```
+- Ejecución CI: [run 45723813488](https://github.com/jesusparrat/ensemblitz/actions/runs/45723813488)
+- Artefacto: `pr2-statistical-audit`
+- Regeneración local: `uv run python scripts/audit_pr2.py`
+- Sin descargas nflverse ni llamadas a The Odds API.
 
-The command reads `reports/baseline_components.parquet`, does not download nflverse data, and does not call The Odds API. It writes the machine-readable result to `reports/pr2_statistical_audit.json` and replaces this document with the run's exact population reconciliation, paired metrics, season-block intervals and game-level exclusions.
+## 1. Población: 2.141 frente a 2.133
 
-## Findings established from the committed artifacts and code
+La discrepancia queda reconciliada:
 
-### Population
+| Concepto | N |
+|---|---:|
+| Partidos regulares jugados | 2.141 |
+| Con predicciones válidas para todas las fuentes | 2.141 |
+| Empates excluidos del scoring | 8 |
+| Predicciones ausentes | 0 |
+| Probabilidades inválidas | 0 |
+| **Muestra final común** | **2.133** |
 
-The committed `reports/backtest.json` reports 2,141 played regular-season rows, while the paired baseline report scores 2,133 games. The difference is eight rows, but this audit does not assume they are all ties. The offline command above enumerates each excluded game and its reason (tie, missing prediction, or invalid probability), then hashes the exact paired game-ID population.
+Los ocho excluidos son empates, no datos ausentes:
 
-The legacy point estimates on 2,133 games are:
+- `2018_01_PIT_CLE`
+- `2018_02_MIN_GB`
+- `2019_01_DET_ARI`
+- `2020_03_CIN_PHI`
+- `2021_10_DET_PIT`
+- `2022_01_IND_HOU`
+- `2022_13_WAS_NYG`
+- `2025_04_GB_DAL`
 
-| Source | Accuracy | Brier | Log loss |
-|---|---:|---:|---:|
-| MODEL_ONLY | 64.79% | 0.22168 | 0.63440 |
-| MARKET | 66.43% | 0.21108 | 0.60968 |
-| ENSEMBLE | 66.24% | 0.21165 | 0.61125 |
+Las tres fuentes comparten exactamente los mismos 2.133 partidos. SHA-256 de los IDs ordenados: `6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144`.
 
-These are committed point estimates, not new PR2 calculations. The old confidence intervals used an independent-game bootstrap and are superseded for inference by the season-block method. Do not use the old intervals to make significance claims.
+## 2. Resultado global: modelo, mercado y ensemble
 
-### Uncertainty method
+| Fuente | Accuracy | Brier | Log loss | Pendiente de calibración |
+|---|---:|---:|---:|---:|
+| MODEL_ONLY | 64,79 % | 0,22168 | 0,63440 | 0,928 |
+| MARKET | **66,43 %** | **0,21108** | **0,60968** | 1,056 |
+| ENSEMBLE | 66,24 % | 0,21165 | 0,61125 | 0,991 |
 
-The revised paired bootstrap samples complete seasons with replacement, retaining every eligible game in each selected season. This preserves within-season dependence and uses the same sampled seasons for all sources and paired differences. There are only eight season clusters (2018-2025), so the resulting intervals are necessarily coarse. They are descriptive uncertainty bounds, not high-powered tests. The report also computes season-block intervals for the 75%+ favourite calibration segment.
+### Diferencias emparejadas frente al mercado
 
-### Temporal leakage review
+Bootstrap por temporadas completas, 10.000 réplicas, semilla 20260, IC percentil del 95 %. La diferencia es fuente menos MARKET; valores positivos en Brier y log loss indican peor resultado.
 
-- **Elo and opponent-adjusted ratings:** `features.build` computes all features for a season/week batch before updating state with that batch's results. Opponent adjustments use ratings captured before the game. The existing perturbation test verifies that changing results and team-game data from a cutoff onward does not move earlier features.
-- **Kalman:** `run_kf` predicts a whole week before applying that week's results. `kalman.tune` slices to seasons strictly earlier than `before_season`; PR2 adds a regression test for this cutoff. However, `models/kf_params.json` contains no per-season training-window metadata. The stored values therefore cannot be independently proven to have been generated with the intended cutoff.
-- **LightGBM and stack selection:** `pipeline._train_mask` includes only played games from earlier seasons/weeks; the stack is refitted before each week using earlier out-of-sample component predictions. PR2 adds a direct guard test for the LightGBM training mask. The repository does not preserve a reproducible history of manual hyperparameter or feature selection, so it cannot prove those choices were not influenced by later seasons.
-- **Potential point-in-time leakage:** historical `home_qb_id`/`away_qb_id`, `temp` and `wind` fields feed QB and LightGBM features, but the repository has no point-in-time snapshots or availability timestamps for them. Actual starter identity and observed game weather may differ from what was knowable at forecast time. This is a potential availability leak, not a demonstrated result-leak bug. Its impact is not quantified here because that would require point-in-time source data and a controlled re-evaluation; PR2 does not retune the model.
-- **Processed-data provenance:** prediction provenance hashes `data/raw/*.parquet`, while features also read derived `data/processed/team_games.parquet` and `qb_games.parquet`. Those files are derivable from raw data but are not directly hashed, leaving stale-cache reproducibility risk.
-- **Injuries:** the current feature builder uses week t-1 or t-2 injury counts, not the current week's report. Historical publication timestamps are not retained in the feature cache.
+| Fuente | Δ Log loss | IC 95 % | Δ Brier | IC 95 % |
+|---|---:|---:|---:|---:|
+| MODEL_ONLY | +0,02472 | [+0,02149; +0,02755] | +0,01059 | [+0,00952; +0,01166] |
+| ENSEMBLE | +0,00157 | [+0,00047; +0,00266] | +0,00057 | [+0,00008; +0,00108] |
 
-### Market source and IND-HOU discrepancy
+**Conclusión estadística:** el mercado supera claramente a MODEL_ONLY. También supera al ensemble publicado en Brier y log loss; la diferencia es pequeña, pero los dos intervalos emparejados quedan por encima de cero. La proporción de réplicas en que ENSEMBLE mejora el log loss de MARKET es 0,22 %.
 
-For 2026 week 11, IND @ HOU:
+Esto no implica que el modelo carezca de valor explicativo o editorial, pero sí que el backtest actual no demuestra una mejora predictiva sobre el mercado.
 
-- nflverse stored home probability: **84.00%**, from the no-vig home/away moneylines **-700 / +500**.
-- The Odds API mean-Shin probability: **85.77%**, across **42 operators**.
-- The legacy mean-multiplicative probability was **84.07%**.
-- Odds data was fetched at **2026-11-17 20:54:38Z**; the prediction was generated at **22:07:57Z**; kickoff was **2026-11-20 01:15:00Z**.
+## 3. Calibración de favoritos de al menos el 75 %
 
-The difference is explained by distinct sources and de-vig methods, not by a sign conversion: the no-vig moneyline calculation gives 84%, the mean of per-operator Shin probabilities gives 85.77%, and the mean multiplicative method gives 84.07%. The Odds API snapshot predates the prediction by 1h 13m 19s. Neither value is a closing quote. The historical baseline uses nflverse closing schedule lines; the live Odds API quote is a separate pre-kickoff capture.
+Cada fuente se evalúa en su propio subconjunto de favoritos; los tamaños, por tanto, no son iguales.
 
-The report generator now compares the independent model-only headline with the aggregate mean-Shin probability. It no longer computes an edge against the market-anchored ensemble.
+| Fuente | N | Probabilidad media | Acierto real | Sobreconfianza | IC 95 % de la brecha |
+|---|---:|---:|---:|---:|---:|
+| MODEL_ONLY | 396 | 80,86 % | 76,52 % | **+4,35 pp** | [+0,86; +7,77] pp |
+| MARKET | 470 | 80,93 % | 82,34 % | −1,41 pp | [−4,63; +1,57] pp |
+| ENSEMBLE | 525 | 81,31 % | 80,57 % | +0,74 pp | [−2,18; +3,85] pp |
 
-### News adjustment
+La hipótesis de +4,3 puntos de sobreconfianza queda reproducida para MODEL_ONLY, con un intervalo que no cruza cero. No se reproduce para el ensemble publicado: su sobreconfianza es de 0,74 pp y el intervalo incluye cero.
 
-The prediction writer adjusts only ensemble probability and margin. The model-only headline remains unchanged, and v1 records `news_adjustment.applies_to = "ensemble"`. Historical news is not included in the baseline because no point-in-time archive is available. Frozen snapshots remain unchanged.
+En los mismos 525 partidos donde el ensemble asigna al favorito al menos un 75 %, el acierto real es 80,57 % (IC por temporadas: 77,61–83,19 %). En esos mismos partidos, MODEL_ONLY asigna de media 76,82 % al favorito del ensemble, MARKET 80,08 % y ENSEMBLE 81,31 %. Esta distinción evita confundir el subconjunto de favoritos propios de cada fuente con una comparación sobre los mismos partidos.
 
-### Odds-data governance
+## 4. Pesos del ensemble y alternativas restringidas
 
-The public standard The Odds API terms reviewed on 2026-11-26 permit user-facing dashboards and derived values, provided the data is not the primary product being sold or redistributed, while prohibiting redistribution as a standalone raw-data feed ([Terms and Conditions](https://the-odds-api.com/terms-and-conditions.html)). Current `reports/odds/` outputs now retain only aggregate mean-Shin probability, capture timestamp, and operator count. Individual prices, operator identifiers, best prices, EV and ensemble-relative edge are removed from current report outputs. Account-specific terms may differ; this is not a legal opinion.
+- La suma de pesos del ensemble publicado supera 1 en el **100 % de los folds**; media 1,091, rango 1,032–1,240.
+- MODEL_ONLY supera 1 en el 97,22 % de los folds; media 1,074.
+- Las variantes con suma de pesos restringida (`ens_cap1`, `ens_pool`) mejoran ligeramente los puntos estimados, pero sus intervalos emparejados frente al ensemble cruzan cero tanto en log loss como en Brier.
 
-### Margin sign convention
+**Decisión:** no cambiar pesos ni hiperparámetros en PR2. Los resultados no justifican retuning en esta fase. La suma de pesos superior a uno se documenta como diagnóstico, no como prueba automática de mala calibración.
 
-Canonical margin is home minus away. nflverse `spread_line` is positive when the home team is favoured. The Odds API spread point uses the opposite sign and is converted with `contract.odds_api_margin_home(point) = -point`. Regression tests already cover the Odds API conversion; PR2 adds a test for the nflverse spread fallback.
+## 5. ATS de MODEL_ONLY
 
-### Governance
+- 1.024 victorias, 1.057 derrotas y 52 pushes.
+- Porcentaje de acierto: 49,21 % (IC 95 %: 47,06–51,35 %).
+- Contraste frente al break-even del 52,38 %: (p=0,0040).
 
-`AGENTS.md` is already written in English, so no language migration was needed. This phase does not retune weights or hyperparameters, rewrite frozen snapshots, make The Odds API calls, change site HTML, or change visual design. The dynamic population and season-block results are generated by `scripts/audit_pr2.py`.
+No aparece una ventaja ATS en esta muestra. No debe presentarse como señal de valor esperado o rentabilidad.
+
+## 6. Auditoría de fuga temporal
+
+**Sin fuga de resultados identificada en la secuencia walk-forward examinada:**
+
+- Elo y ajustes por rival: las features de una semana se calculan antes de actualizar el estado con los resultados de esa misma semana.
+- Kalman: `run_kf` predice la semana completa antes de actualizarla. `kalman.tune` limita la optimización a temporadas estrictamente anteriores a `before_season`; se añadió una regresión que comprueba ese corte.
+- LightGBM: `pipeline._train_mask` usa únicamente partidos jugados de temporadas/semanas anteriores; se añadió un test directo del límite.
+- El stack se vuelve a ajustar antes de cada semana con predicciones de componentes fuera de muestra.
+
+**Riesgos no resueltos ni cuantificados:**
+
+1. `home_qb_id`/`away_qb_id`, `temp` y `wind` alimentan features, pero el histórico no conserva snapshots ni timestamps que prueben cuándo se conocieron. La identidad real del QB y el tiempo observado pueden no coincidir con lo que era conocible al pronosticar. Es un riesgo potencial de disponibilidad, no una fuga de resultados demostrada.
+2. `models/kf_params.json` no registra el periodo de entrenamiento de cada parámetro. El código de tuning respeta el corte, pero no se puede demostrar que todos los valores versionados se generaran así.
+3. No hay historial reproducible de selección manual de features/hiperparámetros de LightGBM; no se puede demostrar que las decisiones históricas fueran independientes de temporadas futuras.
+4. El snapshot de datos hashea `data/raw/*.parquet`, pero las features también leen `data/processed/team_games.parquet` y `qb_games.parquet`, que no se hashean directamente.
+5. Las lesiones usan recuentos de semanas t−1/t−2, no el informe de la semana actual; los timestamps históricos de publicación no se conservan.
+
+No se han cambiado parámetros ni reentrenado modelos para ocultar estos riesgos. Cuantificarlos requiere datos point-in-time y una evaluación controlada posterior.
+
+## 7. Fuentes de mercado: discrepancia IND–HOU
+
+Para IND @ HOU, semana 11 de 2026:
+
+- nflverse: probabilidad local sin margen **84,00 %**, calculada con moneylines −700 / +500.
+- The Odds API: media no ponderada de probabilidades Shin sin margen **85,77 %**, con 42 operadores.
+- La media multiplicativa archivada antes de la limpieza era **84,07 %**.
+- Captura de The Odds API: 17 nov 2026, 20:54:38 UTC.
+- Predicción: 17 nov 2026, 22:07:57 UTC.
+- Kickoff: 20 nov 2026, 01:15:00 UTC.
+
+La diferencia 86 % frente a 84 % procede de fuentes y métodos de de-vig distintos, no de un cambio de signo. La captura de The Odds API precede a la generación de la predicción en 1 h 13 min 19 s. Ninguno de estos valores es una cuota de cierre. El histórico de backtest usa las líneas de cierre nflverse; la captura de The Odds API es otra observación pre-kickoff.
+
+El consenso Shin almacenado es la media aritmética no ponderada de probabilidades Shin por operador, no un cálculo Shin sobre un mercado agregado.
+
+## 8. Noticias, cuotas y convención de margen
+
+- `apply_news` modifica solo probabilidad y margen del ensemble. El titular MODEL_ONLY permanece intacto; v1 registra `news_adjustment.applies_to = "ensemble"`. No hay archivo histórico point-in-time para incluir noticias en el backtest.
+- Se eliminaron de los informes actuales `reports/odds/` los precios individuales, nombres de operadores, mejores precios, EV y edge frente al ensemble. Solo se conservan probabilidad agregada media-Shin, timestamp y número de operadores. Los snapshots históricos congelados no se reescribieron.
+- Los términos públicos de The Odds API permiten datos derivados en interfaces de usuario siempre que los datos no sean el producto principal vendido o redistribuido, y prohíben redistribuir un feed raw independiente ([términos](https://the-odds-api.com/terms-and-conditions.html)). Esto no sustituye la revisión de un acuerdo específico de cuenta.
+- Convención canónica: margen = puntos local − visitante. En nflverse, `spread_line > 0` indica favorito local. The Odds API usa el signo contrario para `point`; se convierte con `odds_api_margin_home(point) = -point`. Los tests cubren la conversión y el fallback de spread nflverse.
+
+## 9. Validación CI
+
+<badge color="success">Todo correcto</badge>
+
+- `uv lock --check`
+- `uv sync --frozen --extra dev`
+- `ruff check .`
+- `ruff format --check .`
+- **160 tests passed**
+- Build del site y validación HTML
+- `validate_outputs.py`
+- `verify_integrity.py`
+- Baseline gate: 2.133 partidos antes y después; OK
+- Auditoría PR2 offline: OK
+- Artefacto de informe completo subido correctamente
+
+## 10. Límites y decisiones
+
+El bootstrap conserva la dependencia dentro de cada temporada, pero solo hay ocho clusters independientes; los intervalos son informativos y deben interpretarse con cautela. No se han retuneado pesos ni hiperparámetros, no se han reescrito snapshots, no se han realizado llamadas a The Odds API y no se ha modificado HTML/UI. `AGENTS.md` ya estaba en inglés; no requería migración.
