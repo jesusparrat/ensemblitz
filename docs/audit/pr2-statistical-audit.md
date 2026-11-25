@@ -1,10 +1,10 @@
 # PR2 Statistical Audit
 
-**Estado: CI verificada.** Generado el **25 de noviembre de 2026, 23:46:51 UTC**, con el modelo `0.1.0`.
+**Estado: CI verificada.** Generado el **25 de noviembre de 2026, 23:51:06 UTC**, con el modelo `0.1.0`.
 
 El informe completo, incluido el JSON con folds y métricas por temporada, se generó offline en CI y se adjunta como artefacto. Este documento conserva los resultados principales y las conclusiones.
 
-- Ejecución CI: [run 45723813488](https://github.com/jesusparrat/ensemblitz/actions/runs/45723813488)
+- Ejecución CI: [run 45724315649](https://github.com/jesusparrat/ensemblitz/actions/runs/45723813488)
 - Artefacto: `pr2-statistical-audit`
 - Regeneración local: `uv run python scripts/audit_pr2.py`
 - Sin descargas nflverse ni llamadas a The Odds API.
