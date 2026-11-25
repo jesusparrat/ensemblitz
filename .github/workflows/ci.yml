@@ -1,9 +1,8 @@
 name: CI
-# Temporary PR2 branch validation; remove after the audit run is verified (retry 3).
 on:
   pull_request:
   push:
-    branches: [main, feat/pr2-statistical-audit]
+    branches: [main]
 permissions:
   contents: read
 concurrency:
