@@ -65,21 +65,11 @@ def consensus_for_teams(odds: pd.DataFrame, home: str, away: str) -> dict | None
     m = bp[(bp["home"] == home) & (bp["away"] == away)]
     if m.empty:
         return None
-    ln = lines(odds)
-    ev = m["event_id"].iloc[0]
-    ln_g = ln[ln["event_id"] == ev]
-    rec = {
+    return {
         "consensus_home_prob_shin": round(float(m["p_home_shin"].mean()), 4),
         "n_books": int(len(m)),
         "fetched_at": str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds.columns else None,
     }
-    if not ln_g.empty:
-        bs = ln_g["book_spread_home"].iloc[0]
-        rec["book_spread_home"] = None if pd.isna(bs) else float(bs)
-        rec["book_total"] = (
-            None if pd.isna(ln_g["book_total"].iloc[0]) else float(ln_g["book_total"].iloc[0])
-        )
-    return rec
 
 
 def explain(g: dict, edge: float) -> list[str]:
@@ -148,80 +138,41 @@ def _game_view(g: dict) -> dict:
 
 
 def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
+    """Compare the independent model-only headline with aggregate market consensus only."""
     bp = book_probs(odds)
-    ln = lines(odds)
     games = []
     for raw in pred["games"]:
         g = _game_view(raw)
         m = bp[(bp["home"] == g["home_team"]) & (bp["away"] == g["away_team"])]
         if m.empty:
             continue
-        ours = g["home_win_prob"]["ensemble"]
-        cons = float(m["p_home_shin"].mean())
-        ev = m["event_id"].iloc[0]
-        ln_g = ln[ln["event_id"] == ev]
-        books = {
-            r.bookmaker: {
-                "p_home_shin": round(r.p_home_shin, 4),
-                "p_home_mult": round(r.p_home_mult, 4),
-                "home_price": r.home_price,
-                "away_price": r.away_price,
-                "edge_vs_ours": round(ours - r.p_home_shin, 4),
-            }
-            for r in m.itertuples()
-        }
-        best_h = m.loc[m["home_price"].idxmax()]
-        best_a = m.loc[m["away_price"].idxmax()]
-        ev_home = ours * best_h["home_price"] - 1
-        ev_away = (1 - ours) * best_a["away_price"] - 1
-        side = "home" if ev_home >= ev_away else "away"
-        edge = ours - cons
-        # The published ensemble leans on the market, so its distance to the market is small by
-        # construction. The informative gap is the one between the market and our models alone.
         pure = g["home_win_prob"].get("ensemble_model_only")
-        gap = None if pure is None else pure - cons
-        flagged = abs(edge if gap is None else gap) >= BIG_EDGE
+        if pure is None:
+            # Never substitute the market-anchored ensemble for the independent headline.
+            continue
+        consensus = float(m["p_home_shin"].mean())
+        gap = float(pure - consensus)
+        flagged = abs(gap) >= BIG_EDGE
         rec = {
             "game_id": g["game_id"],
             "home": g["home_team"],
             "away": g["away_team"],
             "kickoff_utc": g["kickoff_utc"],
-            "our_home_prob": ours,
-            "consensus_home_prob_shin": round(cons, 4),
-            "consensus_home_prob_mult": round(float(m["p_home_mult"].mean()), 4),
-            "edge": round(edge, 4),
-            "model_only_home_prob": None if pure is None else round(pure, 4),
-            "gap_model_only": None if gap is None else round(gap, 4),
+            "model_only_home_prob": round(float(pure), 4),
+            "consensus_home_prob_shin": round(consensus, 4),
+            "gap_model_only": round(gap, 4),
             "n_books": int(len(m)),
-            "best_home_price": {"book": best_h["bookmaker"], "price": float(best_h["home_price"])},
-            "best_away_price": {"book": best_a["bookmaker"], "price": float(best_a["away_price"])},
-            "ev_per_unit_best": {
-                "home": round(float(ev_home), 4),
-                "away": round(float(ev_away), 4),
-            },
-            "best_side": side,
             "flag_large_disagreement": flagged,
-            "books": books,
         }
-        if not ln_g.empty:
-            bs = ln_g["book_spread_home"].iloc[0]
-            rec["book_spread_home"] = None if pd.isna(bs) else float(bs)
-            rec["book_total"] = (
-                None if pd.isna(ln_g["book_total"].iloc[0]) else float(ln_g["book_total"].iloc[0])
-            )
-            if rec["book_spread_home"] is not None and g["predicted_margin"] is not None:
-                rec["our_margin_minus_book"] = round(
-                    g["predicted_margin"] + rec["book_spread_home"], 2
-                )
-                rec["our_cover_prob_home"] = round(
-                    float(ndtr((g["predicted_margin"] + rec["book_spread_home"]) / MARGIN_SD)), 4
-                )
-        if rec["flag_large_disagreement"]:
-            rec["likely_reasons"] = explain(g, edge)
+        if flagged:
+            rec["likely_reasons"] = explain(g, gap)
         games.append(rec)
     return {
         "season": pred["season"],
         "week": pred["week"],
+        "market_source": "The Odds API",
+        "market_type": "h2h",
+        "consensus_method": "unweighted mean of per-operator Shin no-vig probabilities",
         "odds_fetched_at": fetched_at,
         "predictions_generated_at": pred.get("generated_at_utc") or pred.get("generated_at"),
         "games": games,
@@ -230,41 +181,38 @@ def build(pred: dict, odds: pd.DataFrame, fetched_at: str | None) -> dict:
 
 def to_markdown(rep: dict) -> str:
     L = [
-        f"# Cuotas vs modelo, {rep['season']} semana {rep['week']}",
+        f"# Modelo propio frente al consenso, {rep['season']} semana {rep['week']}",
         "",
-        f"Cuotas descargadas: {rep['odds_fetched_at']}. Picks generados: {rep['predictions_generated_at']}.",
-        "Probabilidades sin margen del casino (Shin). Edge = prob. nuestra − prob. consenso (local). "
-        "EV = valor esperado por unidad apostada al mejor precio disponible, si nuestra probabilidad fuese la correcta.",
+        f"Captura agregada: {rep['odds_fetched_at']}. Predicción: {rep['predictions_generated_at']}.",
+        "Comparación de la probabilidad del modelo propio (sin mercado) con la media agregada "
+        "de probabilidades sin margen calculadas mediante Shin. La brecha es modelo propio menos "
+        "consenso, desde la perspectiva del equipo local.",
         "",
-        "| Partido | Nuestra | Consenso | Edge | Mejor lado | Mejor precio | EV | Casas |",
-        "|---|---|---|---|---|---|---|---|",
+        "| Partido | Modelo propio | Consenso agregado | Brecha | Operadores |",
+        "|---|---:|---:|---:|---:|",
     ]
-    for g in sorted(rep["games"], key=lambda x: -abs(x["edge"])):
-        side = g["best_side"]
-        bp = g["best_home_price" if side == "home" else "best_away_price"]
-        team = g["home"] if side == "home" else g["away"]
-        flag = " ⚠" if g["flag_large_disagreement"] else ""
+    for g in sorted(rep["games"], key=lambda x: -abs(x["gap_model_only"])):
+        flag = " *" if g["flag_large_disagreement"] else ""
         L.append(
-            f"| {g['away']} @ {g['home']}{flag} | {g['our_home_prob'] * 100:.1f}% | "
-            f"{g['consensus_home_prob_shin'] * 100:.1f}% | {g['edge'] * 100:+.1f} pp | {team} | "
-            f"{bp['price']:.2f} ({bp['book']}) | {g['ev_per_unit_best'][side] * 100:+.1f}% | {g['n_books']} |"
+            f"| {g['away']} @ {g['home']}{flag} | {g['model_only_home_prob'] * 100:.1f}% | "
+            f"{g['consensus_home_prob_shin'] * 100:.1f}% | "
+            f"{g['gap_model_only'] * 100:+.1f} pp | {g['n_books']} |"
         )
     flagged = [g for g in rep["games"] if g["flag_large_disagreement"]]
     if flagged:
-        L += ["", "## Banderas: solo modelos frente al consenso (≥ 5 pp)", ""]
+        L += ["", "## Discrepancias de 5 puntos porcentuales o más", ""]
         for g in flagged:
-            gap = g.get("gap_model_only")
-            if gap is None:
-                gap = g["edge"]
             L.append(
-                f"- **{g['away']} @ {g['home']}**: brecha {gap * 100:+.1f} pp (local). "
+                f"- **{g['away']} @ {g['home']}**: brecha "
+                f"{g['gap_model_only'] * 100:+.1f} pp. "
                 + "; ".join(g["likely_reasons"])
                 + "."
             )
     L += [
         "",
-        "Aviso: el mercado de cierre es muy eficiente; en el backtest nuestro modelo no lo supera "
-        "(ver `reports/backtest.md`). Un EV positivo aquí es una hipótesis del modelo, no una garantía.",
+        "El consenso es una estadística agregada, no una cuota disponible ni un precio de cierre. "
+        "No se publican precios individuales, nombres de operadores, mejores precios, edge frente "
+        "al ensemble ni valor esperado.",
     ]
     return "\n".join(L) + "\n"
 

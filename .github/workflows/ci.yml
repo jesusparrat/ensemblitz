@@ -49,3 +49,5 @@ jobs:
           else
             uv run python scripts/check_baseline.py
           fi
+      - name: Offline PR2 statistical audit
+        run: uv run python scripts/audit_pr2.py

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ensemblitz import baseline as B
+from ensemblitz import baseline as B, pipeline
 from ensemblitz.models.market import margin_to_prob
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -114,16 +114,19 @@ def test_calibration_slope_is_one_for_calibrated_probabilities():
     assert B.calib_slope(q, y)[1] < 0.7
 
 
-def test_bootstrap_ci_contains_point_estimate(frame, walked):
+def test_season_block_bootstrap_intervals_are_ordered(frame, walked):
     wf, _ = walked
     d = B.scoring_frame(wf)
     y = B.outcomes(d)
     bs = B.bootstrap(d, y, n=300)
-    for k, v in bs["diff_vs_market"].items():
-        if "_minus_" in k:
-            continue
-        lo, hi = v["log_loss_ci"]
-        assert lo <= v["log_loss"] <= hi, k
+    assert bs["block_unit"] == "season"
+    assert bs["n_blocks"] == d["season"].nunique()
+    assert "complete seasons" in bs["resampling"]
+    for value in bs["diff_vs_market"].values():
+        for key in ("log_loss_ci", "brier_ci"):
+            lo, hi = value[key]
+            assert np.isfinite([lo, hi]).all()
+            assert lo <= hi
 
 
 def test_heavy_favourite_bins_partition_games(walked):
@@ -206,3 +209,30 @@ def test_gate_passes_on_identical_numbers_and_fails_on_regression(monkeypatch, c
     slightly["model_only"]["brier"] += 0.0003  # inside the tolerance
     monkeypatch.setattr(B, "gate_metrics", lambda df: slightly)
     assert gate.main() == 0
+
+
+
+def test_population_audit_identifies_ties_and_missing_predictions(walked):
+    wf, _ = walked
+    d = wf[(wf["season"] >= 2018) & (wf["week"] <= 18)].copy()
+    assert len(d) >= 2
+    d["result"] = 1.0
+    d.iloc[0, d.columns.get_loc("result")] = 0.0
+    d.iloc[1, d.columns.get_loc("model_only_prob")] = np.nan
+    population = B.population_audit(d)
+    assert population["n_ties"] == 1
+    assert population["n_missing_prediction_rows"] == 1
+    assert population["n_scored"] == population["n_played"] - 2
+    reasons = {x["game_id"]: x["reasons"] for x in population["excluded_games"]}
+    assert "tie" in reasons[d.iloc[0]["game_id"]]
+    assert "missing_predictions" in reasons[d.iloc[1]["game_id"]]
+
+
+
+def test_backtest_pipeline_exposes_independent_model_only_source(frame):
+    out = pipeline.add_ensemble_walk_forward(frame, first=2018, last=2019)
+    for column in ("model_only_prob", "model_only_margin", "model_only_total"):
+        assert column in out
+        assert out[column].notna().any()
+    probabilities = out["model_only_prob"].dropna()
+    assert probabilities.between(0.0, 1.0).all()

@@ -172,6 +172,28 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
         "## Resultados globales",
         "",
     ]
+    pop = res.get("population", {})
+    L += [
+        "## Reconciliación de población",
+        "",
+        f"- Filas regulares en alcance: {pop.get('n_rows_in_scope', 'n/d')}.",
+        f"- Partidos jugados: {pop.get('n_played', 'n/d')}.",
+        f"- Predicciones válidas para todas las fuentes: {pop.get('n_valid_probability_rows', 'n/d')}.",
+        f"- Empates excluidos: {pop.get('n_ties', 'n/d')}.",
+        f"- Filas con predicciones ausentes: {pop.get('n_missing_prediction_rows', 'n/d')}.",
+        f"- Filas con probabilidades inválidas: {pop.get('n_invalid_probability_rows', 'n/d')}.",
+        f"- Muestra final puntuada: {pop.get('n_scored', res['n_games'])}.",
+        "",
+    ]
+    if pop.get("excluded_games"):
+        L += ["Partidos excluidos y motivo:", ""]
+        for item in pop["excluded_games"]:
+            L.append(
+                f"- {item['game_id']} ({item['season']} semana {item['week']}): "
+                + ", ".join(item["reasons"])
+                + "."
+            )
+        L.append("")
     rows = []
     for k in B.SCORED:
         r, lv_k = o[k], lv[k]
@@ -196,8 +218,9 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
     )
     L += [
         "",
-        "Diferencia con el mercado (negativo = mejor que el mercado), bootstrap por partidos "
-        f"({bs['n_boot']} remuestreos, semilla {bs['seed']}):",
+        "Diferencia con el mercado (negativo = mejor que el mercado), bootstrap emparejado "
+        "por temporadas completas. Conserva la dependencia temporal dentro de cada temporada; "
+        f"{bs['n_blocks']} temporadas independientes, {bs['n_boot']} remuestreos, semilla {bs['seed']}.",
         "",
     ]
     rows = []
@@ -267,7 +290,9 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
     L += [
         "## Favoritos: ¿hay exceso de confianza?",
         "",
-        "Calibración del lado que cada fuente considera favorito, por tramos de su probabilidad.",
+        "Calibración del lado que cada fuente considera favorito, por tramos de su probabilidad. "
+        "Los IC 95 % se calculan remuestreando temporadas completas; solo hay ocho bloques "
+        "independientes, por lo que son intervalos orientativos y de resolución limitada.",
         "",
     ]
     for k in B.SCORED:
@@ -285,8 +310,34 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
         L += _table(["Tramo", "Partidos", "Prevista", "Real", "IC 95 % del real"], rows)
         L += [""]
     L += [
+        "",
+        "### Cada fuente: sus favoritos al 75 % o más",
+        "",
+    ]
+    rows = []
+    for k in B.SCORED:
+        r = res["heavy_favourites_75"][k]
+        interval = r.get("overconfidence_pp_ci95")
+        interval_txt = "n/d" if not interval else ci(interval, 2) + " pp"
+        rows.append(
+            [
+                B.NAMES[k],
+                str(r["n"]),
+                pc(r.get("pred")),
+                pc(r.get("actual")),
+                sn(r.get("overconfidence_pp"), 2) + " pp",
+                interval_txt,
+            ]
+        )
+    L += _table(
+        ["Fuente", "N", "Prevista", "Real", "Prevista menos real", "IC 95 % de la brecha"],
+        rows,
+    )
+    L += [
+        "",
         f"En los {hf['n']} partidos en que el ensemble da al favorito 75 % o más (mismos partidos "
-        f"para todas las fuentes): real {pc(hf['actual'])} (IC 95 % {pc(hf['actual_ci95'][0])} a {pc(hf['actual_ci95'][1])}).",
+        f"para todas las fuentes): real {pc(hf['actual'])} (IC 95 % por temporada "
+        f"{pc(hf['actual_ci95'][0])} a {pc(hf['actual_ci95'][1])}).",
         "",
     ]
     rows = [

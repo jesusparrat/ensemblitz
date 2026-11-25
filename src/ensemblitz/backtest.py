@@ -16,9 +16,10 @@ from ensemblitz.sim import SimParams, simulate_games, summarize_sim
 
 log = logging.getLogger(__name__)
 
-COMPONENTS = ["market", "elo", "kf", "lgbm", "lgbm_mkt", "sim", "ens"]
+COMPONENTS = ["market", "model_only", "elo", "kf", "lgbm", "lgbm_mkt", "sim", "ens"]
 LABELS = {
     "market": "Mercado (cierre)",
+    "model_only": "Modelo propio (sin mercado)",
     "elo": "Elo (MOV)",
     "kf": "Kalman (fuerza dinámica)",
     "lgbm": "LightGBM (sin mercado)",
@@ -87,6 +88,12 @@ def build_results(reg: pd.DataFrame, kf_params: dict | None = None) -> dict:
     for c in COMPONENTS:
         sub = reg.dropna(subset=[f"{c}_prob", f"{c}_margin"])
         res["overall"][c] = M.summarize(sub, c)
+    res["population"] = {
+        "n_played_regular_rows": int(len(reg)),
+        "n_ties": int((reg["result"] == 0).sum()),
+        "n_decided": int((reg["result"] != 0).sum()),
+        "metric_n_by_source": {c: int(res["overall"][c]["n"]) for c in COMPONENTS},
+    }
     mk = reg.dropna(subset=["ens_prob", "ens_total"])
     res["total_mae"] = {
         "ens": float(np.mean(np.abs(mk["ens_total"] - mk["total"]))),
@@ -96,7 +103,7 @@ def build_results(reg: pd.DataFrame, kf_params: dict | None = None) -> dict:
     for s, d in reg.groupby("season"):
         res["per_season"][int(s)] = {
             c: M.summarize(d.dropna(subset=[f"{c}_prob"]), c)
-            for c in ("market", "kf", "lgbm", "ens")
+            for c in ("market", "model_only", "kf", "lgbm", "ens")
         }
     res["calibration"] = {c: M.calibration_table(reg, f"{c}_prob") for c in ("ens", "market")}
     return res

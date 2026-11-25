@@ -106,6 +106,8 @@ A model change that improves the baseline is accepted by regenerating the artefa
 - No copying of armchairlogan, in code, text or design. It is a reference for clarity only.
 - Out of scope, by decision: parlays, a Rust rewrite, and ingesting news from X.
 
-### Known restriction to resolve (finding C16, PR 2)
+### Odds data governance (PR 2)
 
-`reports/odds/*.md` and `reports/odds/*.json` publish per-bookmaker prices, the best price per side with the bookmaker name, and an expected value per unit, computed against the blended ensemble rather than the headline. The rule above against showing individual bookmaker prices or expected value applies to the site, but the repository is public too. PR 2 decides what stays: at most the consensus and the number of books. Until then, do not add new per-bookmaker or EV outputs.
+The public The Odds API terms reviewed on 2026-11-26 permit displaying data and derived values in user-facing websites, dashboards and analytical tools, while prohibiting redistribution as a standalone raw-data feed. This review is based on the publicly posted standard terms, not an account-specific legal opinion; any plan-specific agreement or source restriction takes precedence.
+
+Public repository outputs may retain only the aggregate head-to-head Shin probability (an unweighted mean of the per-operator no-vig probabilities), its capture timestamp and the number of contributing operators. Do not publish individual prices, operator names or keys, best prices, per-operator tables, EV, or an edge computed against the market-anchored ensemble. Historical commits are not rewritten; remediation applies to current files and future outputs. Do not make paid or quota-consuming API calls for an audit.

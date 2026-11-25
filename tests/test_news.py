@@ -90,3 +90,44 @@ def test_likely_score_agrees_with_pick_and_margin():
         assert (d > 0) == (margin[i] > 0) and abs(d - margin[i]) <= 3.5 + 1e-9
         assert ((h[i] == r["like_home"][i]) & (a[i] == r["like_away"][i])).any()
         assert 0 < r["like_prob"][i] < 0.1
+
+
+
+def test_apply_news_changes_ensemble_but_not_model_only_headline(monkeypatch):
+    from ensemblitz import predict
+
+    rows = pd.DataFrame(
+        [
+            {
+                "season": 2026,
+                "week": 11,
+                "home_team": "DET",
+                "away_team": "GB",
+                "ens_prob": 0.64,
+                "ens_margin": 3.0,
+                "nomkt_prob": 0.58,
+                "nomkt_margin": 1.5,
+            }
+        ]
+    )
+    monkeypatch.setattr(N, "load_news", lambda *args, **kwargs: [_item()])
+    monkeypatch.setattr(PL, "load_raw", lambda season: (None, None))
+    monkeypatch.setattr(PL, "build_values", lambda *args: VALUES)
+    monkeypatch.setattr(
+        N,
+        "adjust_game",
+        lambda prob, margin, *args, **kwargs: {
+            "applied": True,
+            "prob_home_before": prob,
+            "margin_before": margin,
+            "prob_home_after": 0.70,
+            "margin_after": 4.0,
+        },
+    )
+
+    audits = predict.apply_news(rows, NOW)
+    assert audits[0]["applied"]
+    assert rows.loc[0, "ens_prob"] == 0.70
+    assert rows.loc[0, "ens_margin"] == 4.0
+    assert rows.loc[0, "nomkt_prob"] == 0.58
+    assert rows.loc[0, "nomkt_margin"] == 1.5

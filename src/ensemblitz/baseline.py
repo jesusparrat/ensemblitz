@@ -17,6 +17,7 @@ layer can be re-audited in seconds (CI) without nflverse data. ``--full`` recomp
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -188,13 +189,70 @@ def _coef(m: StackModel) -> dict:
 
 # ------------------------------------------------------------------ metrics
 def scoring_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Games 2018-2025 where every scored probability exists (ties out of the probabilistic score)."""
+    """Identical eligible game population for every source; ties and invalid probabilities excluded."""
     cols = [f"{c}_prob" for c in [*SCORED, *VARIANTS]]
     d = df[df["season"].between(C.FIRST_BACKTEST_SEASON, C.LAST_BACKTEST_SEASON)]
     d = d[d["played"] & (d["week"] <= 18) & d["game_id"].str.contains(REG_ID)].dropna(
         subset=cols + ["result"]
     )
-    return d[d["result"] != 0].reset_index(drop=True)
+    values = d[cols].to_numpy(dtype=float)
+    valid = np.isfinite(values).all(axis=1) & ((values >= 0.0) & (values <= 1.0)).all(axis=1)
+    return d.loc[valid & (d["result"].to_numpy(float) != 0)].reset_index(drop=True)
+
+
+def population_audit(df: pd.DataFrame) -> dict:
+    """Reconcile every played regular-season row against the exact probabilistic scoring population."""
+    cols = [f"{c}_prob" for c in [*SCORED, *VARIANTS]]
+    target = df[df["season"].between(C.FIRST_BACKTEST_SEASON, C.LAST_BACKTEST_SEASON)]
+    target = target[target["week"].le(18) & target["game_id"].str.contains(REG_ID)].copy()
+    played = target[target["played"] & target["result"].notna()].copy()
+    values = played[cols].to_numpy(dtype=float)
+    missing = played[cols].isna().to_numpy()
+    invalid = (~np.isfinite(values) | (values < 0.0) | (values > 1.0)) & ~missing
+    valid = ~missing.any(axis=1) & ~invalid.any(axis=1)
+    tied = played["result"].to_numpy(float) == 0.0
+    scored = valid & ~tied
+
+    exclusions = []
+    for pos, (_, row) in enumerate(played.iterrows()):
+        reasons = []
+        if tied[pos]:
+            reasons.append("tie")
+        missing_fields = [cols[i] for i in np.flatnonzero(missing[pos])]
+        invalid_fields = [cols[i] for i in np.flatnonzero(invalid[pos])]
+        if missing_fields:
+            reasons.append("missing_predictions")
+        if invalid_fields:
+            reasons.append("invalid_probabilities")
+        if reasons:
+            exclusions.append(
+                {
+                    "game_id": str(row["game_id"]),
+                    "season": int(row["season"]),
+                    "week": int(row["week"]),
+                    "result": float(row["result"]),
+                    "reasons": reasons,
+                    "missing_fields": missing_fields,
+                    "invalid_fields": invalid_fields,
+                }
+            )
+
+    scored_ids = sorted(played.loc[scored, "game_id"].astype(str).tolist())
+    return {
+        "season_range": [int(C.FIRST_BACKTEST_SEASON), int(C.LAST_BACKTEST_SEASON)],
+        "regular_season_week_limit": 18,
+        "n_rows_in_scope": int(len(target)),
+        "n_played": int(len(played)),
+        "n_valid_probability_rows": int(valid.sum()),
+        "n_ties": int(tied.sum()),
+        "n_missing_prediction_rows": int(missing.any(axis=1).sum()),
+        "n_invalid_probability_rows": int(invalid.any(axis=1).sum()),
+        "n_scored": int(scored.sum()),
+        "n_excluded_from_scoring": int(len(played) - scored.sum()),
+        "n_seasons": int(played["season"].nunique()),
+        "scored_game_ids_sha256": hashlib.sha256("\n".join(scored_ids).encode()).hexdigest(),
+        "excluded_games": exclusions,
+    }
 
 
 def outcomes(d: pd.DataFrame) -> np.ndarray:
@@ -263,18 +321,33 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     return float(c - h), float(c + h)
 
 
-def favourite_bins(p: np.ndarray, y: np.ndarray) -> list[dict]:
-    """Calibration of the side the model favours: bins of max(p, 1-p) against how often it won."""
+def favourite_bins(
+    p: np.ndarray,
+    y: np.ndarray,
+    seasons: np.ndarray | None = None,
+    n_boot: int = BOOT_N,
+    seed: int = BOOT_SEED,
+) -> list[dict]:
+    """Favourite-side calibration; use season-block intervals when season labels are supplied."""
     pf = np.maximum(p, 1 - p)
     yf = np.where(p >= 0.5, y, 1 - y)
     out = []
-    for lo, hi in zip(FAV_BINS[:-1], FAV_BINS[1:], strict=True):
+    for i, (lo, hi) in enumerate(zip(FAV_BINS[:-1], FAV_BINS[1:], strict=True)):
         m = (pf >= lo) & (pf < hi) if hi < 1 else (pf >= lo)
         n = int(m.sum())
         if n == 0:
             continue
         k = int(yf[m].sum())
-        l_, h_ = wilson(k, n)
+        if seasons is None:
+            l_, h_ = wilson(k, n)
+            ci_method = "wilson"
+            n_seasons = None
+        else:
+            plan = _season_bootstrap_plan(np.asarray(seasons)[m], n_boot, seed + i)
+            actual_draws = _season_bootstrap_mean(yf[m], plan)
+            l_, h_ = _percentile_ci(actual_draws)
+            ci_method = "season_block_bootstrap"
+            n_seasons = int(plan["n_blocks"])
         out.append(
             {
                 "bin": f"{lo * 100:.0f}-{hi * 100:.0f}%" if hi < 1 else f"{lo * 100:.0f}%+",
@@ -283,6 +356,8 @@ def favourite_bins(p: np.ndarray, y: np.ndarray) -> list[dict]:
                 "actual": k / n,
                 "actual_lo": l_,
                 "actual_hi": h_,
+                "actual_ci_method": ci_method,
+                "n_seasons": n_seasons,
                 "log_loss": float(np.mean(_ll(pf[m], yf[m]))),
             }
         )
@@ -316,11 +391,21 @@ def heavy_fav_same_games(d: pd.DataFrame, y: np.ndarray, thr: float = 0.75) -> d
     fav_home = pe >= 0.5
     n = int(m.sum())
     out: dict = {"threshold": thr, "n": n}
+    if n == 0:
+        out["actual"] = None
+        out["actual_ci95"] = None
+        out["actual_ci_method"] = "season_block_bootstrap"
+        for key in [*SCORED, "ens_cap1", "ens_pool"]:
+            out[key] = {"pred_mean": None, "overconfidence_pp": None, "log_loss": None}
+        return out
     yf = np.where(fav_home, y, 1 - y)[m]
     k = int(yf.sum())
-    lo, hi = wilson(k, n)
-    out["actual"] = k / n if n else None
-    out["actual_ci95"] = [lo, hi]
+    season_draws = _season_bootstrap_mean(
+        yf, _season_bootstrap_plan(d.loc[m, "season"].to_numpy(), BOOT_N, BOOT_SEED + 1)
+    )
+    out["actual"] = k / n
+    out["actual_ci95"] = _percentile_ci(season_draws)
+    out["actual_ci_method"] = "season_block_bootstrap"
     for key in [*SCORED, "ens_cap1", "ens_pool"]:
         p = d[f"{key}_prob"].to_numpy(float)
         pf = np.where(fav_home, p, 1 - p)[m]
@@ -338,62 +423,114 @@ def input_correlation(d: pd.DataFrame) -> dict:
     return {a: {b: float(m.loc[a, b]) for b in COMPS} for a in COMPS}
 
 
+def _season_bootstrap_plan(seasons: np.ndarray, n: int, seed: int) -> dict:
+    """Resample complete seasons, preserving all within-season temporal dependence and pairing."""
+    codes, unique = pd.factorize(np.asarray(seasons), sort=True)
+    n_blocks = len(unique)
+    if n_blocks == 0:
+        raise ValueError("season bootstrap requires at least one season")
+    block_n = np.bincount(codes, minlength=n_blocks)
+    rng = np.random.default_rng(seed)
+    draws = rng.multinomial(n_blocks, np.full(n_blocks, 1.0 / n_blocks), size=n)
+    denominator = draws @ block_n
+    return {"codes": codes, "draws": draws, "denominator": denominator, "n_blocks": n_blocks}
+
+
+def _season_bootstrap_mean(values: np.ndarray, plan: dict) -> np.ndarray:
+    sums = np.bincount(
+        plan["codes"], weights=np.asarray(values, float), minlength=plan["n_blocks"]
+    )
+    return (plan["draws"] @ sums) / plan["denominator"]
+
+
+def _percentile_ci(draws: np.ndarray) -> list[float]:
+    return [float(np.percentile(draws, 2.5)), float(np.percentile(draws, 97.5))]
+
+
+def _season_bootstrap_pair(
+    predicted: np.ndarray, actual: np.ndarray, seasons: np.ndarray, n: int, seed: int
+) -> dict:
+    plan = _season_bootstrap_plan(seasons, n, seed)
+    p_draws = _season_bootstrap_mean(predicted, plan)
+    y_draws = _season_bootstrap_mean(actual, plan)
+    gap_draws = (p_draws - y_draws) * 100.0
+    return {
+        "n_seasons": int(plan["n_blocks"]),
+        "predicted_ci95": _percentile_ci(p_draws),
+        "actual_ci95": _percentile_ci(y_draws),
+        "overconfidence_pp_ci95": _percentile_ci(gap_draws),
+    }
+
+
 def bootstrap(d: pd.DataFrame, y: np.ndarray, n: int = BOOT_N, seed: int = BOOT_SEED) -> dict:
-    """Paired bootstrap over games: 95% CIs for each metric and for differences vs the market."""
+    """Paired percentile bootstrap resampling complete seasons, not independent games."""
     rng = np.random.default_rng(seed)
     keys = [*SCORED, *VARIANTS]
+    seasons = d["season"].to_numpy()
+    codes, unique = pd.factorize(seasons, sort=True)
+    n_blocks = len(unique)
+    if n_blocks == 0:
+        raise ValueError("bootstrap requires at least one season")
+    block_n = np.bincount(codes, minlength=n_blocks)
+    draws = rng.multinomial(n_blocks, np.full(n_blocks, 1.0 / n_blocks), size=n)
+    denominator = draws @ block_n
+    plan = {"codes": codes, "draws": draws, "denominator": denominator, "n_blocks": n_blocks}
+
     p = {k: np.clip(d[f"{k}_prob"].to_numpy(float), 1e-4, 1 - 1e-4) for k in keys}
     ll = {k: _ll(p[k], y) for k in keys}
     br = {k: (p[k] - y) ** 2 for k in keys}
-    nn = len(y)
     acc = {k: ((p[k] > 0.5) == (y == 1)).astype(float) for k in keys}
-    store: dict[str, list[np.ndarray]] = {}
-    done = 0
-    while done < n:
-        b = min(1000, n - done)
-        idx = rng.integers(0, nn, size=(b, nn), dtype=np.int32)
-        for k in keys:
-            store.setdefault(f"ll_{k}", []).append(ll[k][idx].mean(axis=1))
-            store.setdefault(f"br_{k}", []).append(br[k][idx].mean(axis=1))
-            store.setdefault(f"ac_{k}", []).append(acc[k][idx].mean(axis=1))
-        done += b
-    s = {k: np.concatenate(v) for k, v in store.items()}
+    sampled = (
+        {f"ll_{k}": _season_bootstrap_mean(ll[k], plan) for k in keys}
+        | {f"br_{k}": _season_bootstrap_mean(br[k], plan) for k in keys}
+        | {f"ac_{k}": _season_bootstrap_mean(acc[k], plan) for k in keys}
+    )
 
-    def ci(a: np.ndarray) -> list[float]:
-        return [float(np.percentile(a, 2.5)), float(np.percentile(a, 97.5))]
-
-    out: dict = {"n_boot": n, "seed": seed, "levels": {}, "diff_vs_market": {}}
+    out: dict = {
+        "n_boot": n,
+        "seed": seed,
+        "block_unit": "season",
+        "n_blocks": int(n_blocks),
+        "confidence_level": 0.95,
+        "interval_method": "percentile",
+        "resampling": (
+            "paired season-cluster bootstrap: sample complete seasons with replacement; "
+            "retain every eligible game in each sampled season"
+        ),
+        "levels": {},
+        "diff_vs_market": {},
+    }
     for k in keys:
         out["levels"][k] = {
-            "log_loss_ci": ci(s[f"ll_{k}"]),
-            "brier_ci": ci(s[f"br_{k}"]),
-            "accuracy_ci": ci(s[f"ac_{k}"]),
+            "log_loss_ci": _percentile_ci(sampled[f"ll_{k}"]),
+            "brier_ci": _percentile_ci(sampled[f"br_{k}"]),
+            "accuracy_ci": _percentile_ci(sampled[f"ac_{k}"]),
         }
     for k in keys:
         if k == "market":
             continue
-        dl, db = s[f"ll_{k}"] - s["ll_market"], s[f"br_{k}"] - s["br_market"]
-        obs_l = float(ll[k].mean() - ll["market"].mean())
-        obs_b = float(br[k].mean() - br["market"].mean())
+        dl = sampled[f"ll_{k}"] - sampled["ll_market"]
+        db = sampled[f"br_{k}"] - sampled["br_market"]
         out["diff_vs_market"][k] = {
-            "log_loss": obs_l,
-            "log_loss_ci": ci(dl),
-            "log_loss_p_better_than_market": float(np.mean(dl < 0)),
-            "brier": obs_b,
-            "brier_ci": ci(db),
+            "log_loss": float(ll[k].mean() - ll["market"].mean()),
+            "log_loss_ci": _percentile_ci(dl),
+            "bootstrap_share_log_loss_better_than_market": float(np.mean(dl < 0)),
+            "brier": float(br[k].mean() - br["market"].mean()),
+            "brier_ci": _percentile_ci(db),
         }
-    # ens vs the constrained variants (is the constraint better out of sample?)
     for k in ("ens_cap1", "ens_pool"):
-        dl = s[f"ll_{k}"] - s["ll_ens"]
+        dl = sampled[f"ll_{k}"] - sampled["ll_ens"]
+        db = sampled[f"br_{k}"] - sampled["br_ens"]
         out["diff_vs_market"][f"{k}_minus_ens"] = {
             "log_loss": float(ll[k].mean() - ll["ens"].mean()),
-            "log_loss_ci": ci(dl),
+            "log_loss_ci": _percentile_ci(dl),
             "brier": float(br[k].mean() - br["ens"].mean()),
-            "brier_ci": ci(s[f"br_{k}"] - s["br_ens"]),
+            "brier_ci": _percentile_ci(db),
         }
     return out
 
 
+def ats_block(d: pd.DataFrame, margin_col: str) -> dict:
 def ats_block(d: pd.DataFrame, margin_col: str) -> dict:
     """ATS against the closing spread betting the side the model prefers."""
 
@@ -458,25 +595,56 @@ def _market_share(folds: list[dict], residual: bool) -> float:
 # ------------------------------------------------------------------ full audit
 def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
     wf, folds = walk_forward(df)
+    population = population_audit(wf)
     d = scoring_frame(wf)
     y = outcomes(d)
     keys = [*SCORED, *VARIANTS]
+    fav = {k: heavy_fav(d[f"{k}_prob"].to_numpy(float), y) for k in keys}
+    for i, k in enumerate(keys):
+        p = d[f"{k}_prob"].to_numpy(float)
+        pf = np.maximum(p, 1 - p)
+        yf = np.where(p >= 0.5, y, 1 - y)
+        mask = pf >= 0.75
+        if mask.any():
+            intervals = _season_bootstrap_pair(
+                pf[mask], yf[mask], d.loc[mask, "season"].to_numpy(), n_boot, BOOT_SEED + 10 + i
+            )
+            fav[k].update(intervals)
+
+    source_ids = {
+        k: set(d.loc[d[f"{k}_prob"].notna(), "game_id"].astype(str)) for k in SCORED
+    }
+    paired_ids = sorted(source_ids["market"])
+    paired = {
+        "sources": SCORED,
+        "n_games": int(len(d)),
+        "same_game_ids": all(source_ids[k] == source_ids["market"] for k in SCORED),
+        "game_ids_sha256": hashlib.sha256("\n".join(paired_ids).encode()).hexdigest(),
+        "difference_sign": "MODEL_ONLY minus MARKET; negative favours MODEL_ONLY for loss metrics",
+    }
     res: dict = {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "model_version": C.MODEL_VERSION,
         "n_games": int(len(d)),
         "seasons": [int(d["season"].min()), int(d["season"].max())],
+        "population": population,
+        "paired_comparison": paired,
         "protocol": (
-            "Walk-forward estricto: cada pila se reajusta antes de cada (temporada, semana) solo "
-            "con partidos de semanas anteriores (con una aserción de no fuga). Los componentes "
-            "Elo, Kalman y LightGBM ya salen del pipeline walk-forward. Empates fuera de las "
-            "métricas probabilísticas."
+            "Strict walk-forward stacking. Every fold is fitted before each (season, week) using "
+            "earlier weeks only. The paired uncertainty interval resamples complete seasons, "
+            "retaining all eligible games within each sampled season. Ties and invalid/missing "
+            "probabilities are excluded and reconciled in population."
         ),
         "overall": {k: score(d[f"{k}_prob"].to_numpy(float), y) for k in keys},
         "per_season": {},
         "deciles": {k: deciles(d[f"{k}_prob"].to_numpy(float), y) for k in SCORED},
-        "favourite_bins": {k: favourite_bins(d[f"{k}_prob"].to_numpy(float), y) for k in keys},
-        "heavy_favourites_75": {k: heavy_fav(d[f"{k}_prob"].to_numpy(float), y) for k in keys},
+        "favourite_bins": {
+            k: favourite_bins(
+                d[f"{k}_prob"].to_numpy(float), y, d["season"].to_numpy(), n_boot
+            )
+            for k in keys
+        },
+        "heavy_favourites_75": fav,
         "heavy_favourites_on_ens_games": heavy_fav_same_games(d, y),
         "input_logit_correlation": input_correlation(d),
         "bootstrap": bootstrap(d, y, n_boot),
@@ -484,10 +652,11 @@ def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
         "stack_coefficients": weight_summary(folds),
         "folds": folds,
     }
-    for s, g in d.groupby("season"):
-        yy = outcomes(g)
-        res["per_season"][int(s)] = {
-            k: score(g[f"{k}_prob"].to_numpy(float), yy) for k in (*SCORED, "ens_cap1", "ens_pool")
+    for season, group in d.groupby("season"):
+        yy = outcomes(group)
+        res["per_season"][int(season)] = {
+            k: score(group[f"{k}_prob"].to_numpy(float), yy)
+            for k in (*SCORED, "ens_cap1", "ens_pool")
         }
     res["extremizing"] = extremizing_verdict(res)
     res["gate"] = {
@@ -502,6 +671,7 @@ def audit(df: pd.DataFrame, n_boot: int = BOOT_N) -> tuple[dict, pd.DataFrame]:
     return res, d
 
 
+def extremizing_verdict(res: dict) -> dict:
 def extremizing_verdict(res: dict) -> dict:
     o, hf = res["overall"], res["heavy_favourites_on_ens_games"]
     bd = res["bootstrap"]["diff_vs_market"]
