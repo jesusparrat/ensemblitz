@@ -17,7 +17,7 @@
 
 ## Mandatory checks before calling a change done
 
-Run all of them, in this order, and paste the result in the PR. If one fails, fix the cause; do not disable the check or widen its tolerance so it passes.
+Run all of them, in this order, and paste the result in the PR. The environment comes from `uv.lock` and `.python-version` (Python 3.12, the same as CI): `make install` once, then run each command inside `.venv` or with `uv run --frozen`. If one fails, fix the cause; do not disable the check or widen its tolerance so it passes.
 
 ```bash
 ruff check . && ruff format --check .
@@ -61,3 +61,51 @@ A model change that improves the baseline is accepted by regenerating the artefa
 - `scripts/audit_injuries.py`: audit of the nflverse injury reports (needs network); result in `reports/injury_audit.json`.
 - `src/ensemblitz/impact.py`, `margin.py`, `phase1.py`, `phase1_report.py`: per-player injury impact (value over replacement, probability of playing, discrete margin table). `ensemblitz phase1 [--full]` regenerates `reports/phase1_*` and `reports/PHASE1.md`. Not wired into production. `impact.notable_absences` feeds the context lines on the site.
 - `src/ensemblitz/site/`: `build.py` (data and pages), `i18n.py` (language formats), `strings.py` (UI strings), `templates/`, `static/`.
+- `src/ensemblitz/contract.py`, `schemas/predictions.v1.schema.json`, `docs/CONTRACT.md`: prediction contract v1 (provenance, conventions, validation). Defined in PR 1a, wired into the pipeline in PR 1b.
+
+## Governance and fixed rules
+
+### Work rules
+
+- One topic per PR, on its own branch from the latest `main`. Nothing is merged without Jesús saying so. No force-push to `main`, no direct commits.
+- Each PR description (in Spanish) lists: what changes, why, the files, the checks with their numbers and what is left for later.
+- The environment is locked: dependencies change only by editing `pyproject.toml` and committing the regenerated `uv.lock` in the same PR. CI runs `uv lock --check` and `uv sync --frozen`; `UV_FROZEN=1` keeps `uv run` from re-resolving.
+- No paid or quota-consuming call (The Odds API, agents) without need; prefer cached data.
+
+### Review of every PR
+
+- Technical review: checks above, tests for every behaviour change, a check broken once on purpose when it is new.
+- Statistical review: any figure comes from a command; model changes go through the baseline gate with a confidence interval.
+- Product and visual review: screenshots at 375 px and desktop in both languages when the site changes; DESIGN.md rules apply.
+- NFL fan review: the "why" and the context must make sense to someone who follows the league.
+
+### Architecture principles
+
+- **Single source of truth.** The prediction files under `predictions/`, described by the contract v1 (`docs/CONTRACT.md`), are the only source of every published number. Reports and the site are representations of them.
+- **The site only formats.** `site/build.py` must not simulate, refit or derive new figures. Allowed: formatting, the documented subtraction of printed integers (`gap_pts`), and margin and total from the printed expected points. Today it still re-simulates for the histograms (audit finding C8); PR 1b removes it.
+- **One convention per quantity.** Margins in data are home minus away. Probabilities are the home team's. Timestamps are UTC with `Z`. The display uses Europe/Madrid on `/es/` and America/New_York (ET) on `/en/`. A market figure always names its source and is called "closing" only when it is the closing line.
+- **Append-only picks.** A published snapshot is never edited. From PR 1b each run writes a new snapshot with SHA-256 in a manifest, and git history proves the time of publication (no commit field inside the manifest).
+- **Provenance.** Published artifacts carry `git_sha` from a clean tree (`contract.provenance(production=True)`), `data_snapshot` hashes and a `model_version` that is bumped by any model or simulator change. Local artifacts are flagged `reproducible: false`.
+
+### Official sequence
+
+1. **PR 1a:** `uv.lock`, a single Python version, contract v1 (schema, `contract.py`, tests), this governance section.
+2. **PR 1b:** append-only ledger (including the five historical snapshots of `week12.json` rebuilt from git without changes), SHA-256 manifest, `verify_integrity.py`, v0/v1 reader, writer on v1, site without re-simulation.
+3. **PR 2:** statistical audit in the open: 2133 vs 2141 games, model-only 64.8% vs market 66.4%, the ensemble margin equal to the spread, market naming, news adjustment scope, and finding C16 below.
+4. **PR 3:** site and data fixes: ET on `/en/`, one sign convention per row, one market figure per page, tables at 375 px, no false "closing".
+5. **PR 4:** visual system: DESIGN.md from references, three mock-ups to choose from, typographic team badges generated in code, UI icons.
+6. **PR 5:** a real "why": unit match-ups adjusted for opponent and play (NGS, PFR, FTN), "matchups to watch", reading levels.
+7. **PR 6:** product: filters and sorting, follow a team, compare, share, alerts, more frequent batch updates.
+
+### Fixed rules
+
+- The headline number is the model on its own. The market is shown only as a reference.
+- The site is bilingual: Spanish at the root, English under `/en/`, with the same content.
+- Everything is public: code, data outputs, reports and the method.
+- No official NFL logos or derivatives of them: team badges are typographic and generated in code.
+- No copying of armchairlogan, in code, text or design. It is a reference for clarity only.
+- Out of scope, by decision: parlays, a Rust rewrite, and ingesting news from X.
+
+### Known restriction to resolve (finding C16, PR 2)
+
+`reports/odds/*.md` and `reports/odds/*.json` publish per-bookmaker prices, the best price per side with the bookmaker name, and an expected value per unit, computed against the blended ensemble rather than the headline. The rule above against showing individual bookmaker prices or expected value applies to the site, but the repository is public too. PR 2 decides what stays: at most the consensus and the number of books. Until then, do not add new per-bookmaker or EV outputs.
