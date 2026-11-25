@@ -58,7 +58,7 @@ def lines(odds: pd.DataFrame) -> pd.DataFrame:
 
 
 def consensus_for_teams(odds: pd.DataFrame, home: str, away: str) -> dict | None:
-    """Shin consensus and median lines for one matchup, with no need for a prediction file."""
+    """Aggregate mean-Shin probability and operator count for one matchup."""
     bp = book_probs(odds)
     if bp.empty:
         return None

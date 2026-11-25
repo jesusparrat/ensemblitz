@@ -1,5 +1,7 @@
 # Backtest walk-forward
 
+> **Artefacto anterior a PR2.** Este informe todavía no refleja la separación explícita MODEL_ONLY / MARKET / ENSEMBLE ni la reconciliación de población incorporadas al generador. La siguiente ejecución del backtest regenerará el informe con MODEL_ONLY separado. Para incertidumbre estadística usa `uv run python scripts/audit_pr2.py`.
+
 Temporadas 2018–2025, 2141 partidos de temporada regular. Para cada semana, todo (ratings, Kalman, LightGBM, pesos del ensemble) se calcula solo con partidos anteriores. Generado: 2026-11-17T20:45:32+00:00.
 
 ## Global por modelo

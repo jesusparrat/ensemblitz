@@ -108,6 +108,6 @@ A model change that improves the baseline is accepted by regenerating the artefa
 
 ### Odds data governance (PR 2)
 
-The public The Odds API terms reviewed on 2026-11-26 permit displaying data and derived values in user-facing websites, dashboards and analytical tools, while prohibiting redistribution as a standalone raw-data feed. This review is based on the publicly posted standard terms, not an account-specific legal opinion; any plan-specific agreement or source restriction takes precedence.
+The public The Odds API terms reviewed on 2026-11-26 (https://the-odds-api.com/terms-and-conditions.html) permit displaying data and derived values in user-facing websites, dashboards and analytical tools, provided the data is not the primary product being sold or redistributed. They prohibit redistribution as a standalone raw-data feed. This review is based on the publicly posted standard terms, not an account-specific legal opinion; any plan-specific agreement or source restriction takes precedence.
 
 Public repository outputs may retain only the aggregate head-to-head Shin probability (an unweighted mean of the per-operator no-vig probabilities), its capture timestamp and the number of contributing operators. Do not publish individual prices, operator names or keys, best prices, per-operator tables, EV, or an edge computed against the market-anchored ensemble. Historical commits are not rewritten; remediation applies to current files and future outputs. Do not make paid or quota-consuming API calls for an audit.

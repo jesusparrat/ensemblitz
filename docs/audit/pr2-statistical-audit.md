@@ -58,7 +58,7 @@ The prediction writer adjusts only ensemble probability and margin. The model-on
 
 ### Odds-data governance
 
-The public standard The Odds API terms reviewed on 2026-11-26 permit user-facing dashboards and derived values while prohibiting redistribution as a standalone raw-data feed. Current `reports/odds/` outputs now retain only aggregate mean-Shin probability, capture timestamp, and operator count. Individual prices, operator identifiers, best prices, EV and ensemble-relative edge are removed from current report outputs. Account-specific terms may differ; this is not a legal opinion.
+The public standard The Odds API terms reviewed on 2026-11-26 permit user-facing dashboards and derived values, provided the data is not the primary product being sold or redistributed, while prohibiting redistribution as a standalone raw-data feed ([Terms and Conditions](https://the-odds-api.com/terms-and-conditions.html)). Current `reports/odds/` outputs now retain only aggregate mean-Shin probability, capture timestamp, and operator count. Individual prices, operator identifiers, best prices, EV and ensemble-relative edge are removed from current report outputs. Account-specific terms may differ; this is not a legal opinion.
 
 ### Margin sign convention
 

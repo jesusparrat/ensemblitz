@@ -45,7 +45,7 @@ def _market_case_study() -> dict:
         "prediction_generated_at": odds["predictions_generated_at"],
         "model_only_home_probability": quote["model_only_home_prob"],
         "model_only_minus_market_gap": quote["gap_model_only"],
-        "legacy_mean_multiplicative_probability": 0.8407,
+        # Preserved from the pre-remediation report in the parent commit; no longer published.\n        "legacy_mean_multiplicative_probability": 0.8407,
         "interpretation": (
             "The nflverse value is the no-vig probability from -700/+500 moneylines (84.00%). "
             "The Odds API value is the unweighted mean of 42 operator-level Shin probabilities "
@@ -114,14 +114,16 @@ def render(res: dict) -> str:
         "",
         f"- Rows in regular-season scope: {pop['n_rows_in_scope']}",
         f"- Played games: {pop['n_played']}",
-        f"- Rows with valid probabilities for every compared source: {pop['n_valid_probability_rows']}",
+        f"- Rows with valid probabilities for every compared source: "
+        f"{pop['n_valid_probability_rows']}",
         f"- Ties: {pop['n_ties']}",
         f"- Rows with missing predictions: {pop['n_missing_prediction_rows']}",
         f"- Rows with invalid probabilities: {pop['n_invalid_probability_rows']}",
         f"- Final scored population: {pop['n_scored']}",
         f"- Excluded from scoring: {pop['n_excluded_from_scoring']}",
         "",
-        "The exclusions below are game-level records, not an assumption that every difference is a tie.",
+        "The exclusions below are game-level records, not an assumption that every "
+        "difference is a tie.",
         "",
     ]
     if pop["excluded_games"]:
@@ -138,7 +140,8 @@ def render(res: dict) -> str:
         "## Paired source comparison",
         "",
         f"- Sources: {', '.join(res['paired_comparison']['sources'])}",
-        f"- Same game IDs across MODEL_ONLY, MARKET and ENSEMBLE: {res['paired_comparison']['same_game_ids']}",
+        f"- Same game IDs across MODEL_ONLY, MARKET and ENSEMBLE: "
+        f"{res['paired_comparison']['same_game_ids']}",
         f"- Paired N: {res['paired_comparison']['n_games']}",
         f"- SHA-256 of sorted paired game IDs: `{res['paired_comparison']['game_ids_sha256']}`",
         "",
@@ -237,7 +240,9 @@ def render(res: dict) -> str:
         "## Odds-data governance",
         "",
         "The public standard terms reviewed 2026-11-26 permit user-facing dashboards and derived "
-        "values, while prohibiting redistribution as a standalone raw feed. Current odds reports "
+        "values provided the data is not the primary product being sold or redistributed, while "
+        "prohibiting redistribution as a standalone raw feed "
+        "(https://the-odds-api.com/terms-and-conditions.html). Current odds reports "
         "retain only the aggregate mean-Shin probability, capture time, and operator count. "
         "Individual prices, operator identifiers, best prices, EV and ensemble-relative edge have "
         "been removed from current report outputs. Account-specific terms may differ.",

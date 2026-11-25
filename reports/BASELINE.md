@@ -1,5 +1,8 @@
 # Línea base 2018 a 2025
 
+> **Informe histórico, no válido para inferencia estadística tras PR2.** Los intervalos de este documento proceden de un bootstrap IID por partido y no preservan la dependencia temporal entre partidos. No uses sus intervalos ni sus afirmaciones de significación. PR2 los sustituye por bootstrap emparejado de temporadas completas; ejecuta `uv run python scripts/audit_pr2.py` para generar el informe actualizado. Los puntos estimados de abajo se conservan como referencia histórica.
+
+
 Generado el 2026-11-18T21:00:16+00:00. 2133 partidos de temporada regular (2018 a 2025, empates fuera). Datos en `reports/baseline_2018_2025.json`, gráfico en `reports/baseline_calibration.png`. Este documento lo genera `ensemblitz baseline`; no se edita a mano.
 
 ## Conclusiones en lenguaje llano

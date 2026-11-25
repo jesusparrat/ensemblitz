@@ -105,7 +105,9 @@ def build_results(reg: pd.DataFrame, kf_params: dict | None = None) -> dict:
             c: M.summarize(d.dropna(subset=[f"{c}_prob"]), c)
             for c in ("market", "model_only", "kf", "lgbm", "ens")
         }
-    res["calibration"] = {c: M.calibration_table(reg, f"{c}_prob") for c in ("ens", "market")}
+    res["calibration"] = {
+        c: M.calibration_table(reg, f"{c}_prob") for c in ("model_only", "market", "ens")
+    }
     return res
 
 
@@ -167,12 +169,12 @@ def write_report(results: dict, extra_md: str = "") -> None:
         "",
         "## Por temporada (acierto / Brier / log loss / ATS%)",
         "",
-        "| Temporada | Mercado | Kalman | LightGBM | Ensemble |",
-        "|---|---|---|---|---|",
+        "| Temporada | Mercado | Modelo propio | Kalman | LightGBM | Ensemble |",
+        "|---|---|---|---|---|---|",
     ]
     for s, d in results["per_season"].items():
         cells = []
-        for c in ("market", "kf", "lgbm", "ens"):
+        for c in ("market", "model_only", "kf", "lgbm", "ens"):
             r = d[c]
             ats_pct = "—" if c == "market" else f"{r['ats']['win_pct'] * 100:.1f}%"
             cells.append(
@@ -182,15 +184,22 @@ def write_report(results: dict, extra_md: str = "") -> None:
         lines.append(f"| {s} | " + " | ".join(cells) + " |")
     lines += [
         "",
-        "## Calibración del ensemble",
+        "## Calibración por fuente",
         "",
-        "| Tramo | N | Prob. media | Acierto real |",
-        "|---|---|---|---|",
     ]
-    for r in results["calibration"]["ens"]:
-        lines.append(
-            f"| {r['bin']} | {r['n']} | {r['pred'] * 100:.1f}% | {r['actual'] * 100:.1f}% |"
-        )
+    for c in ("model_only", "market", "ens"):
+        lines += [
+            f"### {LABELS[c]}",
+            "",
+            "| Tramo | N | Prob. media | Acierto real |",
+            "|---|---|---|---|",
+        ]
+        for r in results["calibration"][c]:
+            lines.append(
+                f"| {r['bin']} | {r['n']} | {r['pred'] * 100:.1f}% | "
+                f"{r['actual'] * 100:.1f}% |"
+            )
+        lines.append("")
     if extra_md:
         lines += ["", extra_md]
     lines += [

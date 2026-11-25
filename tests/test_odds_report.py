@@ -78,6 +78,9 @@ def test_discrepancy_report_flags_and_explains():
         "books",
         "book_spread_home",
         "book_total",
+        "consensus_home_prob_mult",
+        "our_margin_minus_book",
+        "our_cover_prob_home",
     }
     assert forbidden.isdisjoint(g)
     encoded = json.dumps(rep)
@@ -104,3 +107,40 @@ def test_consensus_quote_exposes_only_aggregate_probability_and_count():
     assert quote is not None
     assert set(quote) == {"consensus_home_prob_shin", "n_books", "fetched_at"}
     assert quote["n_books"] == 2
+
+
+
+def test_prediction_market_quote_publishes_only_aggregate_h2h_fields():
+    from ensemblitz import predict
+
+    row = pd.Series(
+        {
+            "home_team": "HOU",
+            "away_team": "IND",
+            "market_prob": 0.84,
+            "spread_line": 12.5,
+            "total_line": 44.5,
+            "home_moneyline": -700,
+            "away_moneyline": 500,
+        }
+    )
+    quote = {
+        "consensus_home_prob_shin": 0.8577,
+        "n_books": 42,
+        "fetched_at": "2026-11-17T20:54:38Z",
+    }
+    market = predict._market_block(row, "2026-11-17T22:07:57Z", {("HOU", "IND"): quote})
+    api_quote = next(x for x in market if x["source"] == "odds_api_consensus")
+    assert api_quote["home_win_prob"] == 0.8577
+    assert api_quote["n_books"] == 42
+    assert api_quote["margin_home"] is None
+    assert api_quote["total_line"] is None
+    assert set(api_quote) == {
+        "source",
+        "captured_at_utc",
+        "is_closing",
+        "home_win_prob",
+        "margin_home",
+        "total_line",
+        "n_books",
+    }

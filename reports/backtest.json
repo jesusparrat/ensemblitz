@@ -601,7 +601,7 @@
         "bin": "(-0.001, 0.1]",
         "n": 3,
         "pred": 0.09434493519606153,
-        "actual": 0.0
+        "actual": 0
       },
       {
         "bin": "(0.1, 0.2]",
@@ -666,7 +666,7 @@
       "rho": 0.72,
       "hfa": 1.8,
       "sigma": 9.3,
-      "p0": 6.0
+      "p0": 6
     },
     "2016": {
       "q": 0.03,
@@ -674,7 +674,7 @@
       "rho": 0.72,
       "hfa": 1.8,
       "sigma": 9.3,
-      "p0": 6.0
+      "p0": 6
     },
     "2017": {
       "q": 0.03,
@@ -682,7 +682,7 @@
       "rho": 0.72,
       "hfa": 1.8,
       "sigma": 9.3,
-      "p0": 6.0
+      "p0": 6
     },
     "2018": {
       "q": 0.4998178436999691,
@@ -690,7 +690,7 @@
       "rho": 0.6867575037021425,
       "hfa": 2.1664445308488043,
       "sigma": 8.305387193758781,
-      "p0": 6.0
+      "p0": 6
     },
     "2019": {
       "q": 0.4743595814594606,
@@ -698,7 +698,7 @@
       "rho": 0.5784625782955795,
       "hfa": 2.450602344888309,
       "sigma": 8.576780291648715,
-      "p0": 6.0
+      "p0": 6
     },
     "2020": {
       "q": 0.5,
@@ -706,7 +706,7 @@
       "rho": 0.6574163579391541,
       "hfa": 1.748257416771318,
       "sigma": 8.539123824413156,
-      "p0": 6.0
+      "p0": 6
     },
     "2021": {
       "q": 0.5,
@@ -714,7 +714,7 @@
       "rho": 0.5611020783881729,
       "hfa": 1.5871404008552612,
       "sigma": 8.501184503523907,
-      "p0": 6.0
+      "p0": 6
     },
     "2022": {
       "q": 0.43447288766570885,
@@ -722,7 +722,7 @@
       "rho": 0.5691807395295433,
       "hfa": 1.4840615422309396,
       "sigma": 8.62532889603751,
-      "p0": 6.0
+      "p0": 6
     },
     "2023": {
       "q": 0.40207029044569326,
@@ -730,7 +730,7 @@
       "rho": 0.5643566105041337,
       "hfa": 1.6298249305971302,
       "sigma": 8.510810967885808,
-      "p0": 6.0
+      "p0": 6
     },
     "2024": {
       "q": 0.3202075328313348,
@@ -738,7 +738,7 @@
       "rho": 0.5957707581377835,
       "hfa": 1.7470262051430825,
       "sigma": 8.600985196178526,
-      "p0": 6.0
+      "p0": 6
     },
     "2025": {
       "q": 0.3183397278480884,
@@ -746,7 +746,7 @@
       "rho": 0.5932006315747699,
       "hfa": 1.784483547344213,
       "sigma": 8.595181539527433,
-      "p0": 6.0
+      "p0": 6
     },
     "2026": {
       "q": 0.38277864256935656,
@@ -754,7 +754,7 @@
       "rho": 0.5796427238051872,
       "hfa": 1.8421240593974524,
       "sigma": 8.540966406670762,
-      "p0": 6.0
+      "p0": 6
     }
   },
   "total_mae": {
@@ -766,7 +766,7 @@
     "tables": {
       "ens": [
         {
-          "threshold": 0.0,
+          "threshold": 0,
           "n": 2133,
           "su_hit_rate": 0.5405532114392874,
           "su_hit_ci95": 0.021219280213746607,
@@ -828,7 +828,7 @@
       ],
       "lgbm_mkt": [
         {
-          "threshold": 0.0,
+          "threshold": 0,
           "n": 2133,
           "su_hit_rate": 0.45382090951711207,
           "su_hit_ci95": 0.021219280213746607,
@@ -890,7 +890,7 @@
       ],
       "lgbm": [
         {
-          "threshold": 0.0,
+          "threshold": 0,
           "n": 2133,
           "su_hit_rate": 0.40646976090014064,
           "su_hit_ci95": 0.021219280213746607,
@@ -952,7 +952,7 @@
       ],
       "kf": [
         {
-          "threshold": 0.0,
+          "threshold": 0,
           "n": 2133,
           "su_hit_rate": 0.3919362400375059,
           "su_hit_ci95": 0.021219280213746607,
@@ -1013,6 +1013,8 @@
         }
       ]
     },
-    "verdict": "en todos los partidos el ensemble tiene log loss 0.611 frente a 0.610 del mercado (+0.0016; menor es mejor); ning\u00fan modelo supera el punto de equilibrio de 52,4 % ATS con significancia (IC95 incluye o queda por debajo de \u00e9l) y ninguno mejora al mercado en log loss de forma clara: **no hay evidencia de que le ganemos a la l\u00ednea de cierre**. El valor de v0.1 est\u00e1 en las probabilidades calibradas y la distribuci\u00f3n de marcadores, no en una ventaja contra el mercado."
-  }
+    "verdict": "en todos los partidos el ensemble tiene log loss 0.611 frente a 0.610 del mercado (+0.0016; menor es mejor); ningún modelo supera el punto de equilibrio de 52,4 % ATS con significancia (IC95 incluye o queda por debajo de él) y ninguno mejora al mercado en log loss de forma clara: **no hay evidencia de que le ganemos a la línea de cierre**. El valor de v0.1 está en las probabilidades calibradas y la distribución de marcadores, no en una ventaja contra el mercado."
+  },
+  "pr2_status": "legacy_snapshot",
+  "pr2_note": "This snapshot predates PR2's explicit MODEL_ONLY output. The backtest writer now emits MODEL_ONLY, MARKET and ENSEMBLE separately; regenerate the report on the next backtest run. Use reports/pr2_statistical_audit.json for the paired season-block statistical audit."
 }
