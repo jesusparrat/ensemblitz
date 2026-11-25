@@ -52,3 +52,12 @@ jobs:
           fi
       - name: Offline PR2 statistical audit
         run: uv run python scripts/audit_pr2.py
+      - name: Upload PR2 audit report
+        uses: actions/upload-artifact@65462800FD760344B1A7B4382951275A0ABB4808
+        with:
+          name: pr2-statistical-audit
+          path: |
+            reports/pr2_statistical_audit.json
+            docs/audit/pr2-statistical-audit.md
+          if-no-files-found: error
+          retention-days: 7
