@@ -101,4 +101,6 @@ def test_lightgbm_training_mask_excludes_current_and_future_weeks(league):
     train = games.loc[mask]
     assert not train.empty
     assert train["played"].all() and train["result"].notna().all()
-    assert ((train["season"] < CUT[0]) | ((train["season"] == CUT[0]) & (train["week"] < CUT[1]))).all()
+    assert (
+        (train["season"] < CUT[0]) | ((train["season"] == CUT[0]) & (train["week"] < CUT[1]))
+    ).all()

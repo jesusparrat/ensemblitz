@@ -201,7 +201,11 @@ def to_markdown(rep: dict) -> str:
     if flagged:
         L += ["", "## Discrepancias de 5 puntos porcentuales o más", ""]
         for g in flagged:
-            L.append(f"- **{g['away']} @ {g['home']}**: brecha {g['gap_model_only'] * 100:+.1f} pp. " + "; ".join(g["likely_reasons"]) + ".")
+            L.append(
+                f"- **{g['away']} @ {g['home']}**: brecha {g['gap_model_only'] * 100:+.1f} pp. "
+                + "; ".join(g["likely_reasons"])
+                + "."
+            )
     L += [
         "",
         "El consenso es una estadística agregada, no una cuota disponible ni un precio de cierre. "
