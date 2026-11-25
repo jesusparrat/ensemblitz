@@ -1,5 +1,5 @@
 name: CI
-# Temporary PR2 branch validation; remove after the audit run is verified.
+# Temporary PR2 branch validation; remove after the audit run is verified (retry 2).
 on:
   pull_request:
   push:
