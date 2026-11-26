@@ -103,7 +103,14 @@ def add_ensemble_walk_forward(
 ) -> pd.DataFrame:
     """Refit stack + margin/total blend before every batch using only earlier OOS predictions."""
     df = df.copy()
-    for c in ("ens_prob", "ens_margin", "ens_total"):
+    for c in (
+        "ens_prob",
+        "ens_margin",
+        "ens_total",
+        "model_only_prob",
+        "model_only_margin",
+        "model_only_total",
+    ):
         df[c] = np.nan
     need = ["market_prob", "elo_prob", "kf_prob", "lgbm_prob", "lgbm_mkt_prob"]
     for (season, week), batch in df.groupby(["season", "week"], sort=True):
@@ -115,4 +122,7 @@ def add_ensemble_walk_forward(
             continue
         ens = Ensemble(pool)
         df.loc[batch.index, ["ens_prob", "ens_margin", "ens_total"]] = ens.predict(batch).to_numpy()
+        df.loc[batch.index, "model_only_prob"] = ens.no_market.prob(batch)
+        df.loc[batch.index, "model_only_margin"] = ens.no_market.margin(batch)
+        df.loc[batch.index, "model_only_total"] = ens.no_market.total(batch)
     return df

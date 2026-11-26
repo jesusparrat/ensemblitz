@@ -49,18 +49,18 @@ A v1 document is one prediction run for one `(season, week)`. Top level:
 ### Market naming
 
 - Each market figure is a `market[]` quote with an explicit `source`:
-  - `nflverse_line`: spread, total and moneylines in the nflverse schedule at prediction time, converted to a probability.
-  - `odds_api_consensus`: Shin de-vigged consensus of The Odds API books, with `n_books`.
-- `captured_at_utc` says when the quote was read. `is_closing` is `true` only for the real closing line. A line saved with a pre-game prediction is **not** "closing", and the site must not call it that (audit finding C7).
+  - `nflverse_line`: spread, total and moneylines in the nflverse schedule read for the prediction run. The home moneyline is de-vigged against the away moneyline when both exist; otherwise the home-perspective `spread_line` is converted to a probability. In nflverse, `spread_line > 0` means the home team is favoured.
+  - `odds_api_consensus`: aggregate head-to-head probability from The Odds API, with `n_books`. The stored Shin value is the unweighted arithmetic mean of the per-operator Shin no-vig probabilities, not a pooled Shin calculation. For this source, `margin_home` and `total_line` are null; only the aggregate probability and operator count are retained.
+- `captured_at_utc` records when the quote was read into the snapshot. For The Odds API this is the cache's `fetched_at`; for nflverse it is the prediction-run read time, not an independently verified source-side quote timestamp. `data_cutoff_utc` is the latest observed time covered by the input data. `is_closing` is `true` only for a verified closing line. A line saved with a pre-game prediction is **not** "closing", and the site must not call it that (audit finding C7).
 - One quote per source per game. The site shows one market figure per page, and its source is named (audit finding C5).
-- Individual bookmaker prices and expected value are not part of the contract (see AGENTS.md, finding C16).
+- Individual operator prices, operator names, best prices and expected value are not part of the contract (see AGENTS.md, Odds data governance).
 
 ### Headline and ensemble
 
 - `headline` is the published number: the model on its own (Elo, Kalman and LightGBM stacked), with no market input.
 - `ensemble` is a reference only: the model blended with the market. When a market line exists, its margin is anchored on the spread. In 2026 weeks 11 and 12 the fitted margin weights were `[1, 0, 0, 0, 0]`, so `ensemble.margin_home` equals the nflverse spread exactly (audit finding C1). It must never be presented as a model output.
 - `components` holds the home win probability of each fitted model (`elo`, `kf`, `lgbm`, `lgbm_mkt`). The market is not a component in the contract; it lives in `market[]`.
-- `news_adjustment.applies_to` records which block news moved. Since web v2 the pipeline moves only the ensemble (audit finding C12); PR 2 decides whether that changes.
+- `news_adjustment.applies_to` records which block news moved. The current writer adjusts only the market-anchored ensemble probability and margin; the model-only headline remains unchanged. The backtest does not evaluate news adjustments because no historical point-in-time news archive is part of its scoring inputs.
 
 ## 4. Game record
 

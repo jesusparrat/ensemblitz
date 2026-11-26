@@ -1,0 +1,555 @@
+{
+  "audit_version": 2,
+  "generated_at_utc": "2026-11-26T23:05:07+00:00",
+  "model_version": "0.1.0",
+  "method": {
+    "season_range": [
+      2018,
+      2025
+    ],
+    "bootstrap_unit": "2_week_block",
+    "block_weeks": 2,
+    "stratified_by": "season",
+    "n_blocks": 72,
+    "n_seasons": 8,
+    "replicates": 10000,
+    "seed": 20260,
+    "confidence_level": 0.95,
+    "interval_method": "percentile",
+    "paired": true,
+    "sensitivity_block_weeks": [
+      1,
+      2,
+      4
+    ]
+  },
+  "population": {
+    "season_range": [
+      2018,
+      2025
+    ],
+    "regular_season_week_limit": 18,
+    "n_rows_in_scope": 2141,
+    "n_played": 2141,
+    "n_valid_probability_rows": 2141,
+    "n_ties": 8,
+    "n_missing_prediction_rows": 0,
+    "n_invalid_probability_rows": 0,
+    "n_scored": 2133,
+    "n_excluded_from_scoring": 8,
+    "n_seasons": 8,
+    "scored_game_ids_sha256": "6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144",
+    "excluded_games": [
+      {
+        "game_id": "2018_01_PIT_CLE",
+        "season": 2018,
+        "week": 1,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2018_02_MIN_GB",
+        "season": 2018,
+        "week": 2,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2019_01_DET_ARI",
+        "season": 2019,
+        "week": 1,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2020_03_CIN_PHI",
+        "season": 2020,
+        "week": 3,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2021_10_DET_PIT",
+        "season": 2021,
+        "week": 10,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2022_01_IND_HOU",
+        "season": 2022,
+        "week": 1,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2022_13_WAS_NYG",
+        "season": 2022,
+        "week": 13,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      },
+      {
+        "game_id": "2025_04_GB_DAL",
+        "season": 2025,
+        "week": 4,
+        "result": 0.0,
+        "reasons": [
+          "tie"
+        ],
+        "missing_fields": [],
+        "invalid_fields": []
+      }
+    ]
+  },
+  "paired_comparison": {
+    "sources": [
+      "market",
+      "model_only",
+      "ens"
+    ],
+    "n_games": 2133,
+    "same_game_ids": true,
+    "game_ids_sha256": "6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144",
+    "difference_sign": "source minus MARKET; negative favours the source for loss metrics"
+  },
+  "overall": {
+    "model_only": {
+      "n": 2133,
+      "accuracy": 0.6479137365213314,
+      "brier": 0.22167824662423968,
+      "log_loss": 0.6343967389166599,
+      "calibration_intercept": -0.05026178026607828,
+      "calibration_slope": 0.9283764885539115
+    },
+    "market": {
+      "n": 2133,
+      "accuracy": 0.6643225503984997,
+      "brier": 0.2110840486336629,
+      "log_loss": 0.609681478773615,
+      "calibration_intercept": -0.06408502215253925,
+      "calibration_slope": 1.0564378040608902
+    },
+    "ens": {
+      "n": 2133,
+      "accuracy": 0.6624472573839663,
+      "brier": 0.21165328882424855,
+      "log_loss": 0.6112502607035134,
+      "calibration_intercept": -0.03577091905584216,
+      "calibration_slope": 0.9907998831163339
+    }
+  },
+  "paired_differences_vs_market": {
+    "model_only": {
+      "log_loss": 0.024715260143044926,
+      "log_loss_ci": [
+        0.017308418862681637,
+        0.032418103127385474
+      ],
+      "brier": 0.010594197990576787,
+      "brier_ci": [
+        0.007235300541009495,
+        0.014013720911705432
+      ],
+      "bootstrap_share_log_loss_better_than_market": 0.0
+    },
+    "ens": {
+      "log_loss": 0.0015687819298983996,
+      "log_loss_ci": [
+        6.153586020389845e-05,
+        0.0030086287970977786
+      ],
+      "brier": 0.000569240190585657,
+      "brier_ci": [
+        -5.082000224544067e-05,
+        0.0011669502061589598
+      ],
+      "bootstrap_share_log_loss_better_than_market": 0.0205
+    }
+  },
+  "sensitivity": {
+    "1_week": {
+      "block_weeks": 1,
+      "n_blocks": 144,
+      "n_seasons": 8,
+      "diff_vs_market": {
+        "model_only": {
+          "log_loss": 0.024715260143044926,
+          "log_loss_ci": [
+            0.017332835275717072,
+            0.03232525790773356
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0,
+          "brier": 0.010594197990576787,
+          "brier_ci": [
+            0.007322156561317999,
+            0.01389859773328742
+          ]
+        },
+        "ens": {
+          "log_loss": 0.0015687819298983996,
+          "log_loss_ci": [
+            -5.8479549299081386e-05,
+            0.00320805894762329
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0288,
+          "brier": 0.000569240190585657,
+          "brier_ci": [
+            -0.00010327437831469386,
+            0.0012436021844392413
+          ]
+        },
+        "ens_cap1_minus_ens": {
+          "log_loss": -0.0006224588724815794,
+          "log_loss_ci": [
+            -0.0019540196379378818,
+            0.0006627235506112076
+          ],
+          "brier": -0.0002602016587014422,
+          "brier_ci": [
+            -0.0007381019284153231,
+            0.00020020864076217488
+          ]
+        },
+        "ens_pool_minus_ens": {
+          "log_loss": -0.0008654354614400228,
+          "log_loss_ci": [
+            -0.0022711238818612645,
+            0.0004988295061676638
+          ],
+          "brier": -0.00031110872748427165,
+          "brier_ci": [
+            -0.0008303816582467149,
+            0.00020289448995139053
+          ]
+        }
+      }
+    },
+    "2_week": {
+      "block_weeks": 2,
+      "n_blocks": 72,
+      "n_seasons": 8,
+      "diff_vs_market": {
+        "model_only": {
+          "log_loss": 0.024715260143044926,
+          "log_loss_ci": [
+            0.017308418862681637,
+            0.032418103127385474
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0,
+          "brier": 0.010594197990576787,
+          "brier_ci": [
+            0.007235300541009495,
+            0.014013720911705432
+          ]
+        },
+        "ens": {
+          "log_loss": 0.0015687819298983996,
+          "log_loss_ci": [
+            6.153586020389845e-05,
+            0.0030086287970977786
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0205,
+          "brier": 0.000569240190585657,
+          "brier_ci": [
+            -5.082000224544067e-05,
+            0.0011669502061589598
+          ]
+        },
+        "ens_cap1_minus_ens": {
+          "log_loss": -0.0006224588724815794,
+          "log_loss_ci": [
+            -0.0020593490710586553,
+            0.000806595628028983
+          ],
+          "brier": -0.0002602016587014422,
+          "brier_ci": [
+            -0.000771665547159224,
+            0.0002509863384552714
+          ]
+        },
+        "ens_pool_minus_ens": {
+          "log_loss": -0.0008654354614400228,
+          "log_loss_ci": [
+            -0.0023454707508130555,
+            0.0006037412617573035
+          ],
+          "brier": -0.00031110872748427165,
+          "brier_ci": [
+            -0.0008362925334953884,
+            0.00022486157600016955
+          ]
+        }
+      }
+    },
+    "4_week": {
+      "block_weeks": 4,
+      "n_blocks": 40,
+      "n_seasons": 8,
+      "diff_vs_market": {
+        "model_only": {
+          "log_loss": 0.024715260143044926,
+          "log_loss_ci": [
+            0.018119124084126168,
+            0.031722081180231995
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0,
+          "brier": 0.010594197990576787,
+          "brier_ci": [
+            0.007720019185983648,
+            0.01366257407440932
+          ]
+        },
+        "ens": {
+          "log_loss": 0.0015687819298983996,
+          "log_loss_ci": [
+            9.369511984794746e-05,
+            0.002999729825302657
+          ],
+          "bootstrap_share_log_loss_better_than_market": 0.0189,
+          "brier": 0.000569240190585657,
+          "brier_ci": [
+            -3.7800033398749373e-05,
+            0.0011566133141100343
+          ]
+        },
+        "ens_cap1_minus_ens": {
+          "log_loss": -0.0006224588724815794,
+          "log_loss_ci": [
+            -0.0019177382387230353,
+            0.0006525377183582257
+          ],
+          "brier": -0.0002602016587014422,
+          "brier_ci": [
+            -0.0007123652664836937,
+            0.00020028303329527102
+          ]
+        },
+        "ens_pool_minus_ens": {
+          "log_loss": -0.0008654354614400228,
+          "log_loss_ci": [
+            -0.00214972821619184,
+            0.0004360268683292117
+          ],
+          "brier": -0.00031110872748427165,
+          "brier_ci": [
+            -0.000772742747128697,
+            0.00016568576574965677
+          ]
+        }
+      }
+    }
+  },
+  "high_confidence_favourites_75": {
+    "model_only": {
+      "n": 396,
+      "predicted": 0.8086334025639068,
+      "actual": 0.7651515151515151,
+      "overconfidence_pp": 4.348188741239167,
+      "overconfidence_ci95_pp": [
+        0.5972338627344274,
+        8.036704744440701
+      ],
+      "overconfidence_ci95_pp_sensitivity": {
+        "1_week": [
+          0.64246281023998,
+          8.035963102923944
+        ],
+        "2_week": [
+          0.5972338627344274,
+          8.036704744440701
+        ],
+        "4_week": [
+          1.5937555958400713,
+          7.1666101146948025
+        ]
+      }
+    },
+    "market": {
+      "n": 470,
+      "predicted": 0.8092973241784102,
+      "actual": 0.823404255319149,
+      "overconfidence_pp": -1.4106931140738799,
+      "overconfidence_ci95_pp": [
+        -5.036850520282125,
+        2.2624564985891578
+      ],
+      "overconfidence_ci95_pp_sensitivity": {
+        "1_week": [
+          -4.87018713830926,
+          2.2060755600921875
+        ],
+        "2_week": [
+          -5.036850520282125,
+          2.2624564985891578
+        ],
+        "4_week": [
+          -4.985488472288193,
+          2.3226051677660338
+        ]
+      }
+    },
+    "ens": {
+      "n": 525,
+      "predicted": 0.8131219921303723,
+      "actual": 0.8057142857142857,
+      "overconfidence_pp": 0.7407706416086568,
+      "overconfidence_ci95_pp": [
+        -2.582145032213734,
+        4.072369343549242
+      ],
+      "overconfidence_ci95_pp_sensitivity": {
+        "1_week": [
+          -2.545669485322187,
+          3.9235331057630187
+        ],
+        "2_week": [
+          -2.582145032213734,
+          4.072369343549242
+        ],
+        "4_week": [
+          -2.357760830481209,
+          3.903350500743069
+        ]
+      }
+    }
+  },
+  "ensemble_favourites_same_games": {
+    "n": 525,
+    "actual": 0.8057142857142857,
+    "actual_ci95": [
+      0.7728098019299137,
+      0.8378871563353825
+    ],
+    "sources": {
+      "model_only": {
+        "predicted": 0.7682491607547722,
+        "overconfidence_pp": -3.7465124959513485
+      },
+      "market": {
+        "predicted": 0.800807705333843,
+        "overconfidence_pp": -0.4906580380442671
+      },
+      "ens": {
+        "predicted": 0.8131219921303723,
+        "overconfidence_pp": 0.7407706416086568
+      }
+    }
+  },
+  "stack_weight_diagnostics": {
+    "ens": {
+      "mean_sum": 1.0913243055555555,
+      "min_sum": 1.0321,
+      "max_sum": 1.2402,
+      "share_folds_sum_gt_1": 1.0
+    },
+    "model_only": {
+      "mean_sum": 1.0744708333333333,
+      "min_sum": 0.9909,
+      "max_sum": 1.2331,
+      "share_folds_sum_gt_1": 0.9722222222222222
+    },
+    "ens_cap1_minus_ens": {
+      "log_loss": -0.0006224588724815794,
+      "log_loss_ci": [
+        -0.0020593490710586553,
+        0.000806595628028983
+      ],
+      "brier": -0.0002602016587014422,
+      "brier_ci": [
+        -0.000771665547159224,
+        0.0002509863384552714
+      ]
+    },
+    "ens_pool_minus_ens": {
+      "log_loss": -0.0008654354614400228,
+      "log_loss_ci": [
+        -0.0023454707508130555,
+        0.0006037412617573035
+      ],
+      "brier": -0.00031110872748427165,
+      "brier_ci": [
+        -0.0008362925334953884,
+        0.00022486157600016955
+      ]
+    }
+  },
+  "ats_model_only": {
+    "w": 1024,
+    "l": 1057,
+    "push": 52,
+    "win_pct": 0.4920711196540125,
+    "ci95": [
+      0.4706254670913935,
+      0.5135459922655187
+    ],
+    "p_vs_50": 0.48301379077943163,
+    "p_vs_breakeven_52_38": 0.00403039277027281
+  },
+  "market_case_study": {
+    "game_id": "2026_11_IND_HOU",
+    "home": "HOU",
+    "away": "IND",
+    "kickoff_utc": "2026-11-20T01:15:00Z",
+    "nflverse_home_probability": 0.84,
+    "home_moneyline": -700.0,
+    "away_moneyline": 500.0,
+    "odds_api_mean_shin_probability": 0.8577,
+    "odds_api_n_books": 42,
+    "odds_api_fetched_at": "2026-11-17T20:54:38Z",
+    "prediction_generated_at": "2026-11-17T22:07:57Z",
+    "model_only_home_probability": 0.7452,
+    "model_only_minus_market_gap": -0.1125,
+    "legacy_mean_multiplicative_probability": 0.8407,
+    "interpretation": "The nflverse value is the no-vig probability from -700/+500 moneylines (84.00%). The Odds API value is the unweighted mean of 42 operator-level Shin probabilities (85.77%); the legacy unweighted multiplicative mean was 84.07%. The Odds API cache was fetched at 20:54:38Z and the prediction was generated at 22:07:57Z. These are different sources and de-vig methods, captured at different times; neither is a closing quote, and the Odds API cache predates the prediction by 1h 13m 19s."
+  },
+  "code_review": {
+    "walk_forward": "features.build computes every game's features for a (season, week) batch before updating ratings with that batch's results; Elo and opponent-adjusted EPA state are therefore pre-week. pipeline._train_mask admits only played games from earlier seasons/weeks. pipeline.add_ensemble_walk_forward refits stacks on those earlier out-of-sample component predictions. models.kalman.run_kf also predicts a whole week before applying that week's results.",
+    "kalman_tuning": "kalman.tune explicitly slices season < before_season before likelihood optimisation. A regression test guards that cutoff. However models/kf_params.json has no per-season training-window metadata; the checked-in values cannot be independently proven to have been generated by that code path.",
+    "lightgbm": "The walk-forward component path uses _train_mask and refits before each season/week. The repository contains no reproducible hyperparameter/feature-selection history, so it cannot prove that manual model selection was not influenced by later seasons.",
+    "point_in_time_risk": "Historical schedule fields home_qb_id/away_qb_id and temp/wind feed QB-rate/change and LightGBM features. The repository does not retain point-in-time snapshots or availability timestamps for those fields. Actual starter identity and observed game weather may differ from what was knowable at forecast time. This is a potential availability leakage risk, not a demonstrated result-leakage bug; its impact is not quantified in PR2 because doing so requires point-in-time inputs and a separate controlled re-evaluation.",
+    "processed_data_provenance": "contract.data_snapshot hashes data/raw/*.parquet, while feature construction also reads data/processed/team_games.parquet and qb_games.parquet. Those processed files are derived from raw inputs but are not directly hashed in the prediction provenance; stale derived caches remain a reproducibility risk.",
+    "injury_lag": "The feature builder uses Out/Doubtful counts from week t-1 or t-2, not the current week. This avoids direct same-week injury-report leakage, although source publication timestamps are not retained in the historical feature cache."
+  },
+  "conclusions": [
+    "MARKET clearly outperforms MODEL_ONLY on accuracy, Brier and log loss; paired stratified block CIs stay well above zero under 1-, 2- and 4-week block lengths.",
+    "Point estimates slightly favour MARKET over ENSEMBLE, but the difference is tiny and block-length sensitive (the 95% CI crosses zero on Brier under 1-, 2- and 4-week blocks and on log loss under 1-week blocks); there is no robust separation between MARKET and ENSEMBLE, and no evidence that ENSEMBLE improves upon MARKET.",
+    "The high-confidence (75%+) overconfidence hypothesis reproduces for MODEL_ONLY's own favourites (+4.35 pp, 95% CI strictly above zero across 1-, 2- and 4-week blocks), whereas ENSEMBLE's own 75%+ segment is +0.74 pp with CIs spanning zero under all block lengths.",
+    "Constrained ensemble weight variants (ens_cap1, ens_pool) do not separate from the published ensemble under any block length (all CIs cross zero); no retuning in PR2."
+  ],
+  "limitations": [
+    "Primary intervals use 2-week blocks stratified by season (72 blocks across 8 seasons, never crossing season boundaries) with 1-week and 4-week sensitivity checks; intervals are not adjusted for multiple comparisons.",
+    "Historical QB identity and weather features lack point-in-time availability timestamps.",
+    "Stored Kalman parameters and manual LightGBM/model-selection history lack per-season provenance.",
+    "Processed team_games and qb_games caches are derived inputs but are not directly hashed.",
+    "No model weights or hyperparameters were retuned; frozen snapshots were not rewritten; no Odds API calls were made."
+  ]
+}

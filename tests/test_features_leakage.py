@@ -1,7 +1,11 @@
+from types import SimpleNamespace
+
 import numpy as np
 import pandas as pd
 
+from ensemblitz import pipeline
 from ensemblitz.features.build import build_features
+from ensemblitz.models import kalman
 from ensemblitz.models.kalman import KFParams, run_kf
 
 CUT = (2021, 4)  # perturb everything from this (season, week) on
@@ -76,3 +80,27 @@ def test_kalman_predictions_use_only_past(league):
     a = base[base["game_id"].isin(ids)].reset_index(drop=True)
     b = alt[alt["game_id"].isin(ids)].reset_index(drop=True)
     pd.testing.assert_frame_equal(a, b)
+
+
+def test_kalman_tuning_truncates_at_the_requested_season(monkeypatch, league):
+    games, _, _ = league
+    seen = {}
+
+    def fake_minimize(fun, x0, args, **kwargs):
+        seen["max_season"] = int(args[0]["season"].max())
+        return SimpleNamespace(x=x0)
+
+    monkeypatch.setattr(kalman, "minimize", fake_minimize)
+    kalman.tune(games, before_season=CUT[0], maxiter=1)
+    assert seen["max_season"] < CUT[0]
+
+
+def test_lightgbm_training_mask_excludes_current_and_future_weeks(league):
+    games, _, _ = league
+    mask = pipeline._train_mask(games, CUT[0], CUT[1])
+    train = games.loc[mask]
+    assert not train.empty
+    assert train["played"].all() and train["result"].notna().all()
+    assert (
+        (train["season"] < CUT[0]) | ((train["season"] == CUT[0]) & (train["week"] < CUT[1]))
+    ).all()

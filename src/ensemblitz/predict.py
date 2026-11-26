@@ -323,8 +323,8 @@ def _market_block(r: pd.Series, now: str, quotes: dict[tuple[str, str], dict]) -
                 "captured_at_utc": rec.get("fetched_at") or now,
                 "is_closing": False,
                 "home_win_prob": rec["consensus_home_prob_shin"],
-                "margin_home": K.odds_api_margin_home(rec.get("book_spread_home")),
-                "total_line": rec.get("book_total"),
+                "margin_home": None,
+                "total_line": None,
                 "n_books": rec.get("n_books"),
             }
         )

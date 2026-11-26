@@ -9,6 +9,7 @@ from ensemblitz.models.market import ml_to_prob
 
 THRESHOLDS = (0.0, 0.03, 0.05, 0.08)
 MODELS = {
+    "model_only": "Modelo propio (sin mercado)",
     "ens": "Ensemble",
     "lgbm_mkt": "LightGBM (residuo)",
     "lgbm": "LightGBM (sin mercado)",

@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from ensemblitz import baseline as B
+from ensemblitz import pipeline
 from ensemblitz.models.market import margin_to_prob
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -114,16 +115,44 @@ def test_calibration_slope_is_one_for_calibrated_probabilities():
     assert B.calib_slope(q, y)[1] < 0.7
 
 
-def test_bootstrap_ci_contains_point_estimate(frame, walked):
+def test_stratified_block_bootstrap_intervals_and_sensitivity(frame, walked):
     wf, _ = walked
     d = B.scoring_frame(wf)
     y = B.outcomes(d)
     bs = B.bootstrap(d, y, n=300)
-    for k, v in bs["diff_vs_market"].items():
-        if "_minus_" in k:
-            continue
-        lo, hi = v["log_loss_ci"]
-        assert lo <= v["log_loss"] <= hi, k
+    assert bs["block_unit"] == "2_week_block"
+    assert bs["block_weeks"] == 2
+    assert bs["stratified_by"] == "season"
+    assert bs["n_seasons"] == d["season"].nunique()
+    expected_2w = sum(((g["week"] - 1) // 2).nunique() for _, g in d.groupby("season"))
+    assert bs["n_blocks"] == expected_2w
+    assert "never crossing season boundaries" in bs["resampling"]
+    for value in bs["diff_vs_market"].values():
+        for key in ("log_loss_ci", "brier_ci"):
+            lo, hi = value[key]
+            assert np.isfinite([lo, hi]).all()
+            assert lo <= hi
+    assert set(bs["sensitivity"]) == {"1_week", "2_week", "4_week"}
+    for bw, label in ((1, "1_week"), (2, "2_week"), (4, "4_week")):
+        sb = bs["sensitivity"][label]
+        assert sb["block_weeks"] == bw
+        expected_blocks = sum(((g["week"] - 1) // bw).nunique() for _, g in d.groupby("season"))
+        assert sb["n_blocks"] == expected_blocks
+        for value in sb["diff_vs_market"].values():
+            for key in ("log_loss_ci", "brier_ci"):
+                lo, hi = value[key]
+                assert np.isfinite([lo, hi]).all()
+                assert lo <= hi
+
+
+def test_stratified_block_plan_never_crosses_season_boundaries():
+    seasons = np.array([2020, 2020, 2020, 2021, 2021, 2021])
+    weeks = np.array([1, 2, 17, 1, 2, 17])
+    plan = B._stratified_block_bootstrap_plan(seasons, weeks, block_weeks=2, n=50, seed=7)
+    # 2020 has blocks {0, 8} and 2021 has blocks {0, 8}: 4 distinct blocks, never merged across years
+    assert plan["n_blocks"] == 4
+    assert plan["n_seasons"] == 2
+    assert set(plan["codes"][:3]).isdisjoint(set(plan["codes"][3:]))
 
 
 def test_heavy_favourite_bins_partition_games(walked):
@@ -206,3 +235,28 @@ def test_gate_passes_on_identical_numbers_and_fails_on_regression(monkeypatch, c
     slightly["model_only"]["brier"] += 0.0003  # inside the tolerance
     monkeypatch.setattr(B, "gate_metrics", lambda df: slightly)
     assert gate.main() == 0
+
+
+def test_population_audit_identifies_ties_and_missing_predictions(walked):
+    wf, _ = walked
+    d = wf[(wf["season"] >= 2018) & (wf["week"] <= 18)].copy()
+    assert len(d) >= 2
+    d["result"] = 1.0
+    d.iloc[0, d.columns.get_loc("result")] = 0.0
+    d.iloc[1, d.columns.get_loc("model_only_prob")] = np.nan
+    population = B.population_audit(d)
+    assert population["n_ties"] == 1
+    assert population["n_missing_prediction_rows"] == 1
+    assert population["n_scored"] == population["n_played"] - 2
+    reasons = {x["game_id"]: x["reasons"] for x in population["excluded_games"]}
+    assert "tie" in reasons[d.iloc[0]["game_id"]]
+    assert "missing_predictions" in reasons[d.iloc[1]["game_id"]]
+
+
+def test_backtest_pipeline_exposes_independent_model_only_source(frame):
+    out = pipeline.add_ensemble_walk_forward(frame, first=2018, last=2019)
+    for column in ("model_only_prob", "model_only_margin", "model_only_total"):
+        assert column in out
+        assert out[column].notna().any()
+    probabilities = out["model_only_prob"].dropna()
+    assert probabilities.between(0.0, 1.0).all()

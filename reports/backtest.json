@@ -1013,6 +1013,8 @@
         }
       ]
     },
-    "verdict": "en todos los partidos el ensemble tiene log loss 0.611 frente a 0.610 del mercado (+0.0016; menor es mejor); ning\u00fan modelo supera el punto de equilibrio de 52,4 % ATS con significancia (IC95 incluye o queda por debajo de \u00e9l) y ninguno mejora al mercado en log loss de forma clara: **no hay evidencia de que le ganemos a la l\u00ednea de cierre**. El valor de v0.1 est\u00e1 en las probabilidades calibradas y la distribuci\u00f3n de marcadores, no en una ventaja contra el mercado."
-  }
+    "verdict": "en todos los partidos el ensemble tiene log loss 0.611 frente a 0.610 del mercado (+0.0016; menor es mejor); ningún modelo supera el punto de equilibrio de 52,4 % ATS con significancia (IC95 incluye o queda por debajo de él) y ninguno mejora al mercado en log loss de forma clara: **no hay evidencia de que le ganemos a la línea de cierre**. El valor de v0.1 está en las probabilidades calibradas y la distribución de marcadores, no en una ventaja contra el mercado."
+  },
+  "pr2_status": "legacy_snapshot",
+  "pr2_note": "This snapshot predates PR2's explicit MODEL_ONLY output. The backtest writer now emits MODEL_ONLY, MARKET and ENSEMBLE separately; regenerate the report on the next backtest run. Use reports/pr2_statistical_audit_summary.json and docs/audit/pr2-statistical-audit.md for the paired 2-week stratified block bootstrap audit."
 }
