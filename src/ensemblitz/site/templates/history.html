@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_macros.html" import scroll_start, scroll_end with context %}
 {% set nav = 'hist' %}
 {% block title %}{{ t('hist.title') }}{% endblock %}
 {% block content %}
@@ -22,32 +21,32 @@
 
 <h2>{{ t('hist.results_h') }}</h2>
 {% if hist.rows %}
-{{ scroll_start(tx('hist.results_h')) }}<table>
+<table class="fit">
 <thead><tr><th>{{ t('hist.col_source') }}</th><th>{{ t('hist.col_hits') }}</th><th>{{ t('hist.col_pct') }}</th></tr></thead>
 <tbody>
 {% for k in ['official', 'model_only', 'ensemble', 'market'] %}{% set s = hist.sources[k] %}{% if s.n %}
 <tr{% if k == 'official' %} class="hl"{% endif %}><td>{{ t('hist.src_' + k) }}</td><td>{{ s.ok }}/{{ s.n }}</td><td>{{ pct(s.ok / s.n) }}</td></tr>
 {% endif %}{% endfor %}
-</tbody></table>{{ scroll_end() }}
+</tbody></table>
 {% if chart %}<div class="cols2"><div>{{ chart|safe }}</div><div><p>{{ t('hist.chart_note') }}</p></div></div>{% endif %}
 
 <h2>{{ t('hist.games_h') }}</h2>
-{{ scroll_start(tx('hist.games_h')) }}<table class="sortable">
+<table class="sortable stack">
 <thead><tr><th>{{ t('hist.col_date') }}</th><th>{{ t('hist.col_game') }}</th><th>{{ t('hist.col_pick') }}</th><th>{{ t('hist.col_p') }}</th><th>{{ t('hist.col_final') }}</th><th>{{ t('hist.col_ok') }}</th><th>{{ t('hist.col_kind') }}</th></tr></thead>
 <tbody>
 {% for r in hist.rows|reverse %}{% set k = kick(r.kick_utc) %}
-<tr><td data-v="{{ k.date }}">{{ k.short }}</td><td>{{ r.away_team }} {{ t('card.at') }} {{ r.home_team }}</td><td>{{ r.pick }}</td><td data-v="{{ r.p }}">{{ pct(r.p) }}</td><td>{{ r.away_team }} {{ r.away_pts }}, {{ r.home_team }} {{ r.home_pts }}</td><td>{{ t('card.hit_short') if r.ok else t('card.miss_short') }}</td><td>{{ t('hist.kind_' + r.headline) }}</td></tr>
+<tr><td data-label="{{ tx('hist.col_date') }}" data-v="{{ k.date }}">{{ k.short }}</td><td data-label="{{ tx('hist.col_game') }}">{{ r.away_team }} {{ t('card.at') }} {{ r.home_team }}</td><td data-label="{{ tx('hist.col_pick') }}">{{ r.pick }}</td><td data-label="{{ tx('hist.col_p') }}" data-v="{{ r.p }}">{{ pct(r.p) }}</td><td data-label="{{ tx('hist.col_final') }}">{{ r.away_team }} {{ r.away_pts }}, {{ r.home_team }} {{ r.home_pts }}</td><td data-label="{{ tx('hist.col_ok') }}">{{ t('card.hit_short') if r.ok else t('card.miss_short') }}</td><td data-label="{{ tx('hist.col_kind') }}">{{ t('hist.kind_' + r.headline) }}</td></tr>
 {% endfor %}
-</tbody></table>{{ scroll_end() }}
+</tbody></table>
 {% else %}
 <div class="empty"><p>{{ t('hist.empty') }}</p></div>
 {% endif %}
 
 <h2>{{ t('hist.saved_h') }}</h2>
 <p>{{ t('hist.saved_lede') }}</p>
-{{ scroll_start(tx('hist.saved_h')) }}<table>
+<table class="stack">
 <thead><tr><th>{{ t('hist.col_week') }}</th><th>{{ t('hist.col_saved') }}</th><th>{{ t('hist.col_first') }}</th><th>{{ t('hist.col_n') }}</th><th>{{ t('hist.col_headline') }}</th></tr></thead>
 <tbody>
-{% for s in hist.saved %}<tr><td><a href="{{ u('week', s.week) }}">{{ t('hist.week_n', week=s.week, season=s.season) }}</a></td><td>{{ stamp(s.saved_at) }}</td><td>{{ stamp(s.first_kick) }}</td><td>{{ s.n }}</td><td>{{ t('hist.kind_' + s.headline) }}</td></tr>{% endfor %}
-</tbody></table>{{ scroll_end() }}
+{% for s in hist.saved %}<tr><td data-label="{{ tx('hist.col_week') }}"><a href="{{ u('week', s.week) }}">{{ t('hist.week_n', week=s.week, season=s.season) }}</a></td><td data-label="{{ tx('hist.col_saved') }}">{{ stamp(s.saved_at) }}</td><td data-label="{{ tx('hist.col_first') }}">{{ stamp(s.first_kick) }}</td><td data-label="{{ tx('hist.col_n') }}">{{ s.n }}</td><td data-label="{{ tx('hist.col_headline') }}">{{ t('hist.kind_' + s.headline) }}</td></tr>{% endfor %}
+</tbody></table>
 {% endblock %}

@@ -13,6 +13,7 @@ PC = "\u202f%"  # narrow no-break space and percent sign, Spanish style
 ES: dict[str, str] = {
     "na": "n/d",
     "even": "igualado",
+    "tie": "empate",
     "night_thu": "jueves noche en EE.\u202fUU.",
     "night_mon": "lunes noche en EE.\u202fUU.",
     "night_sun": "domingo noche en EE.\u202fUU.",
@@ -37,7 +38,7 @@ ES: dict[str, str] = {
     "nav.data_of": "Datos del {when}",
     "nav.lang_aria": "Read this page in English",
     "nav.theme_aria": "Cambiar entre tema claro y oscuro",
-    "foot.generated": "Generado el {when}. Los picks se guardan antes del saque y no se editan.",
+    "foot.generated": "Últimos picks guardados el {when}. Se guardan antes del saque y no se editan.",
     "foot.license": "Licencia MIT. Tipografías Archivo, Doto e IBM Plex Mono con licencia SIL OFL.",
     # week page
     "week.title": "Jornada {week}",
@@ -80,8 +81,8 @@ ES: dict[str, str] = {
     "day.night": "{night}",
     "notes.aria": "Notas",
     "notes.saved": "Picks guardados el {when}.",
-    "notes.market_books": "«Mercado» es el consenso de varias casas de apuestas, sin su margen.",
-    "notes.market_close": "«Mercado» es la línea de cierre de nflverse, sin su margen.",
+    "notes.market_books": "«Mercado» es el consenso agregado de The Odds API (sin margen).",
+    "notes.market_nflverse": "«Mercado» es la línea pre-partido de nflverse (sin margen).",
     "notes.method": "Cómo lo medimos.",
     "notes.disclaimer": "Es un ejercicio de estadística, no una recomendación de apuesta.",
     # card
@@ -89,6 +90,7 @@ ES: dict[str, str] = {
     "card.wins": "Gana {team}",
     "card.win_aria": "{team} gana con una probabilidad del {p}",
     "card.market": "Mercado: {p} (nosotros {d})",
+    "card.market_flagged": "Mercado: {p}",
     "card.final": "Final: {away} {a}, {home} {h}.",
     "card.hit": "Pick acertado.",
     "card.miss": "Pick fallado.",
@@ -104,7 +106,7 @@ ES: dict[str, str] = {
     # game page
     "game.description": "{away} en {home}: gana {fav} con un {p}. Puntos esperados, margen, total y contexto.",
     "game.kicker": "Jornada {week}, temporada {season}",
-    "game.madrid": "(hora de Madrid)",
+    "game.tz_note": "(hora de Madrid)",
     "game.read_aria": "Resumen del partido",
     "game.margin_of": "margen, {txt}",
     "game.total_label": "puntos en total",
@@ -119,7 +121,7 @@ ES: dict[str, str] = {
     "game.col_range": "Rango del 80\u202f%",
     "game.row_margin": "Margen",
     "game.row_total": "Total",
-    "game.margin_range": "de {lo} a {hi}",
+    "game.margin_range": "{lo} a {hi}",
     "game.range_note": (
         "El rango deja fuera el 10\u202f% de los resultados simulados más bajos y el 10\u202f% de los más altos."
     ),
@@ -131,10 +133,19 @@ ES: dict[str, str] = {
     "game.ours": "Nuestro modelo",
     "game.market": "Mercado",
     "game.diff": "Diferencia",
-    "game.line": "Línea del mercado",
+    "game.market_src_label": "Fuente",
+    "game.market_src_odds_api": "Consenso The Odds API ({n} operadores, sin margen)",
+    "game.market_src_nflverse_pre": "Línea pre-partido de nflverse (sin margen)",
+    "game.market_src_nflverse_close": "Línea histórica de nflverse (sin margen)",
+    "game.market_time_fetched": "Descargado el {when} (caché de The Odds API).",
+    "game.market_time_captured": "Capturado el {when} (instantánea de cuotas).",
+    "game.market_time_read": "Leído el {when} (al generar la predicción).",
+    "game.ref_line_h": "Línea de referencia (nflverse)",
+    "game.line": "Spread y total",
     "game.line_total": "total {v}",
-    "game.market_src_books": "El mercado es el consenso de {n} casas de apuestas, sin su margen.",
-    "game.market_src_close": "El mercado es la línea de cierre, sin su margen.",
+    "game.ref_line_note": "Datos del calendario pre-partido de nflverse; fuente distinta al consenso de probabilidad de The Odds API.",
+    "game.market_src_books": "El mercado es el consenso de {n} operadores (The Odds API), sin su margen.",
+    "game.market_src_nflverse": "El mercado es la línea pre-partido de nflverse, sin su margen.",
     "game.market_note": "Es solo una referencia: no usamos sus cifras para calcular las nuestras.",
     "game.flag_text": (
         "El modelo da a {fav} un {ours} y el mercado un {mkt}: {d} puntos de diferencia. A partir de "
@@ -156,7 +167,7 @@ ES: dict[str, str] = {
     "game.tech_h": "Detalle técnico",
     "game.tech_src": "Fuente",
     "game.tech_prob": "Probabilidad de {team}",
-    "game.tech_note": "Los tres primeros modelos forman el número del titular.",
+    "game.tech_note": "Los tres primeros modelos forman el número del titular. LightGBM sobre el mercado y la mezcla usan la referencia pre-partido de nflverse como entrada.",
     "game.back": "Volver a la jornada {week}",
     "fact.rest": "Descanso",
     "fact.rest_v": "{home} {h} días, {away} {a} días",
@@ -169,7 +180,7 @@ ES: dict[str, str] = {
     "fact.venue_dome": "Cubierto o con techo cerrado",
     "fact.venue_open": "Aire libre, {temp}, viento {wind}",
     "fact.venue_open_nowx": "Aire libre. El tiempo previsto todavía no entra en el modelo",
-    "chart.line": "línea {v}",
+    "chart.line": "nflverse {v}",
     "chart.wins": "gana {team}",
     "chart.points": "puntos totales",
     "chart.margin_aria": "Distribución del margen simulado (local menos visitante)",
@@ -187,7 +198,7 @@ ES: dict[str, str] = {
     "comp_elo": "Elo con margen de victoria",
     "comp_kf": "Kalman (fuerza dinámica)",
     "comp_lgbm": "LightGBM sin mercado",
-    "comp_market": "Mercado (cierre sin margen de la casa)",
+    "comp_market": "Mercado (cierre histórico, sin margen)",
     "comp_lgbm_mkt": "LightGBM sobre el mercado",
     "comp_ensemble": "Modelo mezclado con el mercado",
     "model_market": "Mercado (cierre)",
@@ -229,7 +240,7 @@ ES: dict[str, str] = {
     "hist.src_official": "Pick oficial (el titular de cada fecha)",
     "hist.src_model_only": "Modelo solo, sin mercado",
     "hist.src_ensemble": "Modelo mezclado con el mercado",
-    "hist.src_market": "Mercado (cierre)",
+    "hist.src_market": "Mercado (al predecir)",
     "hist.kind_model_only": "modelo solo",
     "hist.kind_ensemble": "mezcla con el mercado (anterior)",
     "hist.chart_aria": "Acierto acumulado del pick oficial y del mercado",
@@ -256,7 +267,7 @@ ES: dict[str, str] = {
     # calibration chart
     "calib.x": "Probabilidad prevista (%)",
     "calib.y": "Frecuencia real (%)",
-    "calib.aria": "Calibración de la mezcla entre modelo y mercado",
+    "calib.aria": "Calibración del modelo solo (sin mercado)",
     "table.hint": "Desliza la tabla hacia los lados para ver todas las columnas.",
     # empty
     "empty.title": "Sin jornada todavía",
@@ -284,8 +295,9 @@ ES: dict[str, str] = {
     "method.col_mae": "Error medio del margen",
     "method.col_ats": "Contra el spread",
     "method.number_table_note": (
-        "{n} partidos de temporada regular de {a} a {b}, semana a semana: cada semana todo se "
-        "reconstruye solo con partidos anteriores. Brier y log loss: menor es mejor."
+        "{n} partidos decididos de temporada regular de {a} a {b} ({played} jugados, {ties} "
+        "empates excluidos del scoring probabilístico), semana a semana solo con partidos "
+        "anteriores. Brier y log loss: menor es mejor."
     ),
     "method.how_h": "Cómo se calcula",
     "method.how_1": (
@@ -314,7 +326,7 @@ ES: dict[str, str] = {
         "«Mercado» es la probabilidad que implica el consenso de las casas de apuestas que devuelve "
         "The Odds API (regiones de Europa, Reino Unido y EE.\u202fUU., con alguna bolsa de apuestas), "
         "tras quitar el margen de la casa (método de Shin). Si no hay cuotas todavía, es la línea "
-        "de cierre de nflverse."
+        "pre-partido de nflverse (en el backtest histórico 2018-2025 sí es la línea de cierre de nflverse)."
     ),
     "method.market_2": (
         "No mostramos cuotas de casas concretas: la API devuelve operadores de otros países (Francia, "
@@ -343,24 +355,26 @@ ES: dict[str, str] = {
         "Informe completo:"
     ),
     "method.hist_h": "Resultados históricos",
-    "method.hist_1": "Simulación semana a semana de {a} a {b}: {n} partidos de temporada regular. Nada del futuro entra.",
+    "method.hist_1": "Simulación semana a semana de {a} a {b}: {n} partidos decididos ({played} regulares jugados, {ties} empates fuera del scoring probabilístico). Nada del futuro entra.",
     "method.hist_note": (
         "«Contra el spread» es el porcentaje de veces que el lado preferido por el modelo cubre la "
         "línea de cierre; con comisión de −110 hace falta un 52,4\u202f% para no perder dinero."
     ),
     "method.season_h": "Por temporada",
     "method.col_season": "Temporada",
-    "method.col_acc_mkt": "Acierto mercado",
-    "method.col_acc_ens": "Acierto mezcla",
-    "method.col_ll_mkt": "Log loss mercado",
-    "method.col_ll_ens": "Log loss mezcla",
+    "method.col_season_mo": "Solo modelo (acierto / LL)",
+    "method.col_season_ens": "Mezcla (acierto / LL)",
+    "method.col_season_mkt": "Mercado (acierto / LL)",
+    "method.season_note": "Cada celda muestra acierto y log loss en los mismos partidos decididos de esa temporada.",
     "method.calib_h": "Calibración",
     "method.calib_1": "Cuando decimos 70\u202f%, ¿gana el 70\u202f% de las veces? Cada punto es un tramo de probabilidad; su tamaño indica cuántos partidos hay. Sobre la diagonal punteada la calibración sería perfecta.",
     "method.calib_2": "Los tramos extremos tienen pocos partidos y se mueven mucho por azar.",
     "method.verdict": (
-        "¿Le ganamos a la línea de cierre? No. La mezcla tiene un log loss de {ens} frente a {mkt} "
-        "del mercado: la diferencia es indistinguible del azar. Tabla completa:"
+        "¿Le ganamos a la línea de cierre? No. El modelo solo tiene log loss {mo} frente a {mkt} "
+        "del cierre (claramente por detrás en bloques de 1, 2 y 4 semanas). La mezcla ({ens}) "
+        "tampoco demuestra ventaja frente al cierre. Informe completo:"
     ),
+    "method.verdict_audit": "Auditoría estadística PR 2:",
     "method.limits_h": "Límites",
     "method.limit_1": "El objetivo realista es un 65 a 70\u202f% de aciertos directos. Nadie con un método público está cerca del 90\u202f%; quien lo promete suele usar datos del futuro sin darse cuenta.",
     "method.limit_2": "No tenemos ventaja demostrada sobre el mercado. Para ganarle hace falta información que él no tenga y probarla fuera de muestra.",
@@ -385,9 +399,10 @@ ES: dict[str, str] = {
 EN: dict[str, str] = {
     "na": "n/a",
     "even": "even",
-    "night_thu": "Thursday night in the US",
-    "night_mon": "Monday night in the US",
-    "night_sun": "Sunday night in the US",
+    "tie": "tie",
+    "night_thu": "Thursday night",
+    "night_mon": "Monday night",
+    "night_sun": "Sunday night",
     "status_out": "Out",
     "status_doubtful": "Doubtful",
     "status_questionable": "Questionable",
@@ -408,7 +423,7 @@ EN: dict[str, str] = {
     "nav.data_of": "Data from {when}",
     "nav.lang_aria": "Leer esta página en español",
     "nav.theme_aria": "Switch between light and dark theme",
-    "foot.generated": "Generated {when}. Picks are saved before kickoff and never edited.",
+    "foot.generated": "Latest picks saved {when}. Picks are saved before kickoff and never edited.",
     "foot.license": "MIT license. Typefaces Archivo, Doto and IBM Plex Mono under the SIL OFL.",
     "week.title": "Week {week}",
     "week.kicker": "NFL, {season} season",
@@ -416,7 +431,7 @@ EN: dict[str, str] = {
     "week.lede": (
         "For every game: who wins, how likely that is, how many points we expect from each team, "
         "the margin and the total. This is our model's own forecast, not a copy of the betting "
-        "market. Madrid times."
+        "market. All times ET."
     ),
     "week.read_aria": "Week summary",
     "week.read_games": "games this week",
@@ -450,14 +465,15 @@ EN: dict[str, str] = {
     "day.night": "{night}",
     "notes.aria": "Notes",
     "notes.saved": "Picks saved {when}.",
-    "notes.market_books": '"Market" is the consensus of several sportsbooks, with their margin removed.',
-    "notes.market_close": '"Market" is the nflverse closing line, with its margin removed.',
+    "notes.market_books": '"Market" is the aggregate consensus from The Odds API (margin removed).',
+    "notes.market_nflverse": '"Market" is the pre-game nflverse line (margin removed).',
     "notes.method": "How we measure it.",
     "notes.disclaimer": "This is a statistics exercise, not betting advice.",
     "card.at": "at",
     "card.wins": "{team} wins",
     "card.win_aria": "{team} wins with a probability of {p}",
     "card.market": "Market: {p} (us {d})",
+    "card.market_flagged": "Market: {p}",
     "card.final": "Final: {away} {a}, {home} {h}.",
     "card.hit": "Pick correct.",
     "card.miss": "Pick missed.",
@@ -471,7 +487,7 @@ EN: dict[str, str] = {
     "news.source": "source",
     "game.description": "{away} at {home}: {fav} wins with {p}. Expected points, margin, total and context.",
     "game.kicker": "Week {week}, {season} season",
-    "game.madrid": "(Madrid time)",
+    "game.tz_note": "ET",
     "game.read_aria": "Game summary",
     "game.margin_of": "margin, {txt}",
     "game.total_label": "total points",
@@ -486,7 +502,7 @@ EN: dict[str, str] = {
     "game.col_range": "80% range",
     "game.row_margin": "Margin",
     "game.row_total": "Total",
-    "game.margin_range": "from {lo} to {hi}",
+    "game.margin_range": "{lo} to {hi}",
     "game.range_note": "The range leaves out the lowest 10% and the highest 10% of the simulated outcomes.",
     "game.example": (
         "An example score: {away} {a}, {home} {h}. It is one of many possible scores and none "
@@ -496,10 +512,19 @@ EN: dict[str, str] = {
     "game.ours": "Our model",
     "game.market": "Market",
     "game.diff": "Difference",
-    "game.line": "Market line",
+    "game.market_src_label": "Source",
+    "game.market_src_odds_api": "The Odds API consensus ({n} operators, margin removed)",
+    "game.market_src_nflverse_pre": "Pre-game nflverse line (margin removed)",
+    "game.market_src_nflverse_close": "Historical nflverse line (margin removed)",
+    "game.market_time_fetched": "Fetched {when} (The Odds API cache).",
+    "game.market_time_captured": "Captured {when} (quote snapshot).",
+    "game.market_time_read": "Read {when} (at prediction generation).",
+    "game.ref_line_h": "Reference line (nflverse)",
+    "game.line": "Spread and total",
     "game.line_total": "total {v}",
-    "game.market_src_books": "The market is the consensus of {n} sportsbooks, with their margin removed.",
-    "game.market_src_close": "The market is the closing line, with its margin removed.",
+    "game.ref_line_note": "From the pre-game nflverse schedule; a separate source from The Odds API win-probability consensus.",
+    "game.market_src_books": "The market is the consensus of {n} operators (The Odds API), with their margin removed.",
+    "game.market_src_nflverse": "The market is the pre-game nflverse line, with its margin removed.",
     "game.market_note": "It is only a reference: we do not use its numbers to compute ours.",
     "game.flag_text": (
         "The model gives {fav} {ours} and the market {mkt}: a gap of {d} points. From {n} points "
@@ -521,7 +546,7 @@ EN: dict[str, str] = {
     "game.tech_h": "Technical detail",
     "game.tech_src": "Source",
     "game.tech_prob": "{team} probability",
-    "game.tech_note": "The first three models make up the headline number.",
+    "game.tech_note": "The first three models make up the headline number. LightGBM on top of the market and the blend take the pre-game nflverse reference as input.",
     "game.back": "Back to week {week}",
     "fact.rest": "Rest",
     "fact.rest_v": "{home} {h} days, {away} {a} days",
@@ -534,7 +559,7 @@ EN: dict[str, str] = {
     "fact.venue_dome": "Dome or closed roof",
     "fact.venue_open": "Outdoors, {temp}, wind {wind}",
     "fact.venue_open_nowx": "Outdoors. The forecast weather is not in the model yet",
-    "chart.line": "line {v}",
+    "chart.line": "nflverse {v}",
     "chart.wins": "{team} wins",
     "chart.points": "total points",
     "chart.margin_aria": "Distribution of the simulated margin (home minus away)",
@@ -550,7 +575,7 @@ EN: dict[str, str] = {
     "comp_elo": "Elo with margin of victory",
     "comp_kf": "Kalman (dynamic strength)",
     "comp_lgbm": "LightGBM without market",
-    "comp_market": "Market (closing, margin removed)",
+    "comp_market": "Market (historical closing, margin removed)",
     "comp_lgbm_mkt": "LightGBM on top of the market",
     "comp_ensemble": "Model blended with the market",
     "model_market": "Market (closing)",
@@ -590,7 +615,7 @@ EN: dict[str, str] = {
     "hist.src_official": "Official pick (the headline at the time)",
     "hist.src_model_only": "Model alone, no market",
     "hist.src_ensemble": "Model blended with the market",
-    "hist.src_market": "Market (closing)",
+    "hist.src_market": "Market (at prediction time)",
     "hist.kind_model_only": "model alone",
     "hist.kind_ensemble": "blend with the market (earlier)",
     "hist.chart_aria": "Running accuracy of the official pick and the market",
@@ -616,7 +641,7 @@ EN: dict[str, str] = {
     "hist.week_n": "Week {week}, {season}",
     "calib.x": "Predicted probability (%)",
     "calib.y": "Observed frequency (%)",
-    "calib.aria": "Calibration of the blend of model and market",
+    "calib.aria": "Calibration of the model on its own (no market)",
     "table.hint": "Swipe the table sideways to see all columns.",
     "empty.title": "No week yet",
     "empty.h1": "No week yet",
@@ -642,8 +667,9 @@ EN: dict[str, str] = {
     "method.col_mae": "Mean margin error",
     "method.col_ats": "Against the spread",
     "method.number_table_note": (
-        "{n} regular-season games from {a} to {b}, week by week: each week everything is rebuilt "
-        "using earlier games only. Brier and log loss: lower is better."
+        "{n} decided regular-season games from {a} to {b} ({played} played, {ties} ties excluded "
+        "from probabilistic scoring), week by week using earlier games only. Brier and log loss: "
+        "lower is better."
     ),
     "method.how_h": "How it is computed",
     "method.how_1": (
@@ -670,8 +696,8 @@ EN: dict[str, str] = {
     "method.market_1": (
         '"Market" is the probability implied by the consensus of the sportsbooks returned by '
         "The Odds API (Europe, the UK and the US regions, with some betting exchanges), with the "
-        "bookmaker's margin removed (Shin's method). When there are no odds yet, it is the nflverse "
-        "closing line."
+        "bookmaker's margin removed (Shin's method). When there are no odds yet, it is the pre-game "
+        "nflverse line (in the 2018-2025 historical backtest it is the nflverse closing line)."
     ),
     "method.market_2": (
         "We do not show prices from individual sportsbooks: the API returns operators from other "
@@ -699,24 +725,26 @@ EN: dict[str, str] = {
         "report:"
     ),
     "method.hist_h": "Historical results",
-    "method.hist_1": "Week-by-week simulation from {a} to {b}: {n} regular-season games. Nothing from the future gets in.",
+    "method.hist_1": "Week-by-week simulation from {a} to {b}: {n} decided games ({played} regular-season games played, {ties} ties excluded from probabilistic scoring). Nothing from the future gets in.",
     "method.hist_note": (
         '"Against the spread" is how often the side the model prefers covers the closing line; '
         "with −110 juice you need 52.4% to break even."
     ),
     "method.season_h": "By season",
     "method.col_season": "Season",
-    "method.col_acc_mkt": "Market accuracy",
-    "method.col_acc_ens": "Blend accuracy",
-    "method.col_ll_mkt": "Market log loss",
-    "method.col_ll_ens": "Blend log loss",
+    "method.col_season_mo": "Model only (acc / LL)",
+    "method.col_season_ens": "Blend (acc / LL)",
+    "method.col_season_mkt": "Market (acc / LL)",
+    "method.season_note": "Each cell shows accuracy and log loss on the same decided games of that season.",
     "method.calib_h": "Calibration",
     "method.calib_1": "When we say 70%, does the team win 70% of the time? Each dot is a probability bucket; its size shows how many games it holds. On the dotted diagonal calibration would be perfect.",
     "method.calib_2": "The extreme buckets hold few games and move a lot by chance.",
     "method.verdict": (
-        "Do we beat the closing line? No. The blend has a log loss of {ens} against {mkt} for the "
-        "market: the difference cannot be told from chance. Full table:"
+        "Do we beat the closing line? No. The model alone has a log loss of {mo} against {mkt} "
+        "for the closing line (clearly behind across 1-, 2- and 4-week blocks). The blend ({ens}) "
+        "shows no robust edge over the closing line either. Full report:"
     ),
+    "method.verdict_audit": "PR 2 statistical audit:",
     "method.limits_h": "Limits",
     "method.limit_1": "A realistic target is 65 to 70% straight-up accuracy. Nobody with a public method is near 90%; whoever promises it is usually using future data without noticing.",
     "method.limit_2": "We have no demonstrated edge over the market. Beating it takes information it lacks, proven out of sample.",
