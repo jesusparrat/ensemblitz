@@ -56,7 +56,7 @@
     <div class="p">
       <div class="win"><span class="who">{{ t('card.wins', team=g.fav) }}</span><b class="board" role="img" aria-label="{{ tx('card.win_aria', team=g.fav, p=pct(g.p_win)) }}">{{ shown(g.p_win) }}</b><span class="pc" aria-hidden="true">%</span></div>
       {{ pbar(g.p_win) }}
-      {% if g.mkt_win is not none %}<div class="mkt">{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span> {% endif %}{{ t('card.market', p=pct(g.mkt_win), d=signed(g.diff, 0)) }}</div>{% endif %}
+      {% if g.mkt_win is not none %}<div class="mkt">{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span> {{ t('card.market_flagged', p=pct(g.mkt_win)) }}{% else %}{{ t('card.market', p=pct(g.mkt_win), d=signed(g.diff, 0)) }}{% endif %}</div>{% endif %}
     </div>
     <div class="x">
       {% for side, tm, v in (('away', g.away, g.pts_away), ('home', g.home, g.pts_home)) %}
@@ -75,7 +75,7 @@
 
 <section class="notes" aria-label="{{ tx('notes.aria') }}">
   <div>
-    <p>{{ t('notes.saved', when=stamp(meta.generated_at)) }}{% if has_market_books %} {{ t('notes.market_books') }}{% else %} {{ t('notes.market_close') }}{% endif %} <a href="{{ u('method') }}">{{ t('notes.method') }}</a></p>
+    <p>{{ t('notes.saved', when=stamp(meta.generated_at)) }}{% if has_market_books %} {{ t('notes.market_books') }}{% else %} {{ t('notes.market_nflverse') }}{% endif %} <a href="{{ u('method') }}">{{ t('notes.method') }}</a></p>
   </div>
   <div><p>{{ t('notes.disclaimer') }}</p></div>
 </section>

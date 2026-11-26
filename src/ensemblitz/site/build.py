@@ -167,6 +167,7 @@ def _game(
     result: dict | None,
     news_items: list[dict] | None = None,
     headline_kind: str = "model_only",
+    odds_fetched_at: str | None = None,
 ) -> dict:
     """Language independent view of one game; the headline is the published number."""
     home, away = g["home_team"], g["away_team"]
@@ -182,11 +183,29 @@ def _game(
     nfl = contract_io.market_quote(g, "nflverse_line") or {}
     cons = contract_io.market_quote(g, "odds_api_consensus")
     if odds_game:
-        mkt_home, mkt_n = odds_game["consensus_home_prob_shin"], odds_game["n_books"]
+        mkt_home = odds_game["consensus_home_prob_shin"]
+        mkt_n = odds_game["n_books"]
+        mkt_source = "odds_api_consensus"
+        mkt_is_closing = False
+        mkt_time = odds_fetched_at
+        mkt_time_kind = "fetched" if odds_fetched_at else None
     elif cons and cons.get("home_win_prob") is not None:
-        mkt_home, mkt_n = cons["home_win_prob"], cons.get("n_books") or 0
+        mkt_home = cons["home_win_prob"]
+        mkt_n = cons.get("n_books") or 0
+        mkt_source = "odds_api_consensus"
+        mkt_is_closing = bool(cons.get("is_closing", False))
+        mkt_time = cons.get("captured_at_utc")
+        mkt_time_kind = "captured" if mkt_time else None
+    elif nfl.get("home_win_prob") is not None:
+        mkt_home = nfl.get("home_win_prob")
+        mkt_n = 0
+        mkt_source = "nflverse_line"
+        mkt_is_closing = bool(nfl.get("is_closing", False))
+        mkt_time = nfl.get("captured_at_utc")
+        mkt_time_kind = "read" if mkt_time else None
     else:
-        mkt_home, mkt_n = nfl.get("home_win_prob"), 0
+        mkt_home, mkt_n = None, 0
+        mkt_source, mkt_is_closing, mkt_time, mkt_time_kind = None, False, None, None
     mkt_win = None if mkt_home is None else (mkt_home if pick_home else 1 - mkt_home)
     diff = gap_pts(p_win, mkt_win)
     ens_p = g["ensemble"]["home_win_prob"]
@@ -209,8 +228,8 @@ def _game(
             "away": int(round((tot - mar) / 2)),
             "ok": bool(result.get("headline_correct", result.get("ensemble_correct"))),
         }
+    # Per docs/CONTRACT.md §3, market is not a model component and is shown once in its own block.
     comps = {k: g["components"].get(k) for k in ("elo", "kf", "lgbm", "lgbm_mkt")}
-    comps["market"] = nfl.get("home_win_prob")
     comps["ensemble_model_only"] = h["home_win_prob"]
     comps["ensemble"] = ens_p
 
@@ -223,6 +242,8 @@ def _game(
         "total_line": nfl.get("total_line"),
         "home_moneyline": nfl.get("home_moneyline"),
         "away_moneyline": nfl.get("away_moneyline"),
+        "captured_at_utc": nfl.get("captured_at_utc"),
+        "is_closing": bool(nfl.get("is_closing", False)),
     }
     return {
         "id": g["game_id"],
@@ -243,6 +264,10 @@ def _game(
         "range": rng,
         "mkt_win": mkt_win,
         "mkt_n": mkt_n,
+        "mkt_source": mkt_source,
+        "mkt_is_closing": mkt_is_closing,
+        "mkt_time": mkt_time,
+        "mkt_time_kind": mkt_time_kind,
         "diff": diff,
         "flag": diff is not None and abs(diff) >= FLAG_PP,
         "ens_win": ens,
@@ -274,7 +299,9 @@ def game_charts(g: dict, L: Lang) -> dict[str, str]:
         hist["margin_home"],
         side,
         spread,
-        L.text("chart.line", v=L.signed(spread)) if spread is not None else "",
+        L.text("chart.line", v=L.spread_line(g["home"], g["away"], spread))
+        if spread is not None
+        else "",
         L.text("chart.wins", team=g["away"]),
         L.text("chart.wins", team=g["home"]),
         L.text("chart.margin_aria"),
@@ -401,11 +428,17 @@ class Site:
             loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
         )
         self.now = datetime.now(UTC)
-        stamps = [
+        saved_stamps = [
             d.get("generated_at_utc") or d.get("generated_at")
             for d in self.inputs["preds"].values()
+            if d.get("generated_at_utc") or d.get("generated_at")
         ]
-        self.data_stamp = max(stamps) if stamps else "1970-01-01T00:00:00Z"
+        cutoff_stamps = [
+            d["data_cutoff_utc"] for d in self.inputs["preds"].values() if d.get("data_cutoff_utc")
+        ]
+        self.saved_stamp = max(saved_stamps) if saved_stamps else "1970-01-01T00:00:00Z"
+        # v1 snapshots carry data_cutoff_utc; legacy v0 snapshots fall back to generated_at_utc.
+        self.data_stamp = max(cutoff_stamps) if cutoff_stamps else self.saved_stamp
 
     def render(self, L: Lang, tpl: str, kind: str, key: object = None, **ctx: object) -> None:
         dest = ROUTES[L.code][kind].format(key)
@@ -429,6 +462,8 @@ class Site:
             pct_int=L.pct_int,
             rng=L.rng,
             fav_txt=L.fav,
+            spread_txt=L.spread_line,
+            margin_rng=L.margin_range,
             stamp=L.stamp,
             full=full,
             shown=shown_pct,
@@ -440,7 +475,8 @@ class Site:
             alt=alt,
             other=next(c for c in LANGS if c != L.code),
             page_kind=kind,
-            generated_at=L.stamp(self.data_stamp),
+            data_at=L.stamp(self.data_stamp),
+            generated_at=L.stamp(self.saved_stamp),
             repo=REPO_URL,
             flag_pts=FLAG_PP,
             weeks=sorted(self.inputs["preds"]),
@@ -459,7 +495,9 @@ class Site:
         news_by_week = {k: N.load_news(N.news_path(*k, root=self.root)) for k in inputs["preds"]}
         week_pages: dict[tuple, list[dict]] = {}
         for key, d in inputs["preds"].items():
-            og = {x["game_id"]: x for x in (inputs["odds"].get(key) or {}).get("games", [])}
+            odds_doc = inputs["odds"].get(key) or {}
+            og = {x["game_id"]: x for x in odds_doc.get("games", [])}
+            odds_fetched_at = odds_doc.get("odds_fetched_at")
             graded = {r["game_id"]: r for r in inputs["graded"]}
             kinds = inputs["pred_meta"].get(key, {}).get("headline_kinds") or {}
             default_kind = inputs["pred_meta"].get(key, {}).get("headline_kind", "model_only")
@@ -471,6 +509,7 @@ class Site:
                         graded.get(g["game_id"]),
                         news_by_week[key],
                         kinds.get(g["game_id"], default_kind),
+                        odds_fetched_at=odds_fetched_at,
                     )
                     for g in d["games"]
                 ),
@@ -539,20 +578,36 @@ class Site:
         }
         self.render(L, "history.html", "history", **hist_ctx)
         bt, bl = inputs["backtest"], inputs["baseline"]
+        calib_pts = None
+        if bl and (bl.get("deciles") or {}).get("model_only"):
+            calib_pts = bl["deciles"]["model_only"]
+        elif bt and (bt.get("calibration") or {}).get("ens"):
+            calib_pts = bt["calibration"]["ens"]
+        pop = (bl or {}).get("population") or {}
+        scored_n = pop.get("n_scored") or (bl or {}).get("n_games")
+        if scored_n is None and bt:
+            scored_n = bt["overall"]["market"]["n"]
+        played_n = pop.get("n_played") or (bt or {}).get("n_games") or scored_n
+        ties_n = pop.get("n_ties")
+        if ties_n is None and played_n is not None and scored_n is not None:
+            ties_n = played_n - scored_n
         self.render(
             L,
             "method.html",
             "method",
             bt=bt,
             bl=bl,
+            pop_scored=scored_n,
+            pop_played=played_n,
+            pop_ties=ties_n,
             model_labels={k: L.text(f"model_{k}") for k in MODEL_KEYS},
             calib=charts.calibration(
-                bt["calibration"]["ens"],
+                calib_pts,
                 L.text("calib.x"),
                 L.text("calib.y"),
                 L.text("calib.aria"),
             )
-            if bt
+            if calib_pts
             else "",
         )
 
@@ -607,7 +662,7 @@ def fact_text(L: Lang, f: dict) -> tuple[str, str]:
 
 
 def _days(games: list[dict], L: Lang) -> list[dict]:
-    """Group games by Madrid calendar day (a Sunday-night game belongs to Monday there)."""
+    """Group games by local calendar day (Madrid on /es/, US Eastern on /en/)."""
     days: dict[str, dict] = {}
     for g in games:
         d = days.setdefault(

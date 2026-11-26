@@ -134,7 +134,7 @@ Before calling anything done: `python scripts/check_site.py` (contrast, em dashe
 
 ## 11. Data conventions on screen
 
-- Margin: always the favourite and the points it gives, with a true minus sign and the language's decimal ("HOU −12,5"). Never a home margin without a name.
+- Margin: always the predicted favourite with a positive winning margin ("HOU +8,7" / "HOU +8.7") and an 80% range ordered away to home with team labels ("IND +10 a HOU +27"); the negative spread sign ("HOU −12,5") is reserved exclusively for literal market betting-line quotes. Never a home margin without a name.
 - Flags: |model alone minus market consensus| of 5 points or more, computed from the printed integers. The threshold is `FLAG_PP` in `site/build.py`.
 - Times: always Europe/Madrid, also in the header and footer.
 - Empty states: human text, no repository paths.

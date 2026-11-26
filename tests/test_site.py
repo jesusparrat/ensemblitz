@@ -180,11 +180,20 @@ def test_formatters():
     es, en = Lang("es"), Lang("en")
     assert es.n(-12.5) == "\u221212,5" and es.signed(3.0) == "+3,0"
     assert es.pct(0.853) == "85\u202f%" and en.pct(0.853) == "85%" and en.n(-12.5) == "\u221212.5"
+    assert es.fav("HOU", "IND", 12.5) == "HOU +12,5" and en.fav("HOU", "IND", -3) == "IND +3.0"
     assert (
-        es.fav("HOU", "IND", 12.5) == "HOU \u221212,5"
-        and en.fav("HOU", "IND", -3) == "IND \u22123.0"
+        es.spread_line("HOU", "IND", 12.5) == "HOU \u221212,5"
+        and en.spread_line("HOU", "IND", -3) == "IND \u22123.0"
     )
     assert es.fav("HOU", "IND", 0.0) == "igualado" and en.fav("HOU", "IND", 0.0) == "even"
+    # margin_range preserves away -> home histogram axis order in every sign regime
+    assert es.margin_range("HOU", "IND", -10, 27) == "IND +10 a HOU +27"
+    assert en.margin_range("HOU", "IND", -10, 27) == "IND +10 to HOU +27"
+    assert es.margin_range("HOU", "IND", 2, 27) == "HOU +2 a HOU +27"
+    assert es.margin_range("HOU", "IND", -27, -2) == "IND +27 a IND +2"
+    assert en.margin_range("HOU", "IND", -27, -2) == "IND +27 to IND +2"
+    assert es.margin_range("HOU", "IND", 0, 18) == "empate a HOU +18"
+    assert en.margin_range("HOU", "IND", -14, 0) == "IND +14 to tie"
 
 
 PAGES = {
@@ -239,9 +248,9 @@ def test_card_shows_points_with_one_decimal_range_margin_total(tmp_path):
     es = _text(out, "index.html")
     assert "26,4" in es and "20,4" in es  # (46.8 + 6) / 2 and (46.8 - 6) / 2
     assert "(17\u201333)" in es and "(13\u201328)" in es
-    assert "HOU \u22126,0" in es and "46,8" in es  # margin and total from the same shown points
+    assert "HOU +6,0" in es and "46,8" in es  # margin and total from the same shown points
     en = _text(out, "en/index.html")
-    assert "26.4" in en and "HOU \u22126.0" in en
+    assert "26.4" in en and "HOU +6.0" in en
 
 
 def test_margin_and_total_equal_the_shown_points(tmp_path):
@@ -255,7 +264,7 @@ def test_margin_and_total_equal_the_shown_points(tmp_path):
     out = build_site(root=root, out=root / "site" / "_build")
     html = _text(out, "index.html")
     # 26,6 and 20,7 are shown: margin 5,9 and total 47,3 must follow from them
-    assert "26,6" in html and "20,7" in html and "HOU \u22125,9" in html and "47,3" in html
+    assert "26,6" in html and "20,7" in html and "HOU +5,9" in html and "47,3" in html
 
 
 def test_front_page_has_no_jargon_and_no_old_widgets(tmp_path):
@@ -361,7 +370,7 @@ def test_no_bookmaker_prices_or_exchanges_anywhere(tmp_path):
             assert word not in html, (page.name, word)
         assert "bk" not in re.sub(r"[^a-z]", " ", html).split(), page.name
     game = _text(out, "partido/2026_11_IND_HOU.html")
-    assert "consenso de 1 casas" in game and "No mostramos cuotas" not in game
+    assert "consenso de 1 operadores" in game and "No mostramos cuotas" not in game
     assert "No mostramos cuotas de casas" in _text(out, "metodo.html")
 
 
@@ -502,4 +511,232 @@ def test_week_without_odds_or_news_shows_no_repo_paths(tmp_path):
     for page in ("index.html", "jornada/11.html", "partido/2026_11_IND_HOU.html"):
         html = _text(out, page)
         assert "reports/odds" not in html and "predictions/" not in html, page
-    assert "l\u00ednea de cierre de nflverse" in _text(out, "index.html")
+    assert "l\u00ednea pre-partido de nflverse" in _text(out, "index.html")
+
+
+def test_en_pages_use_12h_eastern_time_and_group_snf_on_sunday(tmp_path):
+    root = _repo(tmp_path, True, False)
+    path = root / "predictions/2026/week11.json"
+    d = json.loads(path.read_text())
+    # SNF: Monday 01:20Z = Monday 02:20 Madrid (CET), Sunday 8:20 PM ET (EST)
+    d["games"][0]["kickoff_utc"] = "2099-11-23T01:20:00Z"
+    # Early September EDT game: 17:00Z = 19:00 Madrid (CEST), 1:00 PM ET (EDT)
+    d["games"][1]["kickoff_utc"] = "2099-09-14T17:00:00Z"
+    path.write_text(json.dumps(d))
+    out = build_site(root=root, out=root / "site" / "_build")
+
+    es_home = _text(out, "index.html")
+    en_home = _text(out, "en/index.html")
+    assert "02:20" in es_home and "Lunes 23" in es_home
+    assert "8:20 PM" in en_home and "Sunday Nov 22" in en_home
+    assert "1:00 PM" in en_home and "ET" in en_home
+    assert "Madrid" not in en_home
+    en_game = _text(out, "en/game/2026_11_IND_HOU.html")
+    assert "Sunday Nov 22, 8:20 PM ET." in en_game and "Madrid" not in en_game
+
+
+def test_game_page_has_single_market_prob_and_separates_nflverse_ref_line(tmp_path):
+    root = _repo(tmp_path, True, False)
+    pred_p = root / "predictions/2026/week11.json"
+    d = json.loads(pred_p.read_text())
+    d["games"][0]["home_win_prob"]["market"] = 0.77  # distinct from ensemble 0.70 and odds 0.62
+    pred_p.write_text(json.dumps(d))
+    out = build_site(root=root, out=root / "site" / "_build")
+    game_es = _text(out, "partido/2026_11_IND_HOU.html")
+    # Consensus from Odds API is 62%; nflverse 77% must not appear as a second market row
+    assert "62 %" in game_es
+    assert "Consenso The Odds API (1 operadores, sin margen)" in game_es
+    assert "Descargado el" in game_es
+    assert "Línea de referencia (nflverse)" in game_es
+    assert "HOU −5,5" in game_es  # literal betting spread uses minus
+    assert "HOU +6,0" in game_es  # model margin uses positive winning margin
+    assert "IND +9 a HOU +20" in game_es  # away -> home range with team labels
+    tech = game_es.split('<details class="tech">', 1)[1]
+    assert "Mercado (cierre" not in tech and "77 %" not in tech
+
+
+def test_market_timestamp_distinguishes_fetched_captured_and_read(tmp_path):
+    # Case 1: Odds API report -> fetched ("Descargado" / "Fetched")
+    _, out1 = _build(tmp_path / "c1", odds=True, backtest=False)
+    assert "Fetched" in _text(out1, "en/game/2026_11_IND_HOU.html")
+
+    # Case 2: nflverse fallback -> read ("Leído" / "Read")
+    _, out2 = _build(tmp_path / "c2", odds=False, backtest=False)
+    en2 = _text(out2, "en/game/2026_11_IND_HOU.html")
+    assert "Pre-game nflverse line" in en2 and "Read " in en2
+
+    # Case 3: v1 snapshot with odds_api_consensus.captured_at_utc and no reports/odds/ -> Captured
+    root3 = tmp_path / "c3"
+    (root3 / "predictions/2026/week11").mkdir(parents=True)
+    v1 = {
+        "schema_version": "1",
+        "season": 2026,
+        "week": 11,
+        "generated_at_utc": "2026-11-18T21:41:36Z",
+        "data_cutoff_utc": "2026-11-18T12:00:00Z",
+        "model_version": "0.1.0",
+        "git_sha": "abc1234",
+        "reproducible": True,
+        "data_snapshot": {},
+        "games": [
+            {
+                "game_id": "2026_11_IND_HOU",
+                "home_team": "HOU",
+                "away_team": "IND",
+                "kickoff_utc": "2099-11-20T01:15:00Z",
+                "generated_at_utc": "2026-11-18T21:41:36Z",
+                "headline": {
+                    "home_win_prob": 0.64,
+                    "home_points": 26.4,
+                    "away_points": 20.4,
+                    "distribution": {
+                        "home_points": [17.0, 33.0],
+                        "away_points": [13.0, 28.0],
+                        "margin_home": [-9.0, 20.0],
+                        "total": [32.0, 61.0],
+                    },
+                    "example_score": {"home": 27, "away": 21, "prob": 0.01},
+                },
+                "ensemble": {"home_win_prob": 0.70, "margin_home": 5.5, "total": 45.0},
+                "components": {"elo": 0.65, "kf": 0.66, "lgbm": 0.68, "lgbm_mkt": 0.70},
+                "market": [
+                    {
+                        "source": "odds_api_consensus",
+                        "captured_at_utc": "2026-11-18T20:00:00Z",
+                        "is_closing": False,
+                        "home_win_prob": 0.62,
+                        "margin_home": None,
+                        "total_line": None,
+                        "n_books": 40,
+                    }
+                ],
+                "context": {
+                    "home_qb_change": False,
+                    "away_qb_change": False,
+                    "home_rest_days": 7,
+                    "away_rest_days": 7,
+                    "dome": False,
+                    "weather_known": False,
+                    "temp_f": None,
+                    "wind_mph": None,
+                },
+                "absences": {"home": [], "away": []},
+            }
+        ],
+    }
+    (root3 / "predictions/2026/week11/2026-11-18T21:41:36Z.json").write_text(json.dumps(v1))
+    out3 = build_site(root=root3, out=root3 / "site" / "_build")
+    en3 = _text(out3, "en/game/2026_11_IND_HOU.html")
+    assert "Captured Nov 18, 2026, 3:00 PM ET" in en3
+    # C18 on v1: header uses data_cutoff_utc (7:00 AM ET), footer uses generated_at_utc (4:41 PM ET)
+    assert "Data from Nov 18, 2026, 7:00 AM ET" in en3
+    assert "Latest picks saved Nov 18, 2026, 4:41 PM ET" in en3
+
+
+def test_flagged_card_does_not_duplicate_gap_number(tmp_path):
+    root = _repo(tmp_path, True, False)
+    odds_p = root / "reports/odds/2026_week11.json"
+    od = json.loads(odds_p.read_text())
+    od["games"][0]["consensus_home_prob_shin"] = 0.55  # 64% vs 55% -> +9 flag
+    odds_p.write_text(json.dumps(od))
+    out = build_site(root=root, out=root / "site" / "_build")
+    es = _text(out, "index.html")
+    en = _text(out, "en/index.html")
+    assert "+9" in es and "(nosotros +9)" not in es
+    assert "+9" in en and "(us +9)" not in en
+
+
+def test_data_stamp_v0_fallback_and_wall_clock_invariance(tmp_path, monkeypatch):
+    from datetime import UTC, datetime
+
+    from ensemblitz.site import build as B
+
+    # v0 fixture has no data_cutoff_utc -> falls back legitimately to generated_at_utc
+    root = _repo(tmp_path, False, False)
+
+    class _Clock1(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 11, 18, 10, 0, 0, tzinfo=UTC)
+
+    class _Clock2(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 11, 19, 22, 30, 0, tzinfo=UTC)
+
+    monkeypatch.setattr(B, "datetime", _Clock1)
+    out1 = B.build_site(root=root, out=tmp_path / "out1")
+    monkeypatch.setattr(B, "datetime", _Clock2)
+    out2 = B.build_site(root=root, out=tmp_path / "out2")
+
+    assert _text(out1, "index.html") == _text(out2, "index.html")
+    assert _text(out1, "en/index.html") == _text(out2, "en/index.html")
+    assert "Datos del 17 nov 2026, 21:00 (Madrid)" in _text(out1, "index.html")
+    assert "Data from Nov 17, 2026, 3:00 PM ET" in _text(out1, "en/index.html")
+
+
+def test_method_page_reconciles_2133_scored_and_keeps_all_season_metrics(tmp_path):
+    root = _repo(tmp_path, False, True)
+    repo_root = Path(__file__).resolve().parents[1]
+    bl_src = repo_root / "reports" / "baseline_2018_2025.json"
+    (root / "reports" / "baseline_2018_2025.json").write_text(bl_src.read_text())
+    out = build_site(root=root, out=root / "site" / "_build")
+    es = _text(out, "metodo.html")
+    en = _text(out, "en/method.html")
+    assert "2133 partidos decididos" in es and "2141" in es and "8 empates" in es
+    assert "2133 decided" in en and "2141" in en and "8 ties" in en
+    assert "Solo modelo (acierto / LL)" in es and "Model only (acc / LL)" in en
+    assert "pr2-statistical-audit.md" in es and "pr2-statistical-audit.md" in en
+
+
+def test_check_site_guards_catch_c6_c7_c15_c2_and_ignore_comments(tmp_path):
+    import importlib.util
+
+    repo_root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "check_site", repo_root / "scripts" / "check_site.py"
+    )
+    cs = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(cs)
+
+    root = _repo(tmp_path, True, True)
+    (root / "reports" / "baseline_2018_2025.json").write_text(
+        (repo_root / "reports" / "baseline_2018_2025.json").read_text()
+    )
+    out = build_site(root=root, out=root / "site" / "_build")
+    assert cs.check_output(out) == []
+
+    # HTML comment mentioning "closing" must NOT trigger C7 visible-text guard
+    game_en = out / "en/game/2026_11_IND_HOU.html"
+    orig_game = game_en.read_text()
+    game_en.write_text(orig_game.replace("</body>", "<!-- closing comment --></body>"))
+    assert cs.check_output(out) == []
+
+    # Visible "closing" on game page MUST fail C7
+    game_en.write_text(orig_game.replace("</body>", "<p>closing line</p></body>"))
+    assert any("closing-line wording" in e for e in cs.check_output(out))
+
+    # Visible "Madrid" on English page MUST fail C6
+    game_en.write_text(orig_game.replace("</body>", "<p>Madrid time</p></body>"))
+    assert any("Madrid timezone text" in e for e in cs.check_output(out))
+    game_en.write_text(orig_game)
+
+    # Duplicate gap inside flagged .mkt MUST fail C15
+    es_home = out / "index.html"
+    orig_home = es_home.read_text()
+    es_home.write_text(
+        orig_home.replace(
+            "</body>",
+            '<div class="mkt"><span class="chipf">+11</span> Mercado: 56% (nosotros +11)</div></body>',
+        )
+    )
+    assert any("duplicate market gap" in e for e in cs.check_output(out))
+    es_home.write_text(orig_home)
+
+    # Unreconciled 2141 without 2133 on metodo.html MUST fail C2
+    meth = out / "metodo.html"
+    orig_meth = meth.read_text()
+    meth.write_text(orig_meth.replace("2133", "XXXX"))
+    assert any("2141 without reconciling 2133" in e for e in cs.check_output(out))
+    meth.write_text(orig_meth)

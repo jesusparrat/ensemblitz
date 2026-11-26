@@ -2,7 +2,8 @@
 
 Checks: colour contrast of the design tokens, em dashes, language markers on every page,
 jargon and old widgets on the week pages, bookmaker and exchange names, half-translated team
-names and empty filter groups.
+names, empty filter groups, ET on /en/ (no Madrid), no false closing labels outside method pages,
+no duplicate gap text on flagged cards, and reconciled population counts on method pages.
 
 Usage: python scripts/check_site.py [output_dir]   (default: site/_build)
 Exits with code 1 if anything fails.
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +70,36 @@ SPANISH_TEAMS = re.compile(
     r"los ángeles|filadelfia|nueva inglaterra|bahía de tampa|comandantes|\bacereros\b",
     re.I,
 )
+# Closing-line wording is only valid on historical method pages (2018-2025 closing backtest).
+CLOSING_WORD = re.compile(r"\b(cierre|closing)\b", re.I)
+METHOD_PAGES = frozenset({"metodo.html", "en/method.html"})
+
+
+class _VisibleTextParser(HTMLParser):
+    """Extract only visible user-facing text (skipping scripts, styles, comments, and attributes)."""
+
+    SKIP_TAGS = frozenset({"script", "style", "noscript", "title"})
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._skip_depth = 0
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() in self.SKIP_TAGS:
+            self._skip_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() in self.SKIP_TAGS and self._skip_depth > 0:
+            self._skip_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self._skip_depth == 0:
+            self.parts.append(data)
+
+    def handle_comment(self, data: str) -> None:
+        # Ignore HTML comments so metadata/comments never trigger visible-text guards.
+        return
 
 
 def _lum(hexcol: str) -> float:
@@ -105,8 +137,10 @@ def check_contrast() -> list[str]:
 
 
 def _strip_tags(html: str) -> str:
-    html = re.sub(r"<(script|style)\b.*?</\1>", " ", html, flags=re.S)
-    return re.sub(r"<[^>]+>", " ", html)
+    parser = _VisibleTextParser()
+    parser.feed(html)
+    parser.close()
+    return " ".join(parser.parts)
 
 
 def _lang_of(rel: Path) -> str:
@@ -137,11 +171,12 @@ def check_output(out: Path) -> list[str]:
         return [f"no HTML in {out}"]
     for page in pages:
         rel = page.relative_to(out)
+        rel_posix = rel.as_posix()
         text = page.read_text(encoding="utf-8")
         lang = _lang_of(rel)
         if EM_DASH in text:
             errors.append(f"em dash in {rel}")
-        m = re.search(r"<html[^>]*\blang=\"([a-z]{2})\"", text)
+        m = re.search(r'<html[^>]*\blang="([a-z]{2})"', text)
         if not m or m.group(1) != lang:
             errors.append(f"{rel}: <html lang> should be {lang!r}")
         alts = set(re.findall(r'rel="alternate" hreflang="([a-z-]+)"', text))
@@ -156,6 +191,28 @@ def check_output(out: Path) -> list[str]:
             errors.append(f"{rel}: bookmaker or exchange name ({BOOKS.search(visible).group(0)})")
         if SPANISH_TEAMS.search(visible):
             errors.append(f"{rel}: Spanish team name ({SPANISH_TEAMS.search(visible).group(0)})")
+        # C6: English pages must use ET, never Madrid time.
+        if lang == "en":
+            if re.search(r"\bmadrid\b", visible, re.I):
+                errors.append(f"{rel}: Madrid timezone text on English page")
+            if re.search(r"\b\d{1,2}:\d{2}\b", visible) and not re.search(r"\bET\b", visible):
+                errors.append(f"{rel}: time shown on English page without ET label")
+        # C7: Closing-line wording is forbidden in visible text outside historical method pages.
+        if rel_posix not in METHOD_PAGES and CLOSING_WORD.search(visible):
+            hit = CLOSING_WORD.search(visible).group(0)
+            errors.append(f"{rel}: closing-line wording outside method page ({hit})")
+        # C2: Method pages mentioning 2141 must reconcile it with 2133 decided games.
+        if rel_posix in METHOD_PAGES:
+            has_2141 = bool(re.search(r"\b2[.,]?141\b", visible))
+            has_2133 = bool(re.search(r"\b2[.,]?133\b", visible))
+            if has_2141 and not has_2133:
+                errors.append(f"{rel}: mentions 2141 without reconciling 2133 decided games")
+        # C15: Flagged cards must not repeat the difference in parentheses next to the chip.
+        for mkt in re.finditer(r'<div class="mkt"[^>]*>(.*?)</div>', text, re.S):
+            if 'class="chipf"' in mkt.group(1):
+                mkt_vis = _strip_tags(mkt.group(1))
+                if re.search(r"\((nosotros|us)\s", mkt_vis, re.I):
+                    errors.append(f"{rel}: duplicate market gap on flagged card")
         for grp in re.finditer(r'<div class="chips"[^>]*>(.*?)</div>', text, re.S):
             if "<button" not in grp.group(1):
                 errors.append(f"{rel}: empty filter group")

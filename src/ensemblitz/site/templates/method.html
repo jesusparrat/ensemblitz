@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_macros.html" import scroll_start, scroll_end with context %}
 {% set nav = 'method' %}
 {% block title %}{{ t('method.title') }}{% endblock %}
 {% block content %}
@@ -11,14 +10,14 @@
 <p>{{ t('method.number_1') }}</p>
 <p>{{ t('method.number_2') }}</p>
 {% if bl %}
-{{ scroll_start(tx('method.number_h')) }}<table>
+<table class="fit">
 <thead><tr><th>{{ t('method.col_source') }}</th><th>{{ t('method.col_acc') }}</th><th>{{ t('method.col_brier') }}</th><th>{{ t('method.col_ll') }}</th></tr></thead>
 <tbody>
 {% for k, lab in (('model_only', t('comp_ensemble_model_only')), ('ens', t('comp_ensemble')), ('market', t('comp_market'))) %}{% set r = bl.overall[k] %}
 <tr{% if k == 'model_only' %} class="hl"{% endif %}><td>{{ lab }}</td><td>{{ pct(r.accuracy, 1) }}</td><td>{{ n(r.brier, 3) }}</td><td>{{ n(r.log_loss, 3) }}</td></tr>
 {% endfor %}
-</tbody></table>{{ scroll_end() }}
-<p class="small">{{ t('method.number_table_note', n=bl.n_games, a=bl.seasons[0], b=bl.seasons[1]) }}</p>
+</tbody></table>
+<p class="small">{{ t('method.number_table_note', n=pop_scored, played=pop_played, ties=pop_ties, a=bl.seasons[0], b=bl.seasons[1]) }}</p>
 {% endif %}
 
 <h2>{{ t('method.how_h') }}</h2>
@@ -43,29 +42,48 @@
 <p>{{ t('method.inj_1') }}</p>
 <p>{{ t('method.inj_2') }} <a href="{{ repo }}/blob/main/reports/PHASE1.md">reports/PHASE1.md</a></p>
 
-{% if bt %}
+{% if bt or bl %}
 <h2>{{ t('method.hist_h') }}</h2>
-<p>{{ t('method.hist_1', n=bt.n_games, a=bt.seasons[0], b=bt.seasons[1]) }}</p>
-{{ scroll_start(tx('method.hist_h')) }}<table>
+{% set hs = (bl.seasons if bl else bt.seasons) %}
+<p>{{ t('method.hist_1', n=pop_scored, played=pop_played, ties=pop_ties, a=hs[0], b=hs[1]) }}</p>
+{% if bt %}
+<table class="stack">
 <thead><tr><th>{{ t('method.col_source') }}</th><th>{{ t('method.col_acc') }}</th><th>{{ t('method.col_brier') }}</th><th>{{ t('method.col_ll') }}</th><th>{{ t('method.col_mae') }}</th><th>{{ t('method.col_ats') }}</th></tr></thead>
 <tbody>
 {% for c in ['market','elo','kf','lgbm','lgbm_mkt','sim','ens'] %}{% set r = bt.overall[c] %}
-<tr{% if c == 'ens' %} class="hl"{% endif %}><td>{{ model_labels[c] }}</td><td>{{ pct(r.accuracy, 1) }}</td><td>{{ n(r.brier, 3) }}</td><td>{{ n(r.log_loss, 3) }}</td><td>{{ n(r.mae_margin, 2) }}</td><td>{% if c == 'market' %}{{ t('na') }}{% else %}{{ pct(r.ats.win_pct, 1) }}{% endif %}</td></tr>
+<tr{% if c == 'ens' %} class="hl"{% endif %}><td data-label="{{ tx('method.col_source') }}">{{ model_labels[c] }}</td><td data-label="{{ tx('method.col_acc') }}">{{ pct(r.accuracy, 1) }}</td><td data-label="{{ tx('method.col_brier') }}">{{ n(r.brier, 3) }}</td><td data-label="{{ tx('method.col_ll') }}">{{ n(r.log_loss, 3) }}</td><td data-label="{{ tx('method.col_mae') }}">{{ n(r.mae_margin, 2) }}</td><td data-label="{{ tx('method.col_ats') }}">{% if c == 'market' %}{{ t('na') }}{% else %}{{ pct(r.ats.win_pct, 1) }}{% endif %}</td></tr>
 {% endfor %}
-</tbody></table>{{ scroll_end() }}
+</tbody></table>
 <p class="small">{{ t('method.hist_note') }}</p>
+{% endif %}
 
+{% if bl %}
 <h3 class="sub-h">{{ t('method.season_h') }}</h3>
-{{ scroll_start(tx('method.season_h')) }}<table>
-<thead><tr><th>{{ t('method.col_season') }}</th><th>{{ t('method.col_acc_mkt') }}</th><th>{{ t('method.col_acc_ens') }}</th><th>{{ t('method.col_ll_mkt') }}</th><th>{{ t('method.col_ll_ens') }}</th></tr></thead>
-<tbody>{% for s, v in bt.per_season.items() %}<tr><td>{{ s }}</td><td>{{ pct(v.market.accuracy, 1) }}</td><td>{{ pct(v.ens.accuracy, 1) }}</td><td>{{ n(v.market.log_loss, 3) }}</td><td>{{ n(v.ens.log_loss, 3) }}</td></tr>{% endfor %}</tbody>
-</table>{{ scroll_end() }}
+<table class="stack">
+<thead><tr><th>{{ t('method.col_season') }}</th><th>{{ t('method.col_season_mo') }}</th><th>{{ t('method.col_season_ens') }}</th><th>{{ t('method.col_season_mkt') }}</th></tr></thead>
+<tbody>{% for s, v in bl.per_season.items() %}<tr><td data-label="{{ tx('method.col_season') }}">{{ s }}</td><td data-label="{{ tx('method.col_season_mo') }}">{{ pct(v.model_only.accuracy, 1) }} / {{ n(v.model_only.log_loss, 3) }}</td><td data-label="{{ tx('method.col_season_ens') }}">{{ pct(v.ens.accuracy, 1) }} / {{ n(v.ens.log_loss, 3) }}</td><td data-label="{{ tx('method.col_season_mkt') }}">{{ pct(v.market.accuracy, 1) }} / {{ n(v.market.log_loss, 3) }}</td></tr>{% endfor %}</tbody>
+</table>
+<p class="small">{{ t('method.season_note') }}</p>
+{% elif bt %}
+<h3 class="sub-h">{{ t('method.season_h') }}</h3>
+<table class="stack">
+<thead><tr><th>{{ t('method.col_season') }}</th><th>{{ t('method.col_season_ens') }}</th><th>{{ t('method.col_season_mkt') }}</th></tr></thead>
+<tbody>{% for s, v in bt.per_season.items() %}<tr><td data-label="{{ tx('method.col_season') }}">{{ s }}</td><td data-label="{{ tx('method.col_season_ens') }}">{{ pct(v.ens.accuracy, 1) }} / {{ n(v.ens.log_loss, 3) }}</td><td data-label="{{ tx('method.col_season_mkt') }}">{{ pct(v.market.accuracy, 1) }} / {{ n(v.market.log_loss, 3) }}</td></tr>{% endfor %}</tbody>
+</table>
+<p class="small">{{ t('method.season_note') }}</p>
+{% endif %}
 
+{% if calib %}
 <h3 class="sub-h">{{ t('method.calib_h') }}</h3>
 <div class="cols2"><div>{{ calib|safe }}</div>
 <div><p>{{ t('method.calib_1') }}</p><p>{{ t('method.calib_2') }}</p></div></div>
+{% endif %}
 
-<p>{{ t('method.verdict', ens=n(bt.overall.ens.log_loss, 3), mkt=n(bt.overall.market.log_loss, 3)) }} <a href="{{ repo }}/blob/main/reports/backtest.md">reports/backtest.md</a></p>
+{% if bl %}
+<p>{{ t('method.verdict', mo=n(bl.overall.model_only.log_loss, 3), ens=n(bl.overall.ens.log_loss, 3), mkt=n(bl.overall.market.log_loss, 3)) }} <a href="{{ repo }}/blob/main/reports/BASELINE.md">reports/BASELINE.md</a>. {{ t('method.verdict_audit') }} <a href="{{ repo }}/blob/main/docs/audit/pr2-statistical-audit.md">docs/audit/pr2-statistical-audit.md</a></p>
+{% elif bt %}
+<p>{{ t('method.verdict', mo=t('na'), ens=n(bt.overall.ens.log_loss, 3), mkt=n(bt.overall.market.log_loss, 3)) }} <a href="{{ repo }}/blob/main/reports/backtest.md">reports/backtest.md</a></p>
+{% endif %}
 {% endif %}
 
 <h2>{{ t('method.limits_h') }}</h2>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, pbar, absences, scroll_start, scroll_end with context %}
+{% from "_macros.html" import icon, pbar, absences with context %}
 {% set nav = 'game' %}
 {% block title %}{{ g.away }} {{ t('card.at') }} {{ g.home }}{% endblock %}
 {% block description %}{{ tx('game.description', away=g.away_name, home=g.home_name, fav=g.fav, p=pct(g.p_win)) }}{% endblock %}
@@ -7,7 +7,7 @@
 <section class="head matchup" aria-labelledby="h">
   <div>
     <h1 id="h"><small>{{ t('game.kicker', week=week, season=season) }}</small>{{ g.away }} {{ t('card.at') }} {{ g.home }}</h1>
-    <p class="when">{{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.madrid') }}.</p>
+    <p class="when">{{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.tz_note') }}.</p>
     <p class="lede">{{ why_text(g) }}</p>
   </div>
   <div class="read four" aria-label="{{ tx('game.read_aria') }}">
@@ -22,15 +22,15 @@
 {% if g.final %}<p class="empty"><b>{{ t('card.final', away=g.away, a=g.final.away, home=g.home, h=g.final.home) }}</b> {% if g.final.ok %}{{ t('card.hit') }}{% else %}{{ t('card.miss') }}{% endif %}</p>{% endif %}
 
 <h2>{{ t('game.points_h') }}</h2>
-{{ scroll_start(tx('game.points_h')) }}<table>
+<table class="fit">
 <thead><tr><th>{{ t('game.col_team') }}</th><th>{{ t('game.col_exp') }}</th><th>{{ t('game.col_range') }}</th></tr></thead>
 <tbody>
 {% for side, tm, name, v in (('away', g.away, g.away_name, g.pts_away), ('home', g.home, g.home_name, g.pts_home)) %}
 <tr{% if tm == g.fav %} class="hl"{% endif %}><td>{{ name }}</td><td>{{ n(v, 1) }}</td><td>{% if g.range %}{{ rng(g.range[side][0], g.range[side][1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
 {% endfor %}
-<tr><td>{{ t('game.row_margin') }}</td><td>{% if g.margin_ok %}{{ fav_txt(g.home, g.away, g.margin) }}{% else %}{{ t('even') }}{% endif %}</td><td>{% if g.range %}{{ t('game.margin_range', lo=signed(g.range.margin[0], 0), hi=signed(g.range.margin[1], 0)) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
+<tr><td>{{ t('game.row_margin') }}</td><td>{% if g.margin_ok %}{{ fav_txt(g.home, g.away, g.margin) }}{% else %}{{ t('even') }}{% endif %}</td><td>{% if g.range %}{{ margin_rng(g.home, g.away, g.range.margin[0], g.range.margin[1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
 <tr><td>{{ t('game.row_total') }}</td><td>{{ n(g.total, 1) }}</td><td>{% if g.range %}{{ rng(g.range.total[0], g.range.total[1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
-</tbody></table>{{ scroll_end() }}
+</tbody></table>
 <p class="small">{{ t('game.range_note') }} {{ t('game.example', away=g.away, a=g.example.away, home=g.home, h=g.example.home) }}</p>
 
 <h2>{{ t('game.market_h') }}</h2>
@@ -39,9 +39,18 @@
     <dt>{{ t('game.ours') }}</dt><dd>{{ t('card.wins', team=g.fav) }}, {{ pct(g.p_win) }}</dd>
     <dt>{{ t('game.market') }}</dt><dd>{% if g.mkt_win is not none %}{{ pct(g.mkt_win) }}{% else %}{{ t('na') }}{% endif %}</dd>
     <dt>{{ t('game.diff') }}</dt><dd>{% if g.diff is none %}{{ t('na') }}{% else %}{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span>{% else %}{{ signed(g.diff, 0) }}{% endif %}{% endif %}</dd>
-    {% if g.market.spread_line is not none %}<dt>{{ t('game.line') }}</dt><dd>{{ fav_txt(g.home, g.away, g.market.spread_line) }}, {{ t('game.line_total', v=n(g.market.total_line, 1)) }}</dd>{% endif %}
+    {% if g.mkt_source %}<dt>{{ t('game.market_src_label') }}</dt><dd>{% if g.mkt_source == 'odds_api_consensus' %}{{ t('game.market_src_odds_api', n=g.mkt_n) }}{% elif g.mkt_is_closing %}{{ t('game.market_src_nflverse_close') }}{% else %}{{ t('game.market_src_nflverse_pre') }}{% endif %}</dd>{% endif %}
   </dl>
-  <p class="small">{% if g.mkt_n %}{{ t('game.market_src_books', n=g.mkt_n) }}{% else %}{{ t('game.market_src_close') }}{% endif %} {{ t('game.market_note') }}</p>
+  <p class="small">{% if g.mkt_n %}{{ t('game.market_src_books', n=g.mkt_n) }}{% else %}{{ t('game.market_src_nflverse') }}{% endif %}{% if g.mkt_time and g.mkt_time_kind == 'fetched' %} {{ t('game.market_time_fetched', when=stamp(g.mkt_time)) }}{% elif g.mkt_time and g.mkt_time_kind == 'captured' %} {{ t('game.market_time_captured', when=stamp(g.mkt_time)) }}{% elif g.mkt_time and g.mkt_time_kind == 'read' %} {{ t('game.market_time_read', when=stamp(g.mkt_time)) }}{% endif %} {{ t('game.market_note') }}</p>
+  {% if g.market.spread_line is not none %}
+  <div class="ref-line">
+    <h3 class="sub-h">{{ t('game.ref_line_h') }}</h3>
+    <dl class="facts">
+      <dt>{{ t('game.line') }}</dt><dd>{{ spread_txt(g.home, g.away, g.market.spread_line) }}, {{ t('game.line_total', v=n(g.market.total_line, 1)) }}</dd>
+    </dl>
+    <p class="small">{{ t('game.ref_line_note') }}{% if g.market.captured_at_utc %} {{ t('game.market_time_read', when=stamp(g.market.captured_at_utc)) }}{% endif %}</p>
+  </div>
+  {% endif %}
 </div>
 <div>
   <p>{% if g.flag %}{{ t('game.flag_text', fav=g.fav, ours=pct(g.p_win), mkt=pct(g.mkt_win), d=g.diff|abs, n=flag_pts) }}{% elif g.diff is not none %}{{ t('game.close_text', fav=g.fav, ours=pct(g.p_win), mkt=pct(g.mkt_win)) }}{% endif %}</p>
@@ -73,13 +82,13 @@
 
 <details class="tech">
   <summary>{{ t('game.tech_h') }}</summary>
-  {{ scroll_start(tx('game.tech_h')) }}<table>
+  <table class="fit">
   <thead><tr><th>{{ t('game.tech_src') }}</th><th>{{ t('game.tech_prob', team=g.fav) }}</th></tr></thead>
   <tbody>
-  {% for k in ['ensemble_model_only', 'elo', 'kf', 'lgbm', 'market', 'lgbm_mkt', 'ensemble'] %}{% if g.comps[k] is not none %}
+  {% for k in ['ensemble_model_only', 'elo', 'kf', 'lgbm', 'lgbm_mkt', 'ensemble'] %}{% if g.comps[k] is not none %}
   <tr{% if k == 'ensemble_model_only' %} class="hl"{% endif %}><td>{{ t('comp_' + k) }}</td><td>{{ pct(g.comps[k]) }}</td></tr>
   {% endif %}{% endfor %}
-  </tbody></table>{{ scroll_end() }}
+  </tbody></table>
   <p class="small">{{ t('game.tech_note') }} <a href="{{ u('method') }}">{{ t('notes.method') }}</a></p>
 </details>
 

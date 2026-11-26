@@ -112,7 +112,7 @@ h3 { margin: 0; font-weight: 700; font-size: 18px; line-height: 1.25; }
 .game[hidden], .daygroup[hidden] { display: none; }
 .game > .t { grid-area: t; } .game > .m { grid-area: m; } .game > .p { grid-area: p; } .game > .x { grid-area: x; }
 .game > .mg { grid-area: mg; } .game > .tt { grid-area: tt; } .game > .why { grid-area: why; } .game > .ctx { grid-area: ctx; }
-.t { font-family: var(--font-mono); font-size: 15px; font-weight: 600; line-height: 1.2; }
+.t { font-family: var(--font-mono); font-size: 14px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .t small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-2); margin-top: 2px; font-family: var(--font-sans); }
 .m { min-width: 0; }
 .m h3 { font-stretch: 62%; font-weight: 800; font-size: 34px; line-height: .95; letter-spacing: 0; }
@@ -187,10 +187,10 @@ ul.newslist p { margin: 4px 0 0; }
 .backlink { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--s5); font-weight: 600; }
 
 /* tablas */
-.scroll { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: var(--s3) 0 0;
-  background: linear-gradient(90deg, var(--paper) 30%, transparent) 0 0 / 28px 100% no-repeat local, linear-gradient(270deg, var(--paper) 30%, transparent) 100% 0 / 28px 100% no-repeat local,
-    linear-gradient(90deg, rgba(128, 128, 128, .35), transparent) 0 0 / 10px 100% no-repeat scroll, linear-gradient(270deg, rgba(128, 128, 128, .35), transparent) 100% 0 / 10px 100% no-repeat scroll; }
-.scroll table { min-width: 600px; margin: 0; }
+.scroll { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: var(--s3) 0 0; }
+.scroll table { margin: 0; }
+.ref-line { margin-top: var(--s5); padding-top: var(--s3); border-top: 1px dotted var(--ink-3); }
+.ref-line .sub-h { margin-top: 0; font-size: 16px; }
 .hint { display: none; font-size: 13px; color: var(--ink-2); margin: var(--s2) 0 0; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; margin: var(--s3) 0 var(--s2); }
 caption { text-align: left; padding: 0 0 var(--s2); font-size: 13px; color: var(--ink-2); }
@@ -249,11 +249,26 @@ details.tech summary { cursor: pointer; min-height: 44px; display: flex; align-i
   h2 { font-size: 36px; }
   .tools { margin-top: var(--s7); }
   .day { flex-wrap: wrap; gap: var(--s1) var(--s3); }
-  .game { grid-template-columns: 52px minmax(0, 1fr); grid-template-areas: "t m" ". p" ". x" ". mg" ". tt" ". why" ". ctx"; }
+  .game { grid-template-columns: 76px minmax(0, 1fr); grid-template-areas: "t m" ". p" ". x" ". mg" ". tt" ". why" ". ctx"; }
   .m h3 { font-size: 38px; }
   .mg, .tt { flex-direction: row; align-items: baseline; gap: var(--s3); }
   .mg .lab-m, .tt .lab-m { margin: 0; min-width: 64px; }
   .stat-row { gap: var(--s5); }
+  table.fit th, table.fit td { padding: 8px 4px; font-size: 13px; }
+  table.fit td:first-child { font-size: 13px; }
+  table.stack { display: block; border-top: 2px solid var(--ink); }
+  table.stack:not(.sortable) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  table.stack.sortable thead { display: block; border-bottom: 1px solid var(--ink); padding: var(--s2) 0; }
+  table.stack.sortable thead tr { display: flex; flex-wrap: wrap; gap: 6px; }
+  table.stack.sortable thead th { display: block; border: 1px solid var(--rule); border-radius: var(--r-s); padding: 0; background: var(--surface); text-align: left; }
+  table.stack.sortable thead th .sort { min-height: 44px; min-width: 44px; padding: 0 10px; font-size: 13px; justify-content: flex-start; }
+  table.stack.sortable thead th[aria-sort] { border-color: var(--ink); }
+  table.stack tbody { display: block; }
+  table.stack tbody tr { display: block; padding: var(--s3) 0; border-bottom: 1px dotted var(--ink-3); }
+  table.stack tbody tr.hl { background: var(--surface); padding: var(--s3) var(--s2); }
+  table.stack tbody td { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: 4px 0; border-bottom: 0; text-align: right; font-size: 13px; }
+  table.stack tbody td:first-child { font-weight: 700; font-family: var(--font-sans); font-size: 14px; }
+  table.stack tbody td::before { content: attr(data-label); font-family: var(--font-sans); font-weight: 600; font-size: 13px; color: var(--ink-2); text-align: left; flex-shrink: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
