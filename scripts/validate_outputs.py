@@ -2,12 +2,14 @@
 
 Usage: python scripts/validate_outputs.py [--site site/_build]
 Checks predictions/, reports/, results/, models/ JSON (finite numbers, sane probabilities,
-non-empty weeks) and scans outputs (and the built site, if given) for credential patterns.
+non-empty weeks, required odds-report schema and governance) and scans outputs (and the built
+site, if given) for credential patterns.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -17,6 +19,41 @@ SECRET = re.compile(
     r"(apikey=|api_key=|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|gh[ousr]_[A-Za-z0-9]{20,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16})",
     re.I,
+)
+ODDS_REQUIRED_TOP = (
+    "season",
+    "week",
+    "market_source",
+    "market_type",
+    "consensus_method",
+    "odds_fetched_at",
+    "predictions_generated_at",
+    "games",
+)
+ODDS_REQUIRED_GAME = (
+    "game_id",
+    "home",
+    "away",
+    "model_only_home_prob",
+    "consensus_home_prob_shin",
+    "gap_model_only",
+    "n_books",
+)
+ODDS_FORBIDDEN_GAME = frozenset(
+    {
+        "our_home_prob",
+        "edge",
+        "books",
+        "best_home_price",
+        "best_away_price",
+        "ev_per_unit_best",
+        "best_side",
+        "book_spread_home",
+        "book_total",
+        "consensus_home_prob_mult",
+        "our_margin_minus_book",
+        "our_cover_prob_home",
+    }
 )
 errors: list[str] = []
 
@@ -33,7 +70,62 @@ def load(path: Path):
 
 
 def prob_ok(x) -> bool:
-    return x is None or (isinstance(x, (int, float)) and 0.0 <= x <= 1.0)
+    return x is None or (
+        isinstance(x, (int, float))
+        and not isinstance(x, bool)
+        and math.isfinite(x)
+        and 0.0 <= x <= 1.0
+    )
+
+
+def required_prob_ok(x) -> bool:
+    return (
+        isinstance(x, (int, float))
+        and not isinstance(x, bool)
+        and math.isfinite(x)
+        and 0.0 <= x <= 1.0
+    )
+
+
+def validate_odds_report(d: object, label: str) -> list[str]:
+    """Validate an aggregate odds report against required fields and governance constraints."""
+    errs: list[str] = []
+    if not isinstance(d, dict):
+        return [f"{label}: expected JSON object"]
+    for key in ODDS_REQUIRED_TOP:
+        if key not in d or d[key] is None:
+            errs.append(f"{label}: missing required field {key}")
+    games = d.get("games")
+    if not isinstance(games, list):
+        return errs + [f"{label}: games must be a list"]
+    for idx, g in enumerate(games):
+        if not isinstance(g, dict):
+            errs.append(f"{label}: games[{idx}] must be an object")
+            continue
+        gid = g.get("game_id") or f"games[{idx}]"
+        for key in ODDS_REQUIRED_GAME:
+            if key not in g or g[key] is None:
+                errs.append(f"{label}: {gid} missing required field {key}")
+        for key in ("model_only_home_prob", "consensus_home_prob_shin"):
+            if key in g and g[key] is not None and not required_prob_ok(g[key]):
+                errs.append(f"{label}: {gid} invalid {key}={g[key]}")
+        gap = g.get("gap_model_only")
+        if gap is not None and (
+            isinstance(gap, bool)
+            or not isinstance(gap, (int, float))
+            or not math.isfinite(gap)
+            or not -1.0 <= gap <= 1.0
+        ):
+            errs.append(f"{label}: {gid} invalid gap_model_only={gap}")
+        n_books = g.get("n_books")
+        if n_books is not None and (
+            isinstance(n_books, bool) or not isinstance(n_books, int) or n_books < 1
+        ):
+            errs.append(f"{label}: {gid} invalid n_books={n_books}")
+        bad = sorted(ODDS_FORBIDDEN_GAME.intersection(g))
+        if bad:
+            errs.append(f"{label}: {gid} contains forbidden odds fields {bad}")
+    return errs
 
 
 def check_predictions() -> None:
@@ -78,10 +170,8 @@ def check_json_tree() -> None:
             load(p)
     for p in sorted((ROOT / "reports" / "odds").glob("*_week*.json")):
         d = load(p)
-        for g in (d or {}).get("games", []):
-            for k in ("our_home_prob", "consensus_home_prob_shin"):
-                if not prob_ok(g.get(k)):
-                    errors.append(f"{p.name}: {g.get('game_id')} {k}={g.get(k)}")
+        if d is not None:
+            errors.extend(validate_odds_report(d, p.name))
 
 
 def scan_secrets(folders: list[Path]) -> None:

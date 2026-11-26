@@ -1,148 +1,149 @@
 # PR2 Statistical Audit
 
-**Estado: CI verificada.** Generado el **25 de noviembre de 2026, 23:51:06 UTC**, con el modelo `0.1.0`.
+Generated automatically by `uv run python scripts/audit_pr2.py` (offline, from `reports/baseline_components.parquet` and committed repository artifacts; no nflverse downloads and no calls to The Odds API). Do not hand-edit this file.
 
-El informe completo, incluido el JSON con folds y métricas por temporada, se generó offline en CI y se adjunta como artefacto. Este documento conserva los resultados principales y las conclusiones.
+- Generated UTC: `2026-11-26T23:05:07+00:00`
+- Model version: `0.1.0`
+- Scoring seasons: 2018-2025
+- Compact JSON summary: `reports/pr2_statistical_audit_summary.json`
 
-- Ejecución CI: [run 45724315649](https://github.com/jesusparrat/ensemblitz/actions/runs/45723813488)
-- Artefacto: `pr2-statistical-audit`
-- Regeneración local: `uv run python scripts/audit_pr2.py`
-- Sin descargas nflverse ni llamadas a The Odds API.
+## Executive summary
 
-## 1. Población: 2.141 frente a 2.133
+- MARKET clearly outperforms MODEL_ONLY on accuracy, Brier and log loss; paired stratified block CIs stay well above zero under 1-, 2- and 4-week block lengths.
+- Point estimates slightly favour MARKET over ENSEMBLE, but the difference is tiny and block-length sensitive (the 95% CI crosses zero on Brier under 1-, 2- and 4-week blocks and on log loss under 1-week blocks); there is no robust separation between MARKET and ENSEMBLE, and no evidence that ENSEMBLE improves upon MARKET.
+- The high-confidence (75%+) overconfidence hypothesis reproduces for MODEL_ONLY's own favourites (+4.35 pp, 95% CI strictly above zero across 1-, 2- and 4-week blocks), whereas ENSEMBLE's own 75%+ segment is +0.74 pp with CIs spanning zero under all block lengths.
+- Constrained ensemble weight variants (ens_cap1, ens_pool) do not separate from the published ensemble under any block length (all CIs cross zero); no retuning in PR2.
 
-La discrepancia queda reconciliada:
+## 1. Population reconciliation (2,141 vs 2,133)
 
-| Concepto | N |
-|---|---:|
-| Partidos regulares jugados | 2.141 |
-| Con predicciones válidas para todas las fuentes | 2.141 |
-| Empates excluidos del scoring | 8 |
-| Predicciones ausentes | 0 |
-| Probabilidades inválidas | 0 |
-| **Muestra final común** | **2.133** |
+- Rows in regular-season scope: 2141
+- Played games: 2141
+- Rows with valid probabilities for every compared source: 2141
+- Ties excluded from probabilistic scoring: 8
+- Rows with missing predictions: 0
+- Rows with invalid probabilities: 0
+- Final scored population: 2133
+- Total excluded from scoring: 8
 
-Los ocho excluidos son empates, no datos ausentes:
+Exclusions are reconciled at game level rather than assumed to be ties:
 
-- `2018_01_PIT_CLE`
-- `2018_02_MIN_GB`
-- `2019_01_DET_ARI`
-- `2020_03_CIN_PHI`
-- `2021_10_DET_PIT`
-- `2022_01_IND_HOU`
-- `2022_13_WAS_NYG`
-- `2025_04_GB_DAL`
+- `2018_01_PIT_CLE` (season 2018, week 1): tie
+- `2018_02_MIN_GB` (season 2018, week 2): tie
+- `2019_01_DET_ARI` (season 2019, week 1): tie
+- `2020_03_CIN_PHI` (season 2020, week 3): tie
+- `2021_10_DET_PIT` (season 2021, week 10): tie
+- `2022_01_IND_HOU` (season 2022, week 1): tie
+- `2022_13_WAS_NYG` (season 2022, week 13): tie
+- `2025_04_GB_DAL` (season 2025, week 4): tie
 
-Las tres fuentes comparten exactamente los mismos 2.133 partidos. SHA-256 de los IDs ordenados: `6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144`.
+## 2. Paired source comparison
 
-## 2. Resultado global: modelo, mercado y ensemble
+- Sources: market, model_only, ens
+- Identical game IDs across MODEL_ONLY, MARKET and ENSEMBLE: True
+- Paired N: 2133
+- SHA-256 of sorted paired game IDs: `6c02e4792fce8c947492fc0d0e9db839b830b12f5cc712655ec55bc4d99cd144`
 
-| Fuente | Accuracy | Brier | Log loss | Pendiente de calibración |
-|---|---:|---:|---:|---:|
-| MODEL_ONLY | 64,79 % | 0,22168 | 0,63440 | 0,928 |
-| MARKET | **66,43 %** | **0,21108** | **0,60968** | 1,056 |
-| ENSEMBLE | 66,24 % | 0,21165 | 0,61125 | 0,991 |
-
-### Diferencias emparejadas frente al mercado
-
-Bootstrap por temporadas completas, 10.000 réplicas, semilla 20260, IC percentil del 95 %. La diferencia es fuente menos MARKET; valores positivos en Brier y log loss indican peor resultado.
-
-| Fuente | Δ Log loss | IC 95 % | Δ Brier | IC 95 % |
-|---|---:|---:|---:|---:|
-| MODEL_ONLY | +0,02472 | [+0,02149; +0,02755] | +0,01059 | [+0,00952; +0,01166] |
-| ENSEMBLE | +0,00157 | [+0,00047; +0,00266] | +0,00057 | [+0,00008; +0,00108] |
-
-**Conclusión estadística:** el mercado supera claramente a MODEL_ONLY. También supera al ensemble publicado en Brier y log loss; la diferencia es pequeña, pero los dos intervalos emparejados quedan por encima de cero. La proporción de réplicas en que ENSEMBLE mejora el log loss de MARKET es 0,22 %.
-
-Esto no implica que el modelo carezca de valor explicativo o editorial, pero sí que el backtest actual no demuestra una mejora predictiva sobre el mercado.
-
-## 3. Calibración de favoritos de al menos el 75 %
-
-Cada fuente se evalúa en su propio subconjunto de favoritos; los tamaños, por tanto, no son iguales.
-
-| Fuente | N | Probabilidad media | Acierto real | Sobreconfianza | IC 95 % de la brecha |
+| Source | N | Accuracy | Brier | Log loss | Calibration slope |
 |---|---:|---:|---:|---:|---:|
-| MODEL_ONLY | 396 | 80,86 % | 76,52 % | **+4,35 pp** | [+0,86; +7,77] pp |
-| MARKET | 470 | 80,93 % | 82,34 % | −1,41 pp | [−4,63; +1,57] pp |
-| ENSEMBLE | 525 | 81,31 % | 80,57 % | +0,74 pp | [−2,18; +3,85] pp |
+| MODEL_ONLY | 2133 | 64.79% | 0.22168 | 0.63440 | 0.928 |
+| MARKET | 2133 | 66.43% | 0.21108 | 0.60968 | 1.056 |
+| ENS | 2133 | 66.24% | 0.21165 | 0.61125 | 0.991 |
 
-La hipótesis de +4,3 puntos de sobreconfianza queda reproducida para MODEL_ONLY, con un intervalo que no cruza cero. No se reproduce para el ensemble publicado: su sobreconfianza es de 0,74 pp y el intervalo incluye cero.
+### Paired differences vs MARKET (primary: 2-week blocks stratified by season)
 
-En los mismos 525 partidos donde el ensemble asigna al favorito al menos un 75 %, el acierto real es 80,57 % (IC por temporadas: 77,61–83,19 %). En esos mismos partidos, MODEL_ONLY asigna de media 76,82 % al favorito del ensemble, MARKET 80,08 % y ENSEMBLE 81,31 %. Esta distinción evita confundir el subconjunto de favoritos propios de cada fuente con una comparación sobre los mismos partidos.
+Method: paired 2-week block bootstrap stratified by season: contiguous 2-week blocks within each season (never crossing season boundaries) resampled with replacement independently per season. Primary unit: 2-week blocks (72 blocks across 8 seasons), 10,000 replicates, seed `20260`, 95% percentile CI. Sign convention: source minus MARKET (positive values on log loss and Brier mean worse than MARKET).
 
-## 4. Pesos del ensemble y alternativas restringidas
+| Source minus MARKET | Δ log loss | 95% CI | Share better than MARKET | Δ Brier | 95% CI |
+|---|---:|---:|---:|---:|---:|
+| MODEL_ONLY | +0.02472 | [+0.01731, +0.03242] | 0.00% | +0.01059 | [+0.00724, +0.01401] |
+| ENS | +0.00157 | [+0.00006, +0.00301] | 2.05% | +0.00057 | [-0.00005, +0.00117] |
 
-- La suma de pesos del ensemble publicado supera 1 en el **100 % de los folds**; media 1,091, rango 1,032–1,240.
-- MODEL_ONLY supera 1 en el 97,22 % de los folds; media 1,074.
-- Las variantes con suma de pesos restringida (`ens_cap1`, `ens_pool`) mejoran ligeramente los puntos estimados, pero sus intervalos emparejados frente al ensemble cruzan cero tanto en log loss como en Brier.
+### Block-length sensitivity (1-week, 2-week, 4-week blocks stratified by season)
 
-**Decisión:** no cambiar pesos ni hiperparámetros en PR2. Los resultados no justifican retuning en esta fase. La suma de pesos superior a uno se documenta como diagnóstico, no como prueba automática de mala calibración.
+| Block length | Blocks | Comparison | Δ log loss 95% CI | Δ Brier 95% CI |
+|---|---:|---|---:|---:|
+| 1-week | 144 | MODEL_ONLY minus MARKET | [+0.01733, +0.03233] | [+0.00732, +0.01390] |
+| 1-week | 144 | ENSEMBLE minus MARKET | [-0.00006, +0.00321] | [-0.00010, +0.00124] |
+| 1-week | 144 | ens_cap1 minus ENSEMBLE | [-0.00195, +0.00066] | [-0.00074, +0.00020] |
+| 1-week | 144 | ens_pool minus ENSEMBLE | [-0.00227, +0.00050] | [-0.00083, +0.00020] |
+| 2-week | 72 | MODEL_ONLY minus MARKET | [+0.01731, +0.03242] | [+0.00724, +0.01401] |
+| 2-week | 72 | ENSEMBLE minus MARKET | [+0.00006, +0.00301] | [-0.00005, +0.00117] |
+| 2-week | 72 | ens_cap1 minus ENSEMBLE | [-0.00206, +0.00081] | [-0.00077, +0.00025] |
+| 2-week | 72 | ens_pool minus ENSEMBLE | [-0.00235, +0.00060] | [-0.00084, +0.00022] |
+| 4-week | 40 | MODEL_ONLY minus MARKET | [+0.01812, +0.03172] | [+0.00772, +0.01366] |
+| 4-week | 40 | ENSEMBLE minus MARKET | [+0.00009, +0.00300] | [-0.00004, +0.00116] |
+| 4-week | 40 | ens_cap1 minus ENSEMBLE | [-0.00192, +0.00065] | [-0.00071, +0.00020] |
+| 4-week | 40 | ens_pool minus ENSEMBLE | [-0.00215, +0.00044] | [-0.00077, +0.00017] |
 
-## 5. ATS de MODEL_ONLY
+Interpretation: MARKET beats MODEL_ONLY clearly across all three block lengths on both log loss and Brier. For ENSEMBLE vs MARKET, point estimates favour MARKET slightly (+0.00157 log loss, +0.00057 Brier), but the Brier 95% CI crosses zero under 1-, 2- and 4-week blocks and the log-loss 95% CI crosses zero under 1-week blocks (while sitting near zero at +0.00006 under 2-week blocks). Accordingly, PR2 does not claim a robust separation between MARKET and ENSEMBLE; it concludes that ENSEMBLE does not demonstrate a predictive edge over MARKET.
 
-- 1.024 victorias, 1.057 derrotas y 52 pushes.
-- Porcentaje de acierto: 49,21 % (IC 95 %: 47,06–51,35 %).
-- Contraste frente al break-even del 52,38 %: (p=0,0040).
+The resampling share below zero is descriptive and not a conventional hypothesis-test p-value.
 
-No aparece una ventaja ATS en esta muestra. No debe presentarse como señal de valor esperado o rentabilidad.
+## 3. High-confidence favourites (75%+)
 
-## 6. Auditoría de fuga temporal
+Each source is evaluated on its own 75%+ favourite subset (different sample sizes), with 2-week stratified block bootstrap CIs and 1-week / 4-week sensitivity:
 
-**Sin fuga de resultados identificada en la secuencia walk-forward examinada:**
+| Source | N | Mean predicted | Actual | Overconfidence | 2-week 95% CI | 1-week 95% CI | 4-week 95% CI |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| MODEL_ONLY | 396 | 80.86% | 76.52% | +4.35 pp | [+0.60, +8.04] pp | [+0.64, +8.04] pp | [+1.59, +7.17] pp |
+| MARKET | 470 | 80.93% | 82.34% | -1.41 pp | [-5.04, +2.26] pp | [-4.87, +2.21] pp | [-4.99, +2.32] pp |
+| ENS | 525 | 81.31% | 80.57% | +0.74 pp | [-2.58, +4.07] pp | [-2.55, +3.92] pp | [-2.36, +3.90] pp |
 
-- Elo y ajustes por rival: las features de una semana se calculan antes de actualizar el estado con los resultados de esa misma semana.
-- Kalman: `run_kf` predice la semana completa antes de actualizarla. `kalman.tune` limita la optimización a temporadas estrictamente anteriores a `before_season`; se añadió una regresión que comprueba ese corte.
-- LightGBM: `pipeline._train_mask` usa únicamente partidos jugados de temporadas/semanas anteriores; se añadió un test directo del límite.
-- El stack se vuelve a ajustar antes de cada semana con predicciones de componentes fuera de muestra.
+Same-game comparison on the 525 games where ENSEMBLE assigns >=75% to its favourite: actual win rate 80.57% (2-week stratified 95% CI: [77.28%, 83.79%]). On those identical games, mean predicted probability for the ENSEMBLE favourite is MODEL_ONLY 76.82%, MARKET 80.08%, ENSEMBLE 81.31%.
 
-**Riesgos no resueltos ni cuantificados:**
+## 4. Ensemble weights and constrained variants
 
-1. `home_qb_id`/`away_qb_id`, `temp` y `wind` alimentan features, pero el histórico no conserva snapshots ni timestamps que prueben cuándo se conocieron. La identidad real del QB y el tiempo observado pueden no coincidir con lo que era conocible al pronosticar. Es un riesgo potencial de disponibilidad, no una fuga de resultados demostrada.
-2. `models/kf_params.json` no registra el periodo de entrenamiento de cada parámetro. El código de tuning respeta el corte, pero no se puede demostrar que todos los valores versionados se generaran así.
-3. No hay historial reproducible de selección manual de features/hiperparámetros de LightGBM; no se puede demostrar que las decisiones históricas fueran independientes de temporadas futuras.
-4. El snapshot de datos hashea `data/raw/*.parquet`, pero las features también leen `data/processed/team_games.parquet` y `qb_games.parquet`, que no se hashean directamente.
-5. Las lesiones usan recuentos de semanas t−1/t−2, no el informe de la semana actual; los timestamps históricos de publicación no se conservan.
+- Published ENSEMBLE weight sum exceeds 1 in 100.00% of folds (mean 1.091, range 1.032 to 1.240).
+- MODEL_ONLY weight sum exceeds 1 in 97.22% of folds (mean 1.074, range 0.991 to 1.233).
+- Constrained variants (`ens_cap1`, `ens_pool`) show slightly lower point-estimate loss, but every paired 95% CI vs ENSEMBLE crosses zero across 1-, 2- and 4-week blocks.
+- Decision: no weight or hyperparameter retuning in PR2.
 
-No se han cambiado parámetros ni reentrenado modelos para ocultar estos riesgos. Cuantificarlos requiere datos point-in-time y una evaluación controlada posterior.
+## 5. MODEL_ONLY against the spread (ATS)
 
-## 7. Fuentes de mercado: discrepancia IND–HOU
+- Record vs closing spread: 1024-1057-52 (49.21%, Wilson 95% CI [47.06%, 51.35%]).
+- Exact binomial test vs 52.38% (-110 break-even): p = 0.0040.
+- No ATS profitability edge is present; MODEL_ONLY must not be framed as positive EV.
 
-Para IND @ HOU, semana 11 de 2026:
+## 6. Leakage and temporal-validity review
 
-- nflverse: probabilidad local sin margen **84,00 %**, calculada con moneylines −700 / +500.
-- The Odds API: media no ponderada de probabilidades Shin sin margen **85,77 %**, con 42 operadores.
-- La media multiplicativa archivada antes de la limpieza era **84,07 %**.
-- Captura de The Odds API: 17 nov 2026, 20:54:38 UTC.
-- Predicción: 17 nov 2026, 22:07:57 UTC.
-- Kickoff: 20 nov 2026, 01:15:00 UTC.
+### Walk-forward state and stacking
 
-La diferencia 86 % frente a 84 % procede de fuentes y métodos de de-vig distintos, no de un cambio de signo. La captura de The Odds API precede a la generación de la predicción en 1 h 13 min 19 s. Ninguno de estos valores es una cuota de cierre. El histórico de backtest usa las líneas de cierre nflverse; la captura de The Odds API es otra observación pre-kickoff.
+features.build computes every game's features for a (season, week) batch before updating ratings with that batch's results; Elo and opponent-adjusted EPA state are therefore pre-week. pipeline._train_mask admits only played games from earlier seasons/weeks. pipeline.add_ensemble_walk_forward refits stacks on those earlier out-of-sample component predictions. models.kalman.run_kf also predicts a whole week before applying that week's results.
 
-El consenso Shin almacenado es la media aritmética no ponderada de probabilidades Shin por operador, no un cálculo Shin sobre un mercado agregado.
+### Kalman hyperparameters
 
-## 8. Noticias, cuotas y convención de margen
+kalman.tune explicitly slices season < before_season before likelihood optimisation. A regression test guards that cutoff. However models/kf_params.json has no per-season training-window metadata; the checked-in values cannot be independently proven to have been generated by that code path.
 
-- `apply_news` modifica solo probabilidad y margen del ensemble. El titular MODEL_ONLY permanece intacto; v1 registra `news_adjustment.applies_to = "ensemble"`. No hay archivo histórico point-in-time para incluir noticias en el backtest.
-- Se eliminaron de los informes actuales `reports/odds/` los precios individuales, nombres de operadores, mejores precios, EV y edge frente al ensemble. Solo se conservan probabilidad agregada media-Shin, timestamp y número de operadores. Los snapshots históricos congelados no se reescribieron.
-- Los términos públicos de The Odds API permiten datos derivados en interfaces de usuario siempre que los datos no sean el producto principal vendido o redistribuido, y prohíben redistribuir un feed raw independiente ([términos](https://the-odds-api.com/terms-and-conditions.html)). Esto no sustituye la revisión de un acuerdo específico de cuenta.
-- Convención canónica: margen = puntos local − visitante. En nflverse, `spread_line > 0` indica favorito local. The Odds API usa el signo contrario para `point`; se convierte con `odds_api_margin_home(point) = -point`. Los tests cubren la conversión y el fallback de spread nflverse.
+### LightGBM
 
-## 9. Validación CI
+The walk-forward component path uses _train_mask and refits before each season/week. The repository contains no reproducible hyperparameter/feature-selection history, so it cannot prove that manual model selection was not influenced by later seasons.
 
-<badge color="success">Todo correcto</badge>
+### Point-in-time availability risk
 
-- `uv lock --check`
-- `uv sync --frozen --extra dev`
-- `ruff check .`
-- `ruff format --check .`
-- **160 tests passed**
-- Build del site y validación HTML
-- `validate_outputs.py`
-- `verify_integrity.py`
-- Baseline gate: 2.133 partidos antes y después; OK
-- Auditoría PR2 offline: OK
-- Artefacto de informe completo subido correctamente
+Historical schedule fields home_qb_id/away_qb_id and temp/wind feed QB-rate/change and LightGBM features. The repository does not retain point-in-time snapshots or availability timestamps for those fields. Actual starter identity and observed game weather may differ from what was knowable at forecast time. This is a potential availability leakage risk, not a demonstrated result-leakage bug; its impact is not quantified in PR2 because doing so requires point-in-time inputs and a separate controlled re-evaluation.
 
-## 10. Límites y decisiones
+### Processed-data provenance
 
-El bootstrap conserva la dependencia dentro de cada temporada, pero solo hay ocho clusters independientes; los intervalos son informativos y deben interpretarse con cautela. No se han retuneado pesos ni hiperparámetros, no se han reescrito snapshots, no se han realizado llamadas a The Odds API y no se ha modificado HTML/UI. `AGENTS.md` ya estaba en inglés; no requería migración.
+contract.data_snapshot hashes data/raw/*.parquet, while feature construction also reads data/processed/team_games.parquet and qb_games.parquet. Those processed files are derived from raw inputs but are not directly hashed in the prediction provenance; stale derived caches remain a reproducibility risk.
+
+### Injury features
+
+The feature builder uses Out/Doubtful counts from week t-1 or t-2, not the current week. This avoids direct same-week injury-report leakage, although source publication timestamps are not retained in the historical feature cache.
+
+## 7. Market source and capture semantics
+
+IND @ HOU (`2026_11_IND_HOU`): nflverse no-vig moneyline probability 84.00% (moneylines -700.0/500.0); The Odds API mean-Shin probability 85.77% across 42 operators (legacy multiplicative mean 84.07%). Odds capture `2026-11-17T20:54:38Z`; prediction generation `2026-11-17T22:07:57Z`; kickoff `2026-11-20T01:15:00Z`.
+
+The nflverse value is the no-vig probability from -700/+500 moneylines (84.00%). The Odds API value is the unweighted mean of 42 operator-level Shin probabilities (85.77%); the legacy unweighted multiplicative mean was 84.07%. The Odds API cache was fetched at 20:54:38Z and the prediction was generated at 22:07:57Z. These are different sources and de-vig methods, captured at different times; neither is a closing quote, and the Odds API cache predates the prediction by 1h 13m 19s.
+
+The historical baseline uses the nflverse schedule closing line, while the live Odds API value is a separate pre-kickoff snapshot. These must not be combined or labelled as a single closing quote. The Odds API Shin consensus is an unweighted arithmetic mean of per-operator Shin de-vigged probabilities, not a pooled market calculation.
+
+## 8. News adjustment, odds governance and margin convention
+
+- **News adjustment:** `apply_news` updates only ENSEMBLE probability and margin. The MODEL_ONLY headline remains untouched (`news_adjustment.applies_to = ensemble`). News is absent from the historical backtest because no point-in-time archive exists.
+- **Odds-data governance:** Public standard terms reviewed 2026-11-26 permit derived values in user-facing dashboards provided the data is not the primary redistributed product, while prohibiting redistribution as a standalone raw feed (https://the-odds-api.com/terms-and-conditions.html; account-specific terms may differ). Current `reports/odds/` outputs retain only aggregate mean-Shin probability, capture timestamp, operator count, and model-only gap. Individual prices, operator identifiers, best prices, EV and ensemble-relative edge have been removed.
+- **Margin sign convention:** Canonical margin is home minus away. nflverse `spread_line` is positive when home is favoured. The Odds API spread point uses the opposite sign and is converted by `contract.odds_api_margin_home(point) = -point`. Regression tests cover both directions and the nflverse spread fallback.
+
+## 9. Governance and non-goals
+
+`AGENTS.md` specifies English for code, comments, repository docs, commit messages, PR titles and PR descriptions, reserving Spanish for user discussion and the Spanish site. This audit does not retune weights, alter model hyperparameters, edit frozen prediction snapshots or `predictions/MANIFEST.json`, rewrite git history, call The Odds API, or modify site HTML. Potential point-in-time risks are documented rather than silently patched.

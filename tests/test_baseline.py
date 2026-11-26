@@ -115,19 +115,44 @@ def test_calibration_slope_is_one_for_calibrated_probabilities():
     assert B.calib_slope(q, y)[1] < 0.7
 
 
-def test_season_block_bootstrap_intervals_are_ordered(frame, walked):
+def test_stratified_block_bootstrap_intervals_and_sensitivity(frame, walked):
     wf, _ = walked
     d = B.scoring_frame(wf)
     y = B.outcomes(d)
     bs = B.bootstrap(d, y, n=300)
-    assert bs["block_unit"] == "season"
-    assert bs["n_blocks"] == d["season"].nunique()
-    assert "complete seasons" in bs["resampling"]
+    assert bs["block_unit"] == "2_week_block"
+    assert bs["block_weeks"] == 2
+    assert bs["stratified_by"] == "season"
+    assert bs["n_seasons"] == d["season"].nunique()
+    expected_2w = sum(((g["week"] - 1) // 2).nunique() for _, g in d.groupby("season"))
+    assert bs["n_blocks"] == expected_2w
+    assert "never crossing season boundaries" in bs["resampling"]
     for value in bs["diff_vs_market"].values():
         for key in ("log_loss_ci", "brier_ci"):
             lo, hi = value[key]
             assert np.isfinite([lo, hi]).all()
             assert lo <= hi
+    assert set(bs["sensitivity"]) == {"1_week", "2_week", "4_week"}
+    for bw, label in ((1, "1_week"), (2, "2_week"), (4, "4_week")):
+        sb = bs["sensitivity"][label]
+        assert sb["block_weeks"] == bw
+        expected_blocks = sum(((g["week"] - 1) // bw).nunique() for _, g in d.groupby("season"))
+        assert sb["n_blocks"] == expected_blocks
+        for value in sb["diff_vs_market"].values():
+            for key in ("log_loss_ci", "brier_ci"):
+                lo, hi = value[key]
+                assert np.isfinite([lo, hi]).all()
+                assert lo <= hi
+
+
+def test_stratified_block_plan_never_crosses_season_boundaries():
+    seasons = np.array([2020, 2020, 2020, 2021, 2021, 2021])
+    weeks = np.array([1, 2, 17, 1, 2, 17])
+    plan = B._stratified_block_bootstrap_plan(seasons, weeks, block_weeks=2, n=50, seed=7)
+    # 2020 has blocks {0, 8} and 2021 has blocks {0, 8}: 4 distinct blocks, never merged across years
+    assert plan["n_blocks"] == 4
+    assert plan["n_seasons"] == 2
+    assert set(plan["codes"][:3]).isdisjoint(set(plan["codes"][3:]))
 
 
 def test_heavy_favourite_bins_partition_games(walked):

@@ -1,34 +1,63 @@
 # Línea base 2018 a 2025
 
-> **Informe histórico, no válido para inferencia estadística tras PR2.** Los intervalos de este documento proceden de un bootstrap IID por partido y no preservan la dependencia temporal entre partidos. No uses sus intervalos ni sus afirmaciones de significación. PR2 los sustituye por bootstrap emparejado de temporadas completas; ejecuta `uv run python scripts/audit_pr2.py` para generar el informe actualizado. Los puntos estimados de abajo se conservan como referencia histórica.
-
-
-Generado el 2026-11-18T21:00:16+00:00. 2133 partidos de temporada regular (2018 a 2025, empates fuera). Datos en `reports/baseline_2018_2025.json`, gráfico en `reports/baseline_calibration.png`. Este documento lo genera `ensemblitz baseline`; no se edita a mano.
+Generado el 2026-11-26T23:04:47+00:00. 2133 partidos de temporada regular (2018 a 2025, empates fuera). Datos en `reports/baseline_2018_2025.json`, gráfico en `reports/baseline_calibration.png`. Este documento lo genera `ensemblitz baseline`; no se edita a mano.
 
 ## Conclusiones en lenguaje llano
 
-1. **El modelo propio, sin mirar el mercado, está por detrás de las casas.** Su log loss es 0,634 frente a 0,610 del cierre sin comisión: una diferencia de +0,0247 con intervalo del 95 % [+0,0168; +0,0326], que no incluye el cero. Acierta 64,8 % de los partidos frente al 66,4 % del mercado.
-2. **El ensemble publicado casi copia al mercado y no lo mejora.** Log loss 0,611 contra 0,610 (+0,0016, IC 95 % [−0,0003; +0,0035]): es peor que el mercado y el intervalo incluye el cero. Los pesos le dan al mercado de media un 75 % del total (87 % contando el LightGBM que corrige al mercado), así que no aporta información propia visible.
+1. **El modelo propio, sin mirar el mercado, está por detrás de las casas.** Su log loss es 0,634 frente a 0,610 del cierre sin comisión: una diferencia de +0,0247 con intervalo del 95 % [+0,0173; +0,0324], que no incluye el cero. Acierta 64,8 % de los partidos frente al 66,4 % del mercado.
+2. **El ensemble publicado casi copia al mercado y no lo mejora.** Log loss 0,611 contra 0,610 (+0,0016, IC 95 % en bloques de 2 semanas [+0,0001; +0,0030]): el punto estimado es peor que el mercado, pero la diferencia es mínima y sensible al tamaño de bloque (en Brier cruza cero en 1, 2 y 4 semanas, y en log loss cruza cero con bloques de 1 semana). Los pesos le dan al mercado de media un 75 % del total (87 % contando el LightGBM que corrige al mercado), así que no aporta información propia demostrable.
 3. **Contra el spread, el modelo propio no llega al punto de equilibrio.** Apostando el lado que prefiere contra la línea de cierre: 1024-1057-52 (49,2 %, IC 95 % 47,1 % a 51,4 %). Para ganar dinero con una comisión típica hace falta un 52,38 %. Cuando el modelo discrepa 3 puntos o más del spread: 283-276-8 (50,6 %, IC 95 % 46,5 % a 54,8 %).
 4. **La calibración no falla de forma grave.** La pendiente de calibración del ensemble es 0,99 (1 es perfecto) y en los favoritos del 75 % o más apenas está 0,7 puntos por encima de lo real. El modelo sin mercado es el que se pasa de confiado: 0,93 de pendiente. El tramo con mayor desviación del ensemble (con 100 partidos o más) es 65-70%: prevé 67,5 % y ocurre 61,9 % (294 partidos); con tan pocos partidos por tramo hay que leerlo con cautela.
 5. **El extremizar existe, pero aquí no hace daño.** Los pesos del ensemble suman más de 1 en el 100 % de los reajustes (media 1,09). Con los pesos limitados a suma 1 el log loss baja 0,0006 y sin sesgo ni extremizar baja 0,0009, pero esa mejora no es estadísticamente distinguible de cero. No hay base para decir que las versiones restringidas calibren mejor fuera de muestra; tampoco para defender el extremizar.
+
+## Reconciliación de población
+
+- Filas regulares en alcance: 2141.
+- Partidos jugados: 2141.
+- Predicciones válidas para todas las fuentes: 2141.
+- Empates excluidos: 8.
+- Filas con predicciones ausentes: 0.
+- Filas con probabilidades inválidas: 0.
+- Muestra final puntuada: 2133.
+
+Partidos excluidos y motivo:
+
+- 2018_01_PIT_CLE (2018 semana 1): tie.
+- 2018_02_MIN_GB (2018 semana 2): tie.
+- 2019_01_DET_ARI (2019 semana 1): tie.
+- 2020_03_CIN_PHI (2020 semana 3): tie.
+- 2021_10_DET_PIT (2021 semana 10): tie.
+- 2022_01_IND_HOU (2022 semana 1): tie.
+- 2022_13_WAS_NYG (2022 semana 13): tie.
+- 2025_04_GB_DAL (2025 semana 4): tie.
 
 ## Resultados globales
 
 | Fuente | Acierto (IC 95 %) | Brier (IC 95 %) | Log loss (IC 95 %) | Pendiente calibración |
 |---|---|---|---|---|
 | Mercado (cierre sin comisión) | 66,4 % [64,5; 68,4] | 0,211 [0,204; 0,218] | 0,610 [0,594; 0,625] | 1,06 |
-| Solo modelo (sin mercado) | 64,8 % [62,8; 66,8] | 0,222 [0,215; 0,228] | 0,634 [0,619; 0,650] | 0,93 |
-| Ensemble publicado | 66,2 % [64,2; 68,3] | 0,212 [0,205; 0,219] | 0,611 [0,595; 0,627] | 0,99 |
+| Solo modelo (sin mercado) | 64,8 % [63,2; 66,4] | 0,222 [0,215; 0,228] | 0,634 [0,620; 0,649] | 0,93 |
+| Ensemble publicado | 66,2 % [64,4; 68,1] | 0,212 [0,204; 0,219] | 0,611 [0,595; 0,627] | 0,99 |
 
-Diferencia con el mercado (negativo = mejor que el mercado), bootstrap por partidos (10000 remuestreos, semilla 20260):
+Diferencia con el mercado (negativo = mejor que el mercado), bootstrap emparejado en bloques contiguos de 2 semanas estratificados por temporada (sin cruzar fronteras de temporada): 72 bloques en 8 temporadas, 10000 remuestreos, semilla 20260, IC percentil del 95 %.
 
 | Fuente menos mercado | Δ log loss | IC 95 % | Δ Brier | IC 95 % |
 |---|---|---|---|---|
-| Solo modelo (sin mercado) | +0,0247 | [+0,0168; +0,0326] | +0,0106 | [+0,0071; +0,0141] |
-| Ensemble publicado | +0,0016 | [−0,0003; +0,0035] | +0,0006 | [−0,0002; +0,0014] |
-| Ensemble, pesos con suma ≤ 1 | +0,0009 | [−0,0004; +0,0023] | +0,0003 | [−0,0003; +0,0009] |
-| Ensemble, suma = 1 y sin sesgo (sin extremizar) | +0,0007 | [−0,0004; +0,0018] | +0,0003 | [−0,0002; +0,0008] |
+| Solo modelo (sin mercado) | +0,0247 | [+0,0173; +0,0324] | +0,0106 | [+0,0072; +0,0140] |
+| Ensemble publicado | +0,0016 | [+0,0001; +0,0030] | +0,0006 | [−0,0001; +0,0012] |
+| Ensemble, pesos con suma ≤ 1 | +0,0009 | [−0,0001; +0,0020] | +0,0003 | [−0,0002; +0,0008] |
+| Ensemble, suma = 1 y sin sesgo (sin extremizar) | +0,0007 | [−0,0003; +0,0017] | +0,0003 | [−0,0002; +0,0007] |
+
+Sensibilidad al tamaño de bloque (estratificado por temporada):
+
+| Esquema | Fuente menos mercado | Δ log loss | IC 95 % | Δ Brier | IC 95 % |
+|---|---|---|---|---|---|
+| 1 sem. (144 bloques) | Solo modelo (sin mercado) | +0,0247 | [+0,0173; +0,0323] | +0,0106 | [+0,0073; +0,0139] |
+| 1 sem. (144 bloques) | Ensemble publicado | +0,0016 | [−0,0001; +0,0032] | +0,0006 | [−0,0001; +0,0012] |
+| 2 sem. (72 bloques) | Solo modelo (sin mercado) | +0,0247 | [+0,0173; +0,0324] | +0,0106 | [+0,0072; +0,0140] |
+| 2 sem. (72 bloques) | Ensemble publicado | +0,0016 | [+0,0001; +0,0030] | +0,0006 | [−0,0001; +0,0012] |
+| 4 sem. (40 bloques) | Solo modelo (sin mercado) | +0,0247 | [+0,0181; +0,0317] | +0,0106 | [+0,0077; +0,0137] |
+| 4 sem. (40 bloques) | Ensemble publicado | +0,0016 | [+0,0001; +0,0030] | +0,0006 | [−0,0000; +0,0012] |
 
 ## Por temporada
 
@@ -98,45 +127,54 @@ Diez grupos de igual tamaño según la probabilidad prevista de victoria local. 
 
 ## Favoritos: ¿hay exceso de confianza?
 
-Calibración del lado que cada fuente considera favorito, por tramos de su probabilidad.
+Calibración del lado que cada fuente considera favorito, por tramos de su probabilidad. Los IC 95 % se calculan con bootstrap en bloques de 2 semanas estratificados por temporada (sin cruzar temporadas).
 
 **Mercado (cierre sin comisión)**
 
 | Tramo | Partidos | Prevista | Real | IC 95 % del real |
 |---|---|---|---|---|
-| 50-55% | 275 | 52,6 % | 48,7 % | 42,9 % a 54,6 % |
-| 55-60% | 395 | 57,5 % | 60,3 % | 55,4 % a 65,0 % |
-| 60-65% | 402 | 62,5 % | 58,5 % | 53,6 % a 63,2 % |
-| 65-70% | 302 | 67,7 % | 66,6 % | 61,1 % a 71,6 % |
-| 70-75% | 289 | 72,5 % | 75,1 % | 69,8 % a 79,7 % |
-| 75-80% | 253 | 77,4 % | 79,4 % | 74,0 % a 84,0 % |
-| 80%+ | 217 | 85,0 % | 85,7 % | 80,4 % a 89,7 % |
+| 50-55% | 275 | 52,6 % | 48,7 % | 43,5 % a 53,9 % |
+| 55-60% | 395 | 57,5 % | 60,3 % | 56,4 % a 64,1 % |
+| 60-65% | 402 | 62,5 % | 58,5 % | 54,8 % a 62,2 % |
+| 65-70% | 302 | 67,7 % | 66,6 % | 61,7 % a 71,7 % |
+| 70-75% | 289 | 72,5 % | 75,1 % | 70,7 % a 79,5 % |
+| 75-80% | 253 | 77,4 % | 79,4 % | 73,4 % a 85,2 % |
+| 80%+ | 217 | 85,0 % | 85,7 % | 80,8 % a 90,3 % |
 
 **Solo modelo (sin mercado)**
 
 | Tramo | Partidos | Prevista | Real | IC 95 % del real |
 |---|---|---|---|---|
-| 50-55% | 362 | 52,5 % | 53,3 % | 48,2 % a 58,4 % |
-| 55-60% | 416 | 57,6 % | 57,9 % | 53,1 % a 62,6 % |
-| 60-65% | 391 | 62,5 % | 65,0 % | 60,1 % a 69,5 % |
-| 65-70% | 305 | 67,5 % | 66,6 % | 61,1 % a 71,6 % |
-| 70-75% | 263 | 72,3 % | 71,5 % | 65,7 % a 76,6 % |
-| 75-80% | 187 | 77,1 % | 69,5 % | 62,6 % a 75,7 % |
-| 80%+ | 209 | 84,2 % | 82,8 % | 77,1 % a 87,3 % |
+| 50-55% | 362 | 52,5 % | 53,3 % | 48,4 % a 57,9 % |
+| 55-60% | 416 | 57,6 % | 57,9 % | 53,6 % a 62,2 % |
+| 60-65% | 391 | 62,5 % | 65,0 % | 61,1 % a 68,9 % |
+| 65-70% | 305 | 67,5 % | 66,6 % | 62,0 % a 71,0 % |
+| 70-75% | 263 | 72,3 % | 71,5 % | 66,5 % a 76,3 % |
+| 75-80% | 187 | 77,1 % | 69,5 % | 63,7 % a 75,1 % |
+| 80%+ | 209 | 84,2 % | 82,8 % | 77,9 % a 87,3 % |
 
 **Ensemble publicado**
 
 | Tramo | Partidos | Prevista | Real | IC 95 % del real |
 |---|---|---|---|---|
-| 50-55% | 282 | 52,8 % | 48,2 % | 42,5 % a 54,0 % |
-| 55-60% | 372 | 57,6 % | 60,5 % | 55,4 % a 65,3 % |
-| 60-65% | 378 | 62,4 % | 61,6 % | 56,6 % a 66,4 % |
-| 65-70% | 294 | 67,5 % | 61,9 % | 56,2 % a 67,3 % |
-| 70-75% | 282 | 72,3 % | 75,9 % | 70,6 % a 80,5 % |
-| 75-80% | 258 | 77,3 % | 77,5 % | 72,0 % a 82,2 % |
-| 80%+ | 267 | 85,2 % | 83,5 % | 78,6 % a 87,5 % |
+| 50-55% | 282 | 52,8 % | 48,2 % | 42,7 % a 53,7 % |
+| 55-60% | 372 | 57,6 % | 60,5 % | 55,7 % a 65,4 % |
+| 60-65% | 378 | 62,4 % | 61,6 % | 57,5 % a 65,7 % |
+| 65-70% | 294 | 67,5 % | 61,9 % | 56,9 % a 67,0 % |
+| 70-75% | 282 | 72,3 % | 75,9 % | 70,6 % a 80,8 % |
+| 75-80% | 258 | 77,3 % | 77,5 % | 72,0 % a 82,6 % |
+| 80%+ | 267 | 85,2 % | 83,5 % | 79,0 % a 87,9 % |
 
-En los 525 partidos en que el ensemble da al favorito 75 % o más (mismos partidos para todas las fuentes): real 80,6 % (IC 95 % 77,0 % a 83,7 %).
+
+### Cada fuente: sus favoritos al 75 % o más
+
+| Fuente | N | Prevista | Real | Prevista menos real | IC 95 % de la brecha |
+|---|---|---|---|---|---|
+| Mercado (cierre sin comisión) | 470 | 80,9 % | 82,3 % | −1,41 pp | [−5,04; +2,26] pp |
+| Solo modelo (sin mercado) | 396 | 80,9 % | 76,5 % | +4,35 pp | [+0,60; +8,04] pp |
+| Ensemble publicado | 525 | 81,3 % | 80,6 % | +0,74 pp | [−2,58; +4,07] pp |
+
+En los 525 partidos en que el ensemble da al favorito 75 % o más (mismos partidos para todas las fuentes): real 80,6 % (IC 95 % en bloques de 2 semanas 77,3 % a 83,8 %).
 
 | Fuente | Prevista (media) | Prevista menos real | Log loss |
 |---|---|---|---|
@@ -172,8 +210,8 @@ Variantes restringidas, mismas pérdida y regularización (fuera de muestra, mis
 | Variante | Log loss | Brier | Pendiente | Δ log loss vs publicado | IC 95 % |
 |---|---|---|---|---|---|
 | Ensemble publicado | 0,611 | 0,212 | 0,99 | base | n/d |
-| Ensemble, pesos con suma ≤ 1 | 0,611 | 0,211 | 1,08 | −0,0006 | [−0,0019; +0,0007] |
-| Ensemble, suma = 1 y sin sesgo (sin extremizar) | 0,610 | 0,211 | 1,08 | −0,0009 | [−0,0024; +0,0007] |
+| Ensemble, pesos con suma ≤ 1 | 0,611 | 0,211 | 1,08 | −0,0006 | [−0,0021; +0,0008] |
+| Ensemble, suma = 1 y sin sesgo (sin extremizar) | 0,610 | 0,211 | 1,08 | −0,0009 | [−0,0023; +0,0006] |
 
 **Veredicto.** Las variantes sin extremizar tienen log loss y Brier algo menores y corrigen el signo del exceso en favoritos, pero la mejora cabe dentro del ruido (el intervalo incluye el cero) y su pendiente de calibración se aleja de 1 por el otro lado (el mercado está ligeramente infraconfiado). Conclusión práctica: el extremizar no está estropeando la calibración, tampoco aporta. En la Fase 1 se evaluará la versión con suma de pesos igual a 1 como candidata, sin cambiar la producción ahora.
 
@@ -221,7 +259,7 @@ Por posición hay diferencias grandes: un QB `Questionable` juega el 45,7 % de l
 
 ## Protocolo y límites
 
-- Walk-forward estricto: cada pila se reajusta antes de cada (temporada, semana) solo con partidos de semanas anteriores (con una aserción de no fuga). Los componentes Elo, Kalman y LightGBM ya salen del pipeline walk-forward. Empates fuera de las métricas probabilísticas.
+- Strict walk-forward stacking. Every fold is fitted before each (season, week) using earlier weeks only. Primary uncertainty uses a paired 2-week block bootstrap stratified by season (never crossing season boundaries), with 1-week and 4-week sensitivity checks. Ties and invalid/missing probabilities are excluded and reconciled in population.
 - El audit recalcula los apilados desde las predicciones fuera de muestra de los componentes (`reports/baseline_components.parquet`). Que esos componentes sean honestos lo cubren los tests de fugas del pipeline; `python scripts/check_baseline.py --full` los regenera desde los datos de nflverse.
 - Los modelos usan el spread y la moneyline de cierre de nflverse; el mercado de cierre es el rival más duro posible y no se puede apostar a esa cuota en España.
 - El intervalo de confianza no corrige que se miren varias fuentes y variantes a la vez.

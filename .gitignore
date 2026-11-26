@@ -186,3 +186,4 @@ PR_DESCRIPTION*.md
 
 # built website
 /site/_build/
+/reports/pr2_statistical_audit.json

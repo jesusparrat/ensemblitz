@@ -147,9 +147,12 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
         f"{pc(o['market']['accuracy'])} del mercado.",
         f"2. **El ensemble publicado casi copia al mercado y no lo mejora.** Log loss "
         f"{n(o['ens']['log_loss'])} contra {n(o['market']['log_loss'])} ({sn(en_d['log_loss'])}, "
-        f"IC 95 % {ci(en_d['log_loss_ci'])}): es {side(en_d)} que el mercado y el intervalo {sig(en_d)}. Los pesos le dan al mercado de media un "
-        f"{pc(sc['market_weight_share_ens'], 0)} del total ({pc(sc['market_plus_residual_share_ens'], 0)} contando el "
-        "LightGBM que corrige al mercado), así que no aporta información propia visible.",
+        f"IC 95 % en bloques de 2 semanas {ci(en_d['log_loss_ci'])}): el punto estimado es "
+        f"{side(en_d)} que el mercado, pero la diferencia es mínima y sensible al tamaño de bloque "
+        f"(en Brier cruza cero en 1, 2 y 4 semanas, y en log loss cruza cero con bloques de 1 semana). "
+        f"Los pesos le dan al mercado de media un {pc(sc['market_weight_share_ens'], 0)} del total "
+        f"({pc(sc['market_plus_residual_share_ens'], 0)} contando el LightGBM que corrige al "
+        "mercado), así que no aporta información propia demostrable.",
         f"3. **Contra el spread, el modelo propio {'no llega al punto de equilibrio' if ats['win_pct'] < 0.5238 else 'supera el punto de equilibrio'}.** Apostando el lado que prefiere contra "
         f"la línea de cierre: {ats['w']}-{ats['l']}-{ats['push']} ({pc(ats['win_pct'])}, IC 95 % "
         f"{pc(ats['ci95'][0])} a {pc(ats['ci95'][1])}). Para ganar dinero con una comisión típica "
@@ -168,8 +171,6 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
         f"y sin sesgo ni extremizar baja {n(abs(ex['ens_pool']['log_loss_minus_ens']), 4)}, pero esa mejora no es "
         "estadísticamente distinguible de cero. No hay base para decir que las versiones "
         "restringidas calibren mejor fuera de muestra; tampoco para defender el extremizar.",
-        "",
-        "## Resultados globales",
         "",
     ]
     pop = res.get("population", {})
@@ -194,6 +195,7 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
                 + "."
             )
         L.append("")
+    L += ["## Resultados globales", ""]
     rows = []
     for k in B.SCORED:
         r, lv_k = o[k], lv[k]
@@ -218,9 +220,10 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
     )
     L += [
         "",
-        "Diferencia con el mercado (negativo = mejor que el mercado), bootstrap emparejado "
-        "por temporadas completas. Conserva la dependencia temporal dentro de cada temporada; "
-        f"{bs['n_blocks']} temporadas independientes, {bs['n_boot']} remuestreos, semilla {bs['seed']}.",
+        f"Diferencia con el mercado (negativo = mejor que el mercado), bootstrap emparejado en "
+        f"bloques contiguos de {bs['block_weeks']} semanas estratificados por temporada (sin cruzar "
+        f"fronteras de temporada): {bs['n_blocks']} bloques en {bs['n_seasons']} temporadas, "
+        f"{bs['n_boot']} remuestreos, semilla {bs['seed']}, IC percentil del 95 %.",
         "",
     ]
     rows = []
@@ -236,6 +239,30 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
             ]
         )
     L += _table(["Fuente menos mercado", "Δ log loss", "IC 95 %", "Δ Brier", "IC 95 %"], rows)
+    sens = bs.get("sensitivity", {})
+    if sens:
+        L += ["", "Sensibilidad al tamaño de bloque (estratificado por temporada):", ""]
+        srows = []
+        for label in ("1_week", "2_week", "4_week"):
+            if label not in sens:
+                continue
+            sb = sens[label]
+            for k in ("model_only", "ens"):
+                sd = sb["diff_vs_market"][k]
+                srows.append(
+                    [
+                        f"{sb['block_weeks']} sem. ({sb['n_blocks']} bloques)",
+                        B.NAMES[k],
+                        sn(sd["log_loss"]),
+                        ci(sd["log_loss_ci"]),
+                        sn(sd["brier"]),
+                        ci(sd["brier_ci"]),
+                    ]
+                )
+        L += _table(
+            ["Esquema", "Fuente menos mercado", "Δ log loss", "IC 95 %", "Δ Brier", "IC 95 %"],
+            srows,
+        )
     L += ["", "## Por temporada", ""]
     rows = []
     for s, d in res["per_season"].items():
@@ -291,8 +318,8 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
         "## Favoritos: ¿hay exceso de confianza?",
         "",
         "Calibración del lado que cada fuente considera favorito, por tramos de su probabilidad. "
-        "Los IC 95 % se calculan remuestreando temporadas completas; solo hay ocho bloques "
-        "independientes, por lo que son intervalos orientativos y de resolución limitada.",
+        f"Los IC 95 % se calculan con bootstrap en bloques de {bs['block_weeks']} semanas "
+        "estratificados por temporada (sin cruzar temporadas).",
         "",
     ]
     for k in B.SCORED:
@@ -336,8 +363,8 @@ def write_markdown(res: dict, path: Path | None = None) -> str:
     L += [
         "",
         f"En los {hf['n']} partidos en que el ensemble da al favorito 75 % o más (mismos partidos "
-        f"para todas las fuentes): real {pc(hf['actual'])} (IC 95 % por temporada "
-        f"{pc(hf['actual_ci95'][0])} a {pc(hf['actual_ci95'][1])}).",
+        f"para todas las fuentes): real {pc(hf['actual'])} (IC 95 % en bloques de "
+        f"{bs['block_weeks']} semanas {pc(hf['actual_ci95'][0])} a {pc(hf['actual_ci95'][1])}).",
         "",
     ]
     rows = [

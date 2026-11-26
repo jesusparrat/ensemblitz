@@ -1,4 +1,4 @@
-"""Discrepancy report: our ensemble versus every sportsbook and their consensus."""
+"""Discrepancy report: independent model-only probability versus aggregate consensus."""
 
 from __future__ import annotations
 
@@ -44,16 +44,6 @@ def book_probs(odds: pd.DataFrame) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
-
-
-def lines(odds: pd.DataFrame) -> pd.DataFrame:
-    """Consensus (median) spread and total per event."""
-    sp = odds[odds["market"] == "spreads"].copy()
-    sp = sp[sp["outcome"] == sp["home_name"]]
-    tot = odds[(odds["market"] == "totals") & (odds["outcome"] == "Over")]
-    a = sp.groupby("event_id")["point"].median().rename("book_spread_home")  # negative = home fav
-    b = tot.groupby("event_id")["point"].median().rename("book_total")
-    return pd.concat([a, b], axis=1).reset_index()
 
 
 def consensus_for_teams(odds: pd.DataFrame, home: str, away: str) -> dict | None:

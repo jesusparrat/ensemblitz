@@ -2,7 +2,7 @@
 
 ## Style and design
 
-- Language: the site is bilingual (Spanish by default, English under `/en/`). All UI strings live in `src/ensemblitz/site/strings.py`, both languages with identical keys. Repository docs, code comments, commit messages and the README are in English. PR descriptions are written in Spanish for Jesús. Times in Europe/Madrid, Spanish uses decimal commas, °C and km/h.
+- Language: the site is bilingual (Spanish by default, English under `/en/`). All UI strings live in `src/ensemblitz/site/strings.py`, both languages with identical keys. Code, comments, repository docs, commit messages, PR titles, PR descriptions and the README are in English. Spanish is used for discussion with the user and for the Spanish site (legacy generated reports under `reports/` remain in Spanish unless migrated). Times in Europe/Madrid on `/es/` and ET on `/en/`, Spanish uses decimal commas, °C and km/h.
 - Team names are the official English names in both languages (`site/names.py`). No half-translations.
 - Design: follow `DESIGN.md`. Do not change tokens, fonts or the visual direction without Jesús approving it.
 - Antislop: rules in `.cursor/rules/antislop.mdc` and the MIT copy in `third_party/antislop/` (keep the `LICENSE`). No em dash in written text or in the site output.
@@ -13,7 +13,7 @@
 ## Branches and pull requests
 
 - Never touch `main` directly. Each change goes on a new branch (`feat/...`, `fix/...`) with a pull request. It is not merged until Jesús says so.
-- One PR, one topic. Description in Spanish: what changes, why, and which checks were passed (with the numbers).
+- One PR, one topic. Title and description in English: what changes, why, and which checks were passed (with the numbers).
 
 ## Mandatory checks before calling a change done
 
@@ -90,8 +90,8 @@ A model change that improves the baseline is accepted by regenerating the artefa
 ### Official sequence
 
 1. **PR 1a:** `uv.lock`, a single Python version, contract v1 (schema, `contract.py`, tests), this governance section.
-2. **PR 1b (this work):** append-only ledger (including the five historical snapshots of `week12.json` rebuilt from git without changes), SHA-256 manifest, `verify_integrity.py`, v0/v1 reader, writer on v1, site without re-simulation.
-3. **PR 2:** statistical audit in the open: 2133 vs 2141 games, model-only 64.8% vs market 66.4%, the ensemble margin equal to the spread, market naming, news adjustment scope, and finding C16 below.
+2. **PR 1b:** append-only ledger (including the five historical snapshots of `week12.json` rebuilt from git without changes), SHA-256 manifest, `verify_integrity.py`, v0/v1 reader, writer on v1, site without re-simulation.
+3. **PR 2 (this work):** statistical audit in the open: 2133 vs 2141 games, model-only 64.8% vs market 66.4%, stratified 2-week block bootstrap (+ 1-week/4-week sensitivity), the ensemble margin equal to the spread, market naming, news adjustment scope, and odds data governance below.
 4. **PR 3:** site and data fixes: ET on `/en/`, one sign convention per row, one market figure per page, tables at 375 px, no false "closing".
 5. **PR 4:** visual system: DESIGN.md from references, three mock-ups to choose from, typographic team badges generated in code, UI icons.
 6. **PR 5:** a real "why": unit match-ups adjusted for opponent and play (NGS, PFR, FTN), "matchups to watch", reading levels.

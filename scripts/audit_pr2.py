@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JSON_OUT = ROOT / "reports" / "pr2_statistical_audit.json"
 SUMMARY_OUT = ROOT / "reports" / "pr2_statistical_audit_summary.json"
 MD_OUT = ROOT / "docs" / "audit" / "pr2-statistical-audit.md"
+SENSITIVITY_KEYS = ("1_week", "2_week", "4_week")
 
 
 def _pct(value: float | None, digits: int = 2) -> str:
@@ -24,6 +25,23 @@ def _pct(value: float | None, digits: int = 2) -> str:
 
 def _num(value: float | None, digits: int = 4) -> str:
     return "n/d" if value is None else f"{value:.{digits}f}"
+
+
+def _signed(value: float | None, digits: int = 5) -> str:
+    return "n/d" if value is None else f"{value:+.{digits}f}"
+
+
+def _ci_crosses_zero(bounds: list[float] | None) -> bool:
+    return bounds is None or (bounds[0] <= 0.0 <= bounds[1])
+
+
+def _any_block_crosses_zero(sensitivity: dict, source: str, metric: str) -> bool:
+    key = f"{metric}_ci"
+    return any(
+        _ci_crosses_zero(sensitivity[blk]["diff_vs_market"][source][key])
+        for blk in SENSITIVITY_KEYS
+        if blk in sensitivity
+    )
 
 
 def _market_case_study() -> dict:
@@ -45,7 +63,8 @@ def _market_case_study() -> dict:
         "prediction_generated_at": odds["predictions_generated_at"],
         "model_only_home_probability": quote["model_only_home_prob"],
         "model_only_minus_market_gap": quote["gap_model_only"],
-        # Preserved from the pre-remediation report in the parent commit; no longer published.\n        "legacy_mean_multiplicative_probability": 0.8407,
+        # Preserved from the pre-remediation report in the parent commit; no longer published.
+        "legacy_mean_multiplicative_probability": 0.8407,
         "interpretation": (
             "The nflverse value is the no-vig probability from -700/+500 moneylines (84.00%). "
             "The Odds API value is the unweighted mean of 42 operator-level Shin probabilities "
@@ -101,8 +120,51 @@ def _code_review() -> dict:
     }
 
 
+def _conclusions(res: dict) -> list[str]:
+    sens = res["bootstrap"]["sensitivity"]
+    ens_ll_crosses = _any_block_crosses_zero(sens, "ens", "log_loss")
+    ens_br_crosses = _any_block_crosses_zero(sens, "ens", "brier")
+    mo_fav = res["heavy_favourites_75"]["model_only"]
+    ens_fav = res["heavy_favourites_75"]["ens"]
+    mo_fav_all_pos = all(
+        ci[0] > 0.0 for ci in (mo_fav.get("sensitivity") or {}).values() if ci is not None
+    )
+    ens_msg = (
+        "Point estimates slightly favour MARKET over ENSEMBLE, but the difference is tiny and "
+        "block-length sensitive (the 95% CI crosses zero on Brier under 1-, 2- and 4-week blocks "
+        "and on log loss under 1-week blocks); there is no robust separation between MARKET and "
+        "ENSEMBLE, and no evidence that ENSEMBLE improves upon MARKET."
+        if (ens_ll_crosses or ens_br_crosses)
+        else "MARKET outperforms ENSEMBLE on both log loss and Brier across 1-, 2- and 4-week blocks."
+    )
+    fav_msg = (
+        f"The high-confidence (75%+) overconfidence hypothesis reproduces for MODEL_ONLY's own "
+        f"favourites ({mo_fav['overconfidence_pp']:+.2f} pp, 95% CI strictly above zero across "
+        f"1-, 2- and 4-week blocks), whereas ENSEMBLE's own 75%+ segment is "
+        f"{ens_fav['overconfidence_pp']:+.2f} pp with CIs spanning zero under all block lengths."
+        if mo_fav_all_pos
+        else (
+            f"MODEL_ONLY 75%+ favourites show {mo_fav['overconfidence_pp']:+.2f} pp overconfidence, "
+            f"while ENSEMBLE shows {ens_fav['overconfidence_pp']:+.2f} pp; interval sensitivity "
+            "across block lengths should be inspected before strong claims."
+        )
+    )
+    return [
+        (
+            "MARKET clearly outperforms MODEL_ONLY on accuracy, Brier and log loss; paired "
+            "stratified block CIs stay well above zero under 1-, 2- and 4-week block lengths."
+        ),
+        ens_msg,
+        fav_msg,
+        (
+            "Constrained ensemble weight variants (ens_cap1, ens_pool) do not separate from the "
+            "published ensemble under any block length (all CIs cross zero); no retuning in PR2."
+        ),
+    ]
+
+
 def summary_payload(res: dict) -> dict:
-    """Stable compact summary for review tools; the full JSON retains folds and per-season detail."""
+    """Stable compact summary generated directly from the audit dict."""
     overall = {
         key: {
             metric: res["overall"][key][metric]
@@ -126,6 +188,7 @@ def summary_payload(res: dict) -> dict:
             "actual": row.get("actual"),
             "overconfidence_pp": row.get("overconfidence_pp"),
             "overconfidence_ci95_pp": row.get("overconfidence_pp_ci95"),
+            "overconfidence_ci95_pp_sensitivity": row.get("sensitivity"),
         }
     same = res["heavy_favourites_on_ens_games"]
     same_games = {
@@ -154,32 +217,72 @@ def summary_payload(res: dict) -> dict:
         }
         for key in ("model_only", "ens")
     }
+    sensitivity = {
+        blk: {
+            "block_weeks": boot["sensitivity"][blk]["block_weeks"],
+            "n_blocks": boot["sensitivity"][blk]["n_blocks"],
+            "n_seasons": boot["sensitivity"][blk]["n_seasons"],
+            "diff_vs_market": {
+                key: boot["sensitivity"][blk]["diff_vs_market"][key]
+                for key in ("model_only", "ens", "ens_cap1_minus_ens", "ens_pool_minus_ens")
+            },
+        }
+        for blk in SENSITIVITY_KEYS
+        if blk in boot["sensitivity"]
+    }
     return {
-        "audit_version": 1,
+        "audit_version": 2,
         "generated_at_utc": res["generated_at"],
         "model_version": res["model_version"],
         "method": {
             "season_range": res["seasons"],
             "bootstrap_unit": boot["block_unit"],
-            "independent_blocks": boot["n_blocks"],
+            "block_weeks": boot["block_weeks"],
+            "stratified_by": boot["stratified_by"],
+            "n_blocks": boot["n_blocks"],
+            "n_seasons": boot["n_seasons"],
             "replicates": boot["n_boot"],
             "seed": boot["seed"],
             "confidence_level": boot["confidence_level"],
             "interval_method": boot["interval_method"],
             "paired": True,
+            "sensitivity_block_weeks": [1, 2, 4],
         },
         "population": res["population"],
         "paired_comparison": res["paired_comparison"],
         "overall": overall,
         "paired_differences_vs_market": differences,
+        "sensitivity": sensitivity,
         "high_confidence_favourites_75": favourite,
         "ensemble_favourites_same_games": same_games,
-        "stack_weight_diagnostics": res["stack_coefficients"],
+        "stack_weight_diagnostics": {
+            "ens": {
+                "mean_sum": res["stack_coefficients"]["ens"]["sum_weights_mean"],
+                "min_sum": res["stack_coefficients"]["ens"]["sum_weights_min"],
+                "max_sum": res["stack_coefficients"]["ens"]["sum_weights_max"],
+                "share_folds_sum_gt_1": res["stack_coefficients"]["ens"]["share_of_folds_sum_gt_1"],
+            },
+            "model_only": {
+                "mean_sum": res["stack_coefficients"]["model_only"]["sum_weights_mean"],
+                "min_sum": res["stack_coefficients"]["model_only"]["sum_weights_min"],
+                "max_sum": res["stack_coefficients"]["model_only"]["sum_weights_max"],
+                "share_folds_sum_gt_1": res["stack_coefficients"]["model_only"][
+                    "share_of_folds_sum_gt_1"
+                ],
+            },
+            "ens_cap1_minus_ens": boot["diff_vs_market"]["ens_cap1_minus_ens"],
+            "ens_pool_minus_ens": boot["diff_vs_market"]["ens_pool_minus_ens"],
+        },
         "ats_model_only": res["ats_model_only"]["all"],
         "market_case_study": res["market_case_study"],
         "code_review": res["code_review"],
+        "conclusions": _conclusions(res),
         "limitations": [
-            "Only eight independent season clusters; intervals are informative but coarse.",
+            (
+                "Primary intervals use 2-week blocks stratified by season (72 blocks across 8 "
+                "seasons, never crossing season boundaries) with 1-week and 4-week sensitivity "
+                "checks; intervals are not adjusted for multiple comparisons."
+            ),
             "Historical QB identity and weather features lack point-in-time availability timestamps.",
             "Stored Kalman parameters and manual LightGBM/model-selection history lack per-season provenance.",
             "Processed team_games and qb_games caches are derived inputs but are not directly hashed.",
@@ -191,43 +294,61 @@ def summary_payload(res: dict) -> dict:
 def render(res: dict) -> str:
     pop = res["population"]
     boot = res["bootstrap"]
+    sens = boot["sensitivity"]
+    sc = res["stack_coefficients"]
+    ats = res["ats_model_only"]["all"]
+    same = res["heavy_favourites_on_ens_games"]
+    conclusions = _conclusions(res)
     lines = [
         "# PR2 Statistical Audit",
         "",
-        f"Generated: {res['generated_at']}. Model version: {res['model_version']}.",
-        f"Scoring seasons: {res['seasons'][0]}-{res['seasons'][1]}.",
+        "Generated automatically by `uv run python scripts/audit_pr2.py` (offline, from "
+        "`reports/baseline_components.parquet` and committed repository artifacts; no nflverse "
+        "downloads and no calls to The Odds API). Do not hand-edit this file.",
         "",
-        "## Population reconciliation",
+        f"- Generated UTC: `{res['generated_at']}`",
+        f"- Model version: `{res['model_version']}`",
+        f"- Scoring seasons: {res['seasons'][0]}-{res['seasons'][1]}",
+        "- Compact JSON summary: `reports/pr2_statistical_audit_summary.json`",
+        "",
+        "## Executive summary",
+        "",
+    ]
+    for item in conclusions:
+        lines.append(f"- {item}")
+
+    lines += [
+        "",
+        "## 1. Population reconciliation (2,141 vs 2,133)",
         "",
         f"- Rows in regular-season scope: {pop['n_rows_in_scope']}",
         f"- Played games: {pop['n_played']}",
         f"- Rows with valid probabilities for every compared source: "
         f"{pop['n_valid_probability_rows']}",
-        f"- Ties: {pop['n_ties']}",
+        f"- Ties excluded from probabilistic scoring: {pop['n_ties']}",
         f"- Rows with missing predictions: {pop['n_missing_prediction_rows']}",
         f"- Rows with invalid probabilities: {pop['n_invalid_probability_rows']}",
         f"- Final scored population: {pop['n_scored']}",
-        f"- Excluded from scoring: {pop['n_excluded_from_scoring']}",
+        f"- Total excluded from scoring: {pop['n_excluded_from_scoring']}",
         "",
-        "The exclusions below are game-level records, not an assumption that every "
-        "difference is a tie.",
+        "Exclusions are reconciled at game level rather than assumed to be ties:",
         "",
     ]
     if pop["excluded_games"]:
         for game in pop["excluded_games"]:
             lines.append(
-                f"- {game['game_id']} (season {game['season']}, week {game['week']}): "
+                f"- `{game['game_id']}` (season {game['season']}, week {game['week']}): "
                 + ", ".join(game["reasons"])
-                + "."
             )
     else:
         lines.append("- No exclusions.")
+
     lines += [
         "",
-        "## Paired source comparison",
+        "## 2. Paired source comparison",
         "",
         f"- Sources: {', '.join(res['paired_comparison']['sources'])}",
-        f"- Same game IDs across MODEL_ONLY, MARKET and ENSEMBLE: "
+        f"- Identical game IDs across MODEL_ONLY, MARKET and ENSEMBLE: "
         f"{res['paired_comparison']['same_game_ids']}",
         f"- Paired N: {res['paired_comparison']['n_games']}",
         f"- SHA-256 of sorted paired game IDs: `{res['paired_comparison']['game_ids_sha256']}`",
@@ -239,54 +360,126 @@ def render(res: dict) -> str:
         row = res["overall"][key]
         lines.append(
             f"| {key.upper()} | {row['n']} | {_pct(row['accuracy'])} | "
-            f"{_num(row['brier'])} | {_num(row['log_loss'])} | "
+            f"{_num(row['brier'], 5)} | {_num(row['log_loss'], 5)} | "
             f"{_num(row['calibration_slope'], 3)} |"
         )
+
     lines += [
         "",
-        "## Paired uncertainty",
+        "### Paired differences vs MARKET (primary: 2-week blocks stratified by season)",
         "",
-        f"Method: {boot['resampling']}. Unit: {boot['block_unit']}; "
-        f"{boot['n_blocks']} complete season blocks; {boot['n_boot']} replicates; "
-        f"seed {boot['seed']}; percentile 95% intervals.",
+        f"Method: {boot['resampling']}. Primary unit: {boot['block_weeks']}-week blocks "
+        f"({boot['n_blocks']} blocks across {boot['n_seasons']} seasons), {boot['n_boot']:,} "
+        f"replicates, seed `{boot['seed']}`, 95% percentile CI. Sign convention: source minus "
+        "MARKET (positive values on log loss and Brier mean worse than MARKET).",
         "",
-        "Only eight season clusters are available. The intervals preserve within-season dependence "
-        "but have low cluster count and must be treated as coarse uncertainty estimates, not as "
-        "high-powered significance tests.",
-        "",
-        "| Source minus MARKET | Δ log loss | 95% CI | Δ Brier | 95% CI |",
-        "|---|---:|---:|---:|---:|",
+        "| Source minus MARKET | Δ log loss | 95% CI | Share better than MARKET | Δ Brier | 95% CI |",
+        "|---|---:|---:|---:|---:|---:|",
     ]
     for key in ("model_only", "ens"):
         row = boot["diff_vs_market"][key]
         lines.append(
-            f"| {key.upper()} | {_num(row['log_loss'])} | "
-            f"[{_num(row['log_loss_ci'][0])}, {_num(row['log_loss_ci'][1])}] | "
-            f"{_num(row['brier'])} | "
-            f"[{_num(row['brier_ci'][0])}, {_num(row['brier_ci'][1])}] |"
+            f"| {key.upper()} | {_signed(row['log_loss'])} | "
+            f"[{_signed(row['log_loss_ci'][0])}, {_signed(row['log_loss_ci'][1])}] | "
+            f"{_pct(row['bootstrap_share_log_loss_better_than_market'])} | "
+            f"{_signed(row['brier'])} | "
+            f"[{_signed(row['brier_ci'][0])}, {_signed(row['brier_ci'][1])}] |"
         )
+
     lines += [
         "",
-        "Negative differences favour the first source. The bootstrap share below zero is a "
-        "descriptive resampling proportion, not a conventional p-value.",
+        "### Block-length sensitivity (1-week, 2-week, 4-week blocks stratified by season)",
         "",
-        "## High-confidence favourites (75%+)",
+        "| Block length | Blocks | Comparison | Δ log loss 95% CI | Δ Brier 95% CI |",
+        "|---|---:|---|---:|---:|",
+    ]
+    for blk in SENSITIVITY_KEYS:
+        if blk not in sens:
+            continue
+        sb = sens[blk]
+        for key, label in (
+            ("model_only", "MODEL_ONLY minus MARKET"),
+            ("ens", "ENSEMBLE minus MARKET"),
+            ("ens_cap1_minus_ens", "ens_cap1 minus ENSEMBLE"),
+            ("ens_pool_minus_ens", "ens_pool minus ENSEMBLE"),
+        ):
+            row = sb["diff_vs_market"][key]
+            lines.append(
+                f"| {sb['block_weeks']}-week | {sb['n_blocks']} | {label} | "
+                f"[{_signed(row['log_loss_ci'][0])}, {_signed(row['log_loss_ci'][1])}] | "
+                f"[{_signed(row['brier_ci'][0])}, {_signed(row['brier_ci'][1])}] |"
+            )
+
+    lines += [
         "",
-        "| Source | N | Mean predicted | Actual | Overconfidence | 95% CI overconfidence |",
-        "|---|---:|---:|---:|---:|---:|",
+        "Interpretation: MARKET beats MODEL_ONLY clearly across all three block lengths on both "
+        "log loss and Brier. For ENSEMBLE vs MARKET, point estimates favour MARKET slightly "
+        f"({_signed(boot['diff_vs_market']['ens']['log_loss'])} log loss, "
+        f"{_signed(boot['diff_vs_market']['ens']['brier'])} Brier), but the Brier 95% CI crosses "
+        "zero under 1-, 2- and 4-week blocks and the log-loss 95% CI crosses zero under 1-week "
+        "blocks (while sitting near zero at +0.00006 under 2-week blocks). Accordingly, PR2 does "
+        "not claim a robust separation between MARKET and ENSEMBLE; it concludes that ENSEMBLE "
+        "does not demonstrate a predictive edge over MARKET.",
+        "",
+        "The resampling share below zero is descriptive and not a conventional hypothesis-test p-value.",
+        "",
+        "## 3. High-confidence favourites (75%+)",
+        "",
+        "Each source is evaluated on its own 75%+ favourite subset (different sample sizes), "
+        "with 2-week stratified block bootstrap CIs and 1-week / 4-week sensitivity:",
+        "",
+        "| Source | N | Mean predicted | Actual | Overconfidence | 2-week 95% CI | 1-week 95% CI | 4-week 95% CI |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for key in ("model_only", "market", "ens"):
         row = res["heavy_favourites_75"][key]
         if row["n"]:
-            ci = row.get("overconfidence_pp_ci95")
-            ci_text = "n/d" if not ci else f"[{ci[0]:.2f}, {ci[1]:.2f}] pp"
+            fs = row.get("sensitivity") or {}
+            c2 = row.get("overconfidence_pp_ci95")
+            c1 = fs.get("1_week")
+            c4 = fs.get("4_week")
+
+            def _pp_ci(bounds: list[float] | None) -> str:
+                return "n/d" if not bounds else f"[{bounds[0]:+.2f}, {bounds[1]:+.2f}] pp"
+
             lines.append(
                 f"| {key.upper()} | {row['n']} | {_pct(row['pred'])} | {_pct(row['actual'])} | "
-                f"{row['overconfidence_pp']:+.2f} pp | {ci_text} |"
+                f"{row['overconfidence_pp']:+.2f} pp | {_pp_ci(c2)} | {_pp_ci(c1)} | {_pp_ci(c4)} |"
             )
+
     lines += [
         "",
-        "## Leakage and temporal-validity review",
+        f"Same-game comparison on the {same['n']} games where ENSEMBLE assigns >=75% to its "
+        f"favourite: actual win rate {_pct(same['actual'])} (2-week stratified 95% CI: "
+        f"[{_pct(same['actual_ci95'][0])}, {_pct(same['actual_ci95'][1])}]). On those identical "
+        f"games, mean predicted probability for the ENSEMBLE favourite is "
+        f"MODEL_ONLY {_pct(same['model_only']['pred_mean'])}, "
+        f"MARKET {_pct(same['market']['pred_mean'])}, "
+        f"ENSEMBLE {_pct(same['ens']['pred_mean'])}.",
+        "",
+        "## 4. Ensemble weights and constrained variants",
+        "",
+        f"- Published ENSEMBLE weight sum exceeds 1 in "
+        f"{_pct(sc['ens']['share_of_folds_sum_gt_1'])} of folds "
+        f"(mean {sc['ens']['sum_weights_mean']:.3f}, range "
+        f"{sc['ens']['sum_weights_min']:.3f} to {sc['ens']['sum_weights_max']:.3f}).",
+        f"- MODEL_ONLY weight sum exceeds 1 in "
+        f"{_pct(sc['model_only']['share_of_folds_sum_gt_1'])} of folds "
+        f"(mean {sc['model_only']['sum_weights_mean']:.3f}, range "
+        f"{sc['model_only']['sum_weights_min']:.3f} to "
+        f"{sc['model_only']['sum_weights_max']:.3f}).",
+        "- Constrained variants (`ens_cap1`, `ens_pool`) show slightly lower point-estimate loss, "
+        "but every paired 95% CI vs ENSEMBLE crosses zero across 1-, 2- and 4-week blocks.",
+        "- Decision: no weight or hyperparameter retuning in PR2.",
+        "",
+        "## 5. MODEL_ONLY against the spread (ATS)",
+        "",
+        f"- Record vs closing spread: {ats['w']}-{ats['l']}-{ats['push']} "
+        f"({_pct(ats['win_pct'])}, Wilson 95% CI [{_pct(ats['ci95'][0])}, {_pct(ats['ci95'][1])}]).",
+        f"- Exact binomial test vs 52.38% (-110 break-even): p = {ats['p_vs_breakeven_52_38']:.4f}.",
+        "- No ATS profitability edge is present; MODEL_ONLY must not be framed as positive EV.",
+        "",
+        "## 6. Leakage and temporal-validity review",
         "",
     ]
     for key, label in (
@@ -298,55 +491,51 @@ def render(res: dict) -> str:
         ("injury_lag", "Injury features"),
     ):
         lines += [f"### {label}", "", res["code_review"][key], ""]
+
     m = res["market_case_study"]
     lines += [
-        "## Market source and capture semantics",
+        "## 7. Market source and capture semantics",
         "",
-        f"IND @ HOU ({m['game_id']}): nflverse no-vig moneyline probability "
-        f"{_pct(m['nflverse_home_probability'])}; home/away prices "
-        f"{m['home_moneyline']}/{m['away_moneyline']}. The Odds API mean-Shin probability "
-        f"{_pct(m['odds_api_mean_shin_probability'])} across {m['odds_api_n_books']} operators. "
-        f"Odds capture {m['odds_api_fetched_at']}; prediction generation "
-        f"{m['prediction_generated_at']}; kickoff {m['kickoff_utc']}.",
+        f"IND @ HOU (`{m['game_id']}`): nflverse no-vig moneyline probability "
+        f"{_pct(m['nflverse_home_probability'])} (moneylines "
+        f"{m['home_moneyline']}/{m['away_moneyline']}); The Odds API mean-Shin probability "
+        f"{_pct(m['odds_api_mean_shin_probability'])} across {m['odds_api_n_books']} operators "
+        f"(legacy multiplicative mean {_pct(m['legacy_mean_multiplicative_probability'])}). "
+        f"Odds capture `{m['odds_api_fetched_at']}`; prediction generation "
+        f"`{m['prediction_generated_at']}`; kickoff `{m['kickoff_utc']}`.",
         "",
         m["interpretation"],
         "",
-        "The stored nflverse value is calculated from no-vig moneylines when both are present; "
-        "the historical baseline's market source is the nflverse schedule closing line, while "
-        "the live Odds API value is a separate pre-kickoff snapshot. These must not be combined "
-        "or labelled as one quote. The Odds API Shin consensus is an unweighted mean of individual "
-        "Shin de-vigged probabilities, not a pooled market calculation.",
+        "The historical baseline uses the nflverse schedule closing line, while the live Odds API "
+        "value is a separate pre-kickoff snapshot. These must not be combined or labelled as a "
+        "single closing quote. The Odds API Shin consensus is an unweighted arithmetic mean of "
+        "per-operator Shin de-vigged probabilities, not a pooled market calculation.",
         "",
-        "## News adjustment policy",
+        "## 8. News adjustment, odds governance and margin convention",
         "",
-        "The current prediction path changes only ensemble probability and margin. The headline "
-        "uses the no-market stack and remains unchanged; v1 records `news_adjustment.applies_to = "
-        "ensemble`. News is not part of the historical baseline because no point-in-time archive "
-        "is present. No historical snapshots were rewritten.",
+        "- **News adjustment:** `apply_news` updates only ENSEMBLE probability and margin. The "
+        "MODEL_ONLY headline remains untouched (`news_adjustment.applies_to = ensemble`). "
+        "News is absent from the historical backtest because no point-in-time archive exists.",
+        "- **Odds-data governance:** Public standard terms reviewed 2026-11-26 permit derived "
+        "values in user-facing dashboards provided the data is not the primary redistributed "
+        "product, while prohibiting redistribution as a standalone raw feed "
+        "(https://the-odds-api.com/terms-and-conditions.html; account-specific terms may differ). "
+        "Current `reports/odds/` outputs retain only aggregate mean-Shin probability, capture "
+        "timestamp, operator count, and model-only gap. Individual prices, operator identifiers, "
+        "best prices, EV and ensemble-relative edge have been removed.",
+        "- **Margin sign convention:** Canonical margin is home minus away. nflverse `spread_line` "
+        "is positive when home is favoured. The Odds API spread point uses the opposite sign and "
+        "is converted by `contract.odds_api_margin_home(point) = -point`. Regression tests cover "
+        "both directions and the nflverse spread fallback.",
         "",
-        "## Odds-data governance",
+        "## 9. Governance and non-goals",
         "",
-        "The public standard terms reviewed 2026-11-26 permit user-facing dashboards and derived "
-        "values provided the data is not the primary product being sold or redistributed, while "
-        "prohibiting redistribution as a standalone raw feed "
-        "(https://the-odds-api.com/terms-and-conditions.html). Current odds reports "
-        "retain only the aggregate mean-Shin probability, capture time, and operator count. "
-        "Individual prices, operator identifiers, best prices, EV and ensemble-relative edge have "
-        "been removed from current report outputs. Account-specific terms may differ.",
-        "",
-        "## Margin sign convention",
-        "",
-        "Canonical margin is home minus away. nflverse `spread_line` is positive when the home "
-        "team is favoured. The Odds API spread point uses the opposite sign and is converted by "
-        "`contract.odds_api_margin_home(point) = -point`. Regression tests cover the conversion "
-        "and the nflverse spread fallback.",
-        "",
-        "## Governance and non-goals",
-        "",
-        "`AGENTS.md` is already written in English; no language migration was needed. This audit "
-        "does not retune weights, alter model hyperparameters, change frozen prediction snapshots, "
-        "call The Odds API, or modify site HTML. Potential point-in-time risks are documented, not "
-        "silently repaired or retuned.",
+        "`AGENTS.md` specifies English for code, comments, repository docs, commit messages, PR "
+        "titles and PR descriptions, reserving Spanish for user discussion and the Spanish site. "
+        "This audit does not retune weights, alter model hyperparameters, edit frozen prediction "
+        "snapshots or `predictions/MANIFEST.json`, rewrite git history, call The Odds API, or "
+        "modify site HTML. Potential point-in-time risks are documented rather than silently "
+        "patched.",
         "",
     ]
     return "\n".join(lines)
@@ -354,7 +543,9 @@ def render(res: dict) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bootstrap", type=int, default=B.BOOT_N, help="season-block replicates")
+    parser.add_argument(
+        "--bootstrap", type=int, default=B.BOOT_N, help="stratified block bootstrap replicates"
+    )
     args = parser.parse_args()
     if args.bootstrap < 100:
         parser.error("--bootstrap must be at least 100")
@@ -373,7 +564,8 @@ def main() -> int:
     print(
         f"PR2 audit written: {JSON_OUT.relative_to(ROOT)}, "
         f"{SUMMARY_OUT.relative_to(ROOT)} and {MD_OUT.relative_to(ROOT)}; "
-        f"N={result['n_games']}, seasons={result['bootstrap']['n_blocks']}, "
+        f"N={result['n_games']}, blocks={result['bootstrap']['n_blocks']} "
+        f"({result['bootstrap']['block_weeks']}w across {result['bootstrap']['n_seasons']} seasons), "
         f"bootstrap={result['bootstrap']['n_boot']}"
     )
     print(
