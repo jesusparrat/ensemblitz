@@ -109,5 +109,13 @@
   <dt>{{ t('method.gloss_shin_t') }}</dt><dd>{{ t('method.gloss_shin') }}</dd>
 </dl>
 
+<h2 id="privacidad">{{ t('method.privacy_h') }}</h2>
+{% if goatcounter_code %}
+<p>{{ t('method.privacy_on', code=goatcounter_code) }}</p>
+{% else %}
+<p>{{ t('method.privacy_off') }}</p>
+{% endif %}
+<p>{{ t('method.privacy_law') }}</p>
+
 <p class="small">{{ t('method.footer', repo=repo) }}</p>
 {% endblock %}

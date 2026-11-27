@@ -30,6 +30,8 @@ jobs:
       - run: uv lock --check  # uv.lock must match pyproject.toml
       - run: uv sync --frozen  # Python from .python-version
       - run: uv run ensemblitz site
+        env:
+          ENSEMBLITZ_GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
       - run: uv run python scripts/validate_outputs.py --site site/_build
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa  # v3
