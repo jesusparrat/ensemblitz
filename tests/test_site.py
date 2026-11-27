@@ -201,6 +201,7 @@ PAGES = {
         "index.html",
         "historial.html",
         "metodo.html",
+        "verificar.html",
         "jornada/11.html",
         "partido/2026_11_IND_HOU.html",
     ],
@@ -208,6 +209,7 @@ PAGES = {
         "en/index.html",
         "en/history.html",
         "en/method.html",
+        "en/verify.html",
         "en/week/11.html",
         "en/game/2026_11_IND_HOU.html",
     ],
@@ -918,3 +920,106 @@ def test_pr5_matchups_placement_two_level_ux_and_check_site(tmp_path: Path) -> N
         text=True,
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_verify_page_lists_manifest_and_discloses_browser_and_attestation_scope(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path, True, True)
+    manifest = {
+        "artifacts": {
+            "predictions/2026/week11.json": "a" * 64,
+            "predictions/2026/week11/20261118T214136Z.json": "b" * 64,
+        }
+    }
+    (root / "predictions" / "MANIFEST.json").write_text(json.dumps(manifest))
+    out = build_site(root=root, out=root / "site" / "_build")
+
+    es_v = _text(out, "verificar.html")
+    en_v = _text(out, "en/verify.html")
+
+    # Language twins and manifest entries with SHA-256 and GitHub blob links.
+    assert 'href="en/verify.html"' in es_v and 'href="../verificar.html"' in en_v
+    for html in (es_v, en_v):
+        assert 'id="manifest-data"' in html
+        assert "predictions/2026/week11.json" in html
+        assert "predictions/2026/week11/20261118T214136Z.json" in html
+        assert ("a" * 64) in html and ("b" * 64) in html
+        assert "github.com/jesusparrat/ensemblitz/blob/main/predictions/2026/week11.json" in html
+        assert (
+            "gh attestation verify predictions/MANIFEST.json --repo jesusparrat/ensemblitz" in html
+        )
+        assert (
+            "gh attestation verify predictions/2026/week11/20261118T214136Z.json"
+            " --repo jesusparrat/ensemblitz" in html
+        )
+        assert 'id="verify-file"' in html
+
+    # Explicit Safeguard D disclosures: browser does NOT verify Sigstore signatures;
+    # attestations prove artifact integrity and provenance, NOT statistical correctness.
+    assert "No verifica firmas Sigstore" in es_v
+    assert "No demuestran corrección estadística" in es_v
+    assert "does not verify Sigstore signatures" in en_v
+    assert "do not prove statistical correctness" in en_v
+
+    # Safeguard H privacy disclosure on both method and verify pages.
+    for html in (es_v, en_v, _text(out, "metodo.html"), _text(out, "en/method.html")):
+        assert "ens-theme" in html and "ens-lang" in html and "ens-team" in html
+    assert "No usar cookies no equivale a carecer de obligaciones" in es_v
+    assert "Using zero cookies does not mean zero privacy obligations" in en_v
+
+
+def test_nav_excludes_code_link_and_footer_keeps_it(tmp_path: Path) -> None:
+    _, out = _build(tmp_path)
+    for page, labels, code_word in (
+        ("index.html", ("Jornada", "Historial", "Método", "Verificar"), "Código"),
+        ("verificar.html", ("Jornada", "Historial", "Método", "Verificar"), "Código"),
+        ("en/index.html", ("Week", "Record", "Method", "Verify"), "Code"),
+        ("en/verify.html", ("Week", "Record", "Method", "Verify"), "Code"),
+    ):
+        html = _text(out, page)
+        nav_m = re.search(r'<nav class="nav"[^>]*>(.*?)</nav>', html, re.S)
+        foot_m = re.search(r'<footer class="wrap foot"[^>]*>(.*?)</footer>', html, re.S)
+        assert nav_m and foot_m, page
+        nav_html, foot_html = nav_m.group(1), foot_m.group(1)
+        for label in labels:
+            assert label in nav_html, (page, label)
+        assert "github.com" not in nav_html and code_word not in nav_html, page
+        assert "github.com/jesusparrat/ensemblitz" in foot_html and code_word in foot_html, page
+
+
+def test_favorite_team_select_copy_link_and_hero_lede(tmp_path: Path) -> None:
+    _, out = _build(tmp_path)
+    es_home = _text(out, "index.html")
+    en_home = _text(out, "en/index.html")
+    for html in (es_home, en_home):
+        sel_m = re.search(r'<select id="fav-team"[^>]*>(.*?)</select>', html, re.S)
+        assert sel_m is not None
+        opts = re.findall(r'<option value="([^"]*)">([^<]+)</option>', sel_m.group(1))
+        # 1 blank default + 32 official NFL teams
+        assert len(opts) == 33
+        team_names = {name for val, name in opts if val}
+        assert len(team_names) == 32
+        assert "Houston Texans" in team_names and "Kansas City Chiefs" in team_names
+        assert 'data-home="HOU"' in html and 'data-away="IND"' in html
+
+    # Copy link button with aria-live confirmation on game pages.
+    es_game = _text(out, "partido/2026_11_IND_HOU.html")
+    en_game = _text(out, "en/game/2026_11_IND_HOU.html")
+    assert (
+        "data-copy-url" in es_game
+        and "Copiar enlace" in es_game
+        and 'aria-live="polite"' in es_game
+    )
+    assert "data-copy-url" in en_game and "Copy link" in en_game and 'aria-live="polite"' in en_game
+
+    # Client-side JS implements ens-team and Web Crypto SHA-256 digest.
+    app_js = (out / "assets/app.js").read_text()
+    assert "ens-team" in app_js and 'digest("SHA-256"' in app_js
+
+    # Refined homepage hero lede is 2 clear sentences preserving season context.
+    for html in (es_home, en_home):
+        lede_m = re.search(r'<p class="lede">(.*?)</p>', html, re.S)
+        assert lede_m is not None
+        sentences = [s.strip() for s in lede_m.group(1).strip().split(".") if s.strip()]
+        assert len(sentences) == 2, lede_m.group(1)

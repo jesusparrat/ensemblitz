@@ -36,11 +36,22 @@
 
 <div class="tools">
   <p class="legend">{{ t('week.legend') }}{% if flagged %} <span class="sig-swatch" aria-hidden="true"></span> {{ t('week.legend_flag', n=flag_pts) }}{% endif %}</p>
-  {% if flagged %}<div class="chips" role="group" aria-label="{{ tx('filter.label') }}">
-    <button class="chip" type="button" data-f="all" aria-pressed="true">{{ t('filter.all') }}<span class="n">{{ games|length }}</span></button>
-    <button class="chip" type="button" data-f="flag" aria-pressed="false">{{ t('filter.flags') }}<span class="n">{{ flagged|length }}</span></button>
-  </div>{% endif %}
+  <div class="controls">
+    {% if team_options %}<div class="team-ctrl">
+      <label for="fav-team">{{ t('team.label') }}</label>
+      <select id="fav-team" class="team-select" name="team">
+        <option value="">{{ t('team.none') }}</option>
+        {% for abbr, name in team_options %}<option value="{{ abbr }}">{{ name }}</option>{% endfor %}
+      </select>
+    </div>{% endif %}
+    {% if flagged %}<div class="chips" role="group" aria-label="{{ tx('filter.label') }}">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">{{ t('filter.all') }}<span class="n">{{ games|length }}</span></button>
+      <button class="chip" type="button" data-f="flag" aria-pressed="false">{{ t('filter.flags') }}<span class="n">{{ flagged|length }}</span></button>
+      <button class="chip" type="button" data-f="team" aria-pressed="false" hidden>{{ t('filter.team') }}<span class="n">0</span></button>
+    </div>{% endif %}
+  </div>
 </div>
+<p class="filter-empty empty" id="filter-empty" role="status" aria-live="polite" hidden>{{ t('filter.empty') }}</p>
 
 {% for d in days %}
 <section class="daygroup" aria-labelledby="{{ d.id }}">
@@ -48,7 +59,7 @@
   <div class="cols" aria-hidden="true"><span>{{ t('cols.time') }}</span><span>{{ t('cols.game') }}</span><span>{{ t('cols.win') }}</span><span>{{ t('cols.points') }}</span><span class="r">{{ t('cols.margin') }}</span><span class="r">{{ t('cols.total') }}</span></div>
   <ol class="games">
   {% for g in d.games %}
-  <li class="game{{ ' is-flagged' if g.flag }}" data-flag="{{ 1 if g.flag else 0 }}" data-day="{{ d.id }}">
+  <li class="game{{ ' is-flagged' if g.flag }}" data-flag="{{ 1 if g.flag else 0 }}" data-day="{{ d.id }}" data-home="{{ g.home }}" data-away="{{ g.away }}">
     <div class="t">{{ g.kick.time }}<small>{{ g.kick.wd }}</small></div>
     <div class="m">
       <h3><a href="{{ u('game', g.id) }}">{{ g.away }} <em>{{ t('card.at') }}</em> {{ g.home }}</a></h3>
