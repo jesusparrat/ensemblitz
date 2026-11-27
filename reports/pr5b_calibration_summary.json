@@ -1,0 +1,417 @@
+{
+  "n_games": 2133,
+  "seasons": [
+    2018,
+    2025
+  ],
+  "bootstrap": {
+    "n_replicates": 10000,
+    "seed": 20260,
+    "primary_block_weeks": 2,
+    "sensitivity_block_weeks": [
+      1,
+      2,
+      4
+    ]
+  },
+  "decision": "not_wired",
+  "decision_reason": "No pre-specified recalibration variant achieved a paired 95% log-loss CI strictly below zero against model_only. Per AGENTS.md governance, production weights remain unchanged.",
+  "variants": {
+    "model_only": {
+      "label": "Model only (current production baseline)",
+      "log_loss": 0.6344,
+      "delta_log_loss": 0.0,
+      "brier": 0.2217,
+      "delta_brier": 0.0,
+      "accuracy": 0.6479,
+      "calibration_slope": 0.928,
+      "heavy_favourites_75": {
+        "n": 396,
+        "predicted": 0.8086,
+        "actual": 0.7652,
+        "overconfidence_pp": 4.35,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            0.65,
+            8.06
+          ],
+          "2w": [
+            0.61,
+            8.06
+          ],
+          "4w": [
+            1.59,
+            7.13
+          ]
+        }
+      },
+      "paired_vs_model_only": {}
+    },
+    "mo_cap1": {
+      "label": "Constrained stack: sum(w) <= 1, w >= 0, bias b",
+      "log_loss": 0.6337,
+      "delta_log_loss": -0.0007,
+      "brier": 0.2215,
+      "delta_brier": -0.0002,
+      "accuracy": 0.6474,
+      "calibration_slope": 0.994,
+      "heavy_favourites_75": {
+        "n": 326,
+        "predicted": 0.8055,
+        "actual": 0.773,
+        "overconfidence_pp": 3.25,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            -0.7,
+            7.16
+          ],
+          "2w": [
+            -0.73,
+            7.25
+          ],
+          "4w": [
+            0.01,
+            6.47
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            -0.00186,
+            0.00048
+          ],
+          "delta_brier_ci95": [
+            -0.00061,
+            0.00025
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            -0.0019,
+            0.00052
+          ],
+          "delta_brier_ci95": [
+            -0.00061,
+            0.00027
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            -0.00175,
+            0.00036
+          ],
+          "delta_brier_ci95": [
+            -0.00056,
+            0.00021
+          ]
+        }
+      }
+    },
+    "mo_pool": {
+      "label": "Convex pool: sum(w) == 1, w >= 0, bias = 0",
+      "log_loss": 0.6336,
+      "delta_log_loss": -0.0008,
+      "brier": 0.2215,
+      "delta_brier": -0.0002,
+      "accuracy": 0.6404,
+      "calibration_slope": 1.006,
+      "heavy_favourites_75": {
+        "n": 327,
+        "predicted": 0.8053,
+        "actual": 0.7706,
+        "overconfidence_pp": 3.46,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            -0.61,
+            7.47
+          ],
+          "2w": [
+            -0.39,
+            7.37
+          ],
+          "4w": [
+            0.22,
+            6.59
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            -0.00227,
+            0.00066
+          ],
+          "delta_brier_ci95": [
+            -0.00076,
+            0.00041
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            -0.0023,
+            0.00067
+          ],
+          "delta_brier_ci95": [
+            -0.00076,
+            0.00041
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            -0.00212,
+            0.00042
+          ],
+          "delta_brier_ci95": [
+            -0.00069,
+            0.00033
+          ]
+        }
+      }
+    },
+    "mo_temp": {
+      "label": "Post-stack OOS temperature scaling (T >= 1)",
+      "log_loss": 0.6346,
+      "delta_log_loss": 0.0002,
+      "brier": 0.2219,
+      "delta_brier": 0.0002,
+      "accuracy": 0.6479,
+      "calibration_slope": 1.042,
+      "heavy_favourites_75": {
+        "n": 287,
+        "predicted": 0.801,
+        "actual": 0.7979,
+        "overconfidence_pp": 0.31,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            -4.08,
+            4.73
+          ],
+          "2w": [
+            -4.2,
+            4.75
+          ],
+          "4w": [
+            -3.8,
+            4.1
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            -0.00151,
+            0.00189
+          ],
+          "delta_brier_ci95": [
+            -0.00046,
+            0.00083
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            -0.00152,
+            0.00195
+          ],
+          "delta_brier_ci95": [
+            -0.00044,
+            0.00083
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            -0.0015,
+            0.00179
+          ],
+          "delta_brier_ci95": [
+            -0.00043,
+            0.00077
+          ]
+        }
+      }
+    },
+    "mo_platt": {
+      "label": "Post-stack OOS Platt scaling (a*z + b)",
+      "log_loss": 0.6354,
+      "delta_log_loss": 0.001,
+      "brier": 0.2221,
+      "delta_brier": 0.0004,
+      "accuracy": 0.6517,
+      "calibration_slope": 0.989,
+      "heavy_favourites_75": {
+        "n": 315,
+        "predicted": 0.8003,
+        "actual": 0.7746,
+        "overconfidence_pp": 2.57,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            -1.51,
+            6.67
+          ],
+          "2w": [
+            -1.38,
+            6.44
+          ],
+          "4w": [
+            -1.1,
+            5.92
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            -0.00135,
+            0.00337
+          ],
+          "delta_brier_ci95": [
+            -0.00062,
+            0.0014
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            -0.00138,
+            0.00327
+          ],
+          "delta_brier_ci95": [
+            -0.00063,
+            0.00135
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            -0.00114,
+            0.00312
+          ],
+          "delta_brier_ci95": [
+            -0.00055,
+            0.00133
+          ]
+        }
+      }
+    },
+    "mo_iso": {
+      "label": "Post-stack OOS isotonic regression",
+      "log_loss": 0.655,
+      "delta_log_loss": 0.0206,
+      "brier": 0.2244,
+      "delta_brier": 0.0027,
+      "accuracy": 0.6451,
+      "calibration_slope": 0.688,
+      "heavy_favourites_75": {
+        "n": 290,
+        "predicted": 0.8426,
+        "actual": 0.7931,
+        "overconfidence_pp": 4.95,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            1.19,
+            8.89
+          ],
+          "2w": [
+            1.01,
+            9.07
+          ],
+          "4w": [
+            1.15,
+            8.62
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            0.00756,
+            0.03637
+          ],
+          "delta_brier_ci95": [
+            0.00113,
+            0.00433
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            0.00827,
+            0.03508
+          ],
+          "delta_brier_ci95": [
+            0.00124,
+            0.0043
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            0.00864,
+            0.03446
+          ],
+          "delta_brier_ci95": [
+            0.00117,
+            0.00445
+          ]
+        }
+      }
+    },
+    "market": {
+      "label": "Market closing line (reference)",
+      "log_loss": 0.6097,
+      "delta_log_loss": -0.0247,
+      "brier": 0.2111,
+      "delta_brier": -0.0106,
+      "accuracy": 0.662,
+      "calibration_slope": 1.056,
+      "heavy_favourites_75": {
+        "n": 470,
+        "predicted": 0.8093,
+        "actual": 0.8234,
+        "overconfidence_pp": -1.41,
+        "overconfidence_pp_ci95": {
+          "1w": [
+            -4.82,
+            2.13
+          ],
+          "2w": [
+            -5.18,
+            2.35
+          ],
+          "4w": [
+            -4.9,
+            2.42
+          ]
+        }
+      },
+      "paired_vs_model_only": {
+        "1w": {
+          "delta_log_loss_ci95": [
+            -0.03233,
+            -0.01733
+          ],
+          "delta_brier_ci95": [
+            -0.0139,
+            -0.00732
+          ]
+        },
+        "2w": {
+          "delta_log_loss_ci95": [
+            -0.03242,
+            -0.01731
+          ],
+          "delta_brier_ci95": [
+            -0.01401,
+            -0.00724
+          ]
+        },
+        "4w": {
+          "delta_log_loss_ci95": [
+            -0.03172,
+            -0.01812
+          ],
+          "delta_brier_ci95": [
+            -0.01366,
+            -0.00772
+          ]
+        }
+      }
+    }
+  }
+}
