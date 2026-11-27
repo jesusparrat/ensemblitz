@@ -8,9 +8,13 @@ Spanish pages live at the site root, English pages under ``en/``. The data layer
 from __future__ import annotations
 
 import json
+import os
+import re
 import shutil
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.parse import urlsplit
+from xml.sax.saxutils import escape as xml_escape
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
@@ -20,12 +24,14 @@ from ensemblitz import contract_io
 from ensemblitz import ledger as L
 from ensemblitz import news as N
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
-from ensemblitz.site import charts
+from ensemblitz.site import charts, og
 from ensemblitz.site.i18n import LANGS, Lang
 from ensemblitz.site.names import TEAMS, full
 
 HERE = Path(__file__).parent
 REPO_URL = "https://github.com/jesusparrat/ensemblitz"
+DEFAULT_BASE_URL = "https://jesusparrat.github.io/ensemblitz"
+GOATCOUNTER_CODE_RE = re.compile(r"^[a-z0-9-]+$")
 TEAM_OPTIONS = sorted(((abbr, full(abbr)) for abbr in TEAMS), key=lambda x: x[1])
 FLAG_PP = 10  # fixed >= 10 printed percentage points gap that marks a reading disagreement
 HFA = 1.8  # home-field advantage in points (Kalman hyper-parameter, see reports/backtest.json)
@@ -427,12 +433,80 @@ def _history(inputs: dict) -> dict:
     }
 
 
+# ---------------------------------------------------------------- SEO & analytics helpers
+def resolve_base_url(base_url: str | None = None) -> str:
+    """Resolve and validate the public site base URL (no trailing slash)."""
+    raw = os.environ.get("SITE_BASE_URL", "") if base_url is None else base_url
+    cleaned = raw.strip().rstrip("/") or DEFAULT_BASE_URL
+    parsed = urlsplit(cleaned)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        raise ValueError(f"invalid SITE_BASE_URL: {raw!r} (expected http:// or https:// URL)")
+    return cleaned
+
+
+def resolve_goatcounter_code(code: str | None = None) -> str | None:
+    """Resolve optional GoatCounter site code; returns None when disabled, raises if invalid."""
+    raw = os.environ.get("ENSEMBLITZ_GOATCOUNTER_CODE", "") if code is None else code
+    cleaned = raw.strip()
+    if not cleaned:
+        return None
+    if not GOATCOUNTER_CODE_RE.fullmatch(cleaned):
+        raise ValueError(f"invalid ENSEMBLITZ_GOATCOUNTER_CODE: {raw!r} (must match ^[a-z0-9-]+$)")
+    return cleaned
+
+
+def build_csp(goatcounter_code: str | None) -> Markup:
+    """Build the Content-Security-Policy header; zero external domains unless analytics is set."""
+    script_src = "'self'"
+    connect_src = "'none'"
+    if goatcounter_code:
+        if not GOATCOUNTER_CODE_RE.fullmatch(goatcounter_code):
+            raise ValueError(
+                f"invalid ENSEMBLITZ_GOATCOUNTER_CODE: {goatcounter_code!r} "
+                "(must match ^[a-z0-9-]+$)"
+            )
+        script_src = "'self' https://gc.zgo.at"
+        connect_src = f"https://{goatcounter_code}.goatcounter.com"
+    return Markup(
+        f"default-src 'none'; script-src {script_src}; style-src 'self' 'unsafe-inline'; "
+        f"font-src 'self'; img-src 'self' data:; connect-src {connect_src}; "
+        "object-src 'none'; base-uri 'none'; form-action 'none'"
+    )
+
+
+def abs_url(base_url: str, dest: str) -> str:
+    """Convert a built relative path to its canonical absolute URL."""
+    clean = dest.lstrip("/")
+    if clean == "index.html":
+        return f"{base_url}/"
+    if clean.endswith("/index.html"):
+        return f"{base_url}/{clean[: -len('index.html')]}"
+    return f"{base_url}/{clean}"
+
+
+def _domain_label(base_url: str) -> str:
+    """Short human-readable host/path label for OG card footers."""
+    parsed = urlsplit(base_url)
+    return (parsed.netloc + parsed.path).rstrip("/")
+
+
 # ---------------------------------------------------------------- build
 class Site:
     """One build: renders every page in every language."""
 
-    def __init__(self, root: Path, out: Path) -> None:
+    def __init__(
+        self,
+        root: Path,
+        out: Path,
+        *,
+        base_url: str | None = None,
+        goatcounter_code: str | None = None,
+    ) -> None:
         self.root, self.out = root, out
+        self.base_url = resolve_base_url(base_url)
+        self.goatcounter_code = resolve_goatcounter_code(goatcounter_code)
+        self.csp = build_csp(self.goatcounter_code)
+        self.rendered_pages: list[dict[str, object]] = []
         self.inputs = load_inputs(root)
         self.env = Environment(
             loader=FileSystemLoader(HERE / "templates"), autoescape=select_autoescape(["html"])
@@ -450,7 +524,19 @@ class Site:
         # v1 snapshots carry data_cutoff_utc; legacy v0 snapshots fall back to generated_at_utc.
         self.data_stamp = max(cutoff_stamps) if cutoff_stamps else self.saved_stamp
 
-    def render(self, L: Lang, tpl: str, kind: str, key: object = None, **ctx: object) -> None:
+    def render(
+        self,
+        L: Lang,
+        tpl: str,
+        kind: str,
+        key: object = None,
+        *,
+        og_title: str | None = None,
+        og_description: str | None = None,
+        og_image_rel: str | None = None,
+        og_image_alt: str | None = None,
+        **ctx: object,
+    ) -> None:
         dest = ROUTES[L.code][kind].format(key)
         rel = "../" * dest.count("/")
 
@@ -459,8 +545,14 @@ class Site:
 
         alt = {
             c: rel + ROUTES[c][kind].format(key)
-            for c in LANGS  # the same page in each language, for the switch and hreflang
+            for c in LANGS  # relative twin path for the interactive language switch
         }
+        alt_abs = {
+            c: abs_url(self.base_url, ROUTES[c][kind].format(key))
+            for c in LANGS  # absolute twin URLs for canonical/hreflang/sitemap
+        }
+        canonical_url = abs_url(self.base_url, dest)
+        image_rel = og_image_rel or og.home_card_rel(L.code)
         text = self.env.get_template(tpl).render(
             L=L,
             lang=L.code,
@@ -483,6 +575,14 @@ class Site:
             u=u,
             rel=rel,
             alt=alt,
+            alt_abs=alt_abs,
+            canonical_url=canonical_url,
+            og_title=og_title or f"{L.text('site.title')} | ensemblitz",
+            og_description=og_description or L.text("site.description"),
+            og_image_url=abs_url(self.base_url, image_rel),
+            og_image_alt=og_image_alt or L.text("og.alt_home"),
+            csp=self.csp,
+            goatcounter_code=self.goatcounter_code,
             other=next(c for c in LANGS if c != L.code),
             page_kind=kind,
             data_at=L.stamp(self.data_stamp),
@@ -494,10 +594,12 @@ class Site:
         )
         path = self.out / dest
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
+        path.write_text(text, encoding="utf-8")
+        self.rendered_pages.append({"dest": dest, "url": canonical_url, "alt_abs": alt_abs})
 
     def build(self) -> Path:
         out, inputs = self.out, self.inputs
+        self.rendered_pages = []
         if out.exists():
             shutil.rmtree(out)
         (out / "assets").mkdir(parents=True)
@@ -506,7 +608,7 @@ class Site:
         week_pages: dict[tuple, list[dict]] = {}
         for key, d in inputs["preds"].items():
             odds_doc = inputs["odds"].get(key) or {}
-            og = {x["game_id"]: x for x in odds_doc.get("games", [])}
+            odds_games = {x["game_id"]: x for x in odds_doc.get("games", [])}
             odds_fetched_at = odds_doc.get("odds_fetched_at")
             graded = {r["game_id"]: r for r in inputs["graded"]}
             kinds = inputs["pred_meta"].get(key, {}).get("headline_kinds") or {}
@@ -515,7 +617,7 @@ class Site:
                 (
                     _game(
                         g,
-                        og.get(g["game_id"]),
+                        odds_games.get(g["game_id"]),
                         graded.get(g["game_id"]),
                         news_by_week[key],
                         kinds.get(g["game_id"], default_kind),
@@ -527,11 +629,57 @@ class Site:
             )
         current = _current_week(week_pages, self.now)
         hist = _history(inputs)
+        domain_label = _domain_label(self.base_url)
         for code in LANGS:
             L = Lang(code)
+            og.generate_og_cards(
+                out,
+                L,
+                week_pages,
+                current,
+                flag_pp=FLAG_PP,
+                domain_label=domain_label,
+            )
             self._pages(L, week_pages, news_by_week, current, hist)
-        (out / ".nojekyll").write_text("")
+        self._write_sitemap()
+        self._write_robots()
+        (out / ".nojekyll").write_text("", encoding="utf-8")
         return out
+
+    def _write_sitemap(self) -> None:
+        """Write deterministic XML sitemap covering all ES and EN rendered HTML pages."""
+        lastmod = self.saved_stamp[:10] if self.saved_stamp[:4] != "1970" else None
+        lines = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+            'xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+        ]
+        for entry in sorted(self.rendered_pages, key=lambda item: str(item["url"])):
+            url = xml_escape(str(entry["url"]))
+            alt_abs = entry["alt_abs"]
+            assert isinstance(alt_abs, dict)
+            lines.append("  <url>")
+            lines.append(f"    <loc>{url}</loc>")
+            if lastmod:
+                lines.append(f"    <lastmod>{xml_escape(lastmod)}</lastmod>")
+            lines.append(
+                f'    <xhtml:link rel="alternate" hreflang="es" href="{xml_escape(alt_abs["es"])}"/>'
+            )
+            lines.append(
+                f'    <xhtml:link rel="alternate" hreflang="en" href="{xml_escape(alt_abs["en"])}"/>'
+            )
+            lines.append(
+                f'    <xhtml:link rel="alternate" hreflang="x-default" '
+                f'href="{xml_escape(alt_abs["es"])}"/>'
+            )
+            lines.append("  </url>")
+        lines.append("</urlset>\n")
+        (self.out / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
+
+    def _write_robots(self) -> None:
+        """Write robots.txt pointing crawlers to the absolute sitemap.xml URL."""
+        body = f"User-agent: *\nAllow: /\n\nSitemap: {self.base_url}/sitemap.xml\n"
+        (self.out / "robots.txt").write_text(body, encoding="utf-8")
 
     def _pages(
         self, L: Lang, week_pages: dict, news_by_week: dict, current: tuple | None, hist: dict
@@ -557,15 +705,52 @@ class Site:
                 "legacy": any(g["legacy"] for g in games),
                 "team_options": TEAM_OPTIONS,
             }
-            self.render(L, "week.html", "week", key[1], **ctx)
+            week_img = og.week_card_rel(key[0], key[1], L.code)
+            self.render(
+                L,
+                "week.html",
+                "week",
+                key[1],
+                og_title=f"{L.text('week.title', week=key[1])} | ensemblitz",
+                og_description=L.text("og.desc_week", week=key[1], season=key[0]),
+                og_image_rel=week_img,
+                og_image_alt=L.text("og.alt_week", week=key[1], season=key[0]),
+                **ctx,
+            )
             if key == current:
-                self.render(L, "week.html", "home", None, **ctx)
+                self.render(
+                    L,
+                    "week.html",
+                    "home",
+                    None,
+                    og_title=f"{L.text('week.title', week=key[1])} | ensemblitz",
+                    og_description=L.text("site.description"),
+                    og_image_rel=og.home_card_rel(L.code),
+                    og_image_alt=L.text("og.alt_home"),
+                    **ctx,
+                )
             for g in games:
                 self.render(
                     L,
                     "game.html",
                     "game",
                     g["id"],
+                    og_title=f"{g['away']} {L.text('card.at')} {g['home']} | ensemblitz",
+                    og_description=L.text(
+                        "game.description",
+                        away=g["away_name"],
+                        home=g["home_name"],
+                        fav=g["fav"],
+                        p=L.pct(g["p_win"]),
+                    ),
+                    og_image_rel=week_img,
+                    og_image_alt=L.text(
+                        "og.alt_game",
+                        away=g["away"],
+                        home=g["home"],
+                        week=key[1],
+                        season=key[0],
+                    ),
                     g=g,
                     charts=game_charts(g, L),
                     season=key[0],
@@ -573,7 +758,15 @@ class Site:
                     facts=[fact_text(L, f) for f in g["facts"]],
                 )
         if current is None:
-            self.render(L, "empty.html", "home")
+            self.render(
+                L,
+                "empty.html",
+                "home",
+                og_title=f"{L.text('empty.title')} | ensemblitz",
+                og_description=L.text("site.description"),
+                og_image_rel=og.home_card_rel(L.code),
+                og_image_alt=L.text("og.alt_home"),
+            )
         hist_ctx = {
             "hist": hist,
             "chart": charts.running_lines(
@@ -587,7 +780,16 @@ class Site:
             else "",
             "kick": lambda s: L.kick(s),
         }
-        self.render(L, "history.html", "history", **hist_ctx)
+        self.render(
+            L,
+            "history.html",
+            "history",
+            og_title=f"{L.text('hist.title')} | ensemblitz",
+            og_description=L.text("og.desc_history"),
+            og_image_rel=og.home_card_rel(L.code),
+            og_image_alt=L.text("og.alt_history"),
+            **hist_ctx,
+        )
         bt, bl = inputs["backtest"], inputs["baseline"]
         calib_pts = None
         if bl and (bl.get("deciles") or {}).get("model_only"):
@@ -606,6 +808,10 @@ class Site:
             L,
             "method.html",
             "method",
+            og_title=f"{L.text('method.title')} | ensemblitz",
+            og_description=L.text("og.desc_method"),
+            og_image_rel=og.home_card_rel(L.code),
+            og_image_alt=L.text("og.alt_method"),
             bt=bt,
             bl=bl,
             pop_scored=scored_n,
@@ -651,9 +857,20 @@ class Site:
         )
 
 
-def build_site(root: Path | None = None, out: Path | None = None) -> Path:
+def build_site(
+    root: Path | None = None,
+    out: Path | None = None,
+    *,
+    base_url: str | None = None,
+    goatcounter_code: str | None = None,
+) -> Path:
     root = root or C.ROOT
-    return Site(root, out or root / "site" / "_build").build()
+    return Site(
+        root,
+        out or root / "site" / "_build",
+        base_url=base_url,
+        goatcounter_code=goatcounter_code,
+    ).build()
 
 
 def why_text(L: Lang, g: dict) -> Markup:

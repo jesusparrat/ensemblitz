@@ -501,7 +501,52 @@ ES: dict[str, str] = {
     "method.gloss_pp": "Diferencia entre dos porcentajes: de 66\u202f% a 68\u202f% hay 2 puntos.",
     "method.gloss_shin_t": "Sin margen de la casa",
     "method.gloss_shin": "Las cuotas llevan una comisión; se quita para que las probabilidades sumen 100\u202f%.",
+    "method.privacy_h": "Privacidad y analítica",
+    "method.privacy_off": (
+        "En esta compilación la analítica externa está desactivada: la página no carga scripts de "
+        "terceros, no realiza peticiones de red salientes (política CSP connect-src 'none') ni "
+        "instala cookies de seguimiento."
+    ),
+    "method.privacy_on": (
+        "En esta compilación está activada la medición opt-in de GoatCounter (código {code}). Al "
+        "cargar una página, tu navegador envía una petición a gc.zgo.at y a "
+        "{code}.goatcounter.com con la ruta visitada, la referencia, el agente de usuario, el "
+        "tamaño de ventana y la dirección IP, que GoatCounter utiliza de forma transitoria para "
+        "calcular un hash diario de sesión sin guardar cookies."
+    ),
+    "method.privacy_law": (
+        "No usar cookies no equivale a estar exento de obligaciones de privacidad o protección de "
+        "datos (como el RGPD): cuando la analítica externa está activada, el navegador transmite "
+        "metadatos de petición a un tercero y el responsable del sitio debe informar de ello y "
+        "evaluar su base jurídica antes de habilitarla."
+    ),
     "method.footer": 'Todo el código y los datos de salida están en <a href="{repo}">{repo}</a> bajo licencia MIT.',
+    # Open Graph and SEO metadata
+    "og.tagline": "Modelo propio sin mercado. Picks guardados antes del saque.",
+    "og.home_title": "Pronósticos NFL",
+    "og.home_sub": "Jornada {week}, temporada {season}",
+    "og.home_empty": "Sin jornada publicada todavía",
+    "og.week_title": "Jornada {week}",
+    "og.week_sub": "Temporada NFL {season}",
+    "og.games_label": "partidos",
+    "og.flags_label": "desacuerdos >= {n} pts",
+    "og.featured_label": "PARTIDOS DESTACADOS",
+    "og.alt_home": "ensemblitz: pronósticos NFL de la semana actual",
+    "og.alt_week": "ensemblitz: pronósticos NFL de la jornada {week}, temporada {season}",
+    "og.alt_game": "ensemblitz: {away} en {home}, jornada {week} de {season}",
+    "og.alt_history": "ensemblitz: historial de picks guardados antes del saque",
+    "og.alt_method": "ensemblitz: método, backtest y límites",
+    "og.desc_week": (
+        "Pronósticos NFL de la jornada {week} ({season}): probabilidades del modelo sin mercado, "
+        "puntos esperados, margen y total."
+    ),
+    "og.desc_history": (
+        "Historial público de picks de la NFL guardados antes del saque, sin editar después."
+    ),
+    "og.desc_method": (
+        "Cómo calcula ensemblitz sus pronósticos NFL, resultados históricos 2018-2025, "
+        "calibración y límites."
+    ),
     # privacy and local storage
     "privacy.h": "Privacidad y almacenamiento local",
     "privacy.storage": (
@@ -1067,7 +1112,51 @@ EN: dict[str, str] = {
     "method.gloss_pp": "The difference between two percentages: from 66% to 68% is 2 points.",
     "method.gloss_shin_t": "Margin removed",
     "method.gloss_shin": "Odds carry a bookmaker fee; it is taken out so the probabilities add up to 100%.",
+    "method.privacy_h": "Privacy and analytics",
+    "method.privacy_off": (
+        "External analytics is disabled in this build: the page loads no third-party scripts, "
+        "makes no outbound network requests (CSP connect-src 'none'), and sets no tracking "
+        "cookies."
+    ),
+    "method.privacy_on": (
+        "Opt-in GoatCounter measurement is enabled in this build (code {code}). When a page "
+        "loads, your browser sends a request to gc.zgo.at and {code}.goatcounter.com with the "
+        "page path, referrer, user agent, viewport size and IP address, which GoatCounter uses "
+        "transiently to compute a daily session hash without setting cookies."
+    ),
+    "method.privacy_law": (
+        "Using no cookies does not mean zero privacy or data-protection obligations (such as "
+        "under the GDPR): when external analytics is enabled, the browser transmits request "
+        "metadata to a third-party processor, and the site operator remains responsible for "
+        "transparency notices and legal-basis assessment before turning it on."
+    ),
     "method.footer": 'All the code and output data are at <a href="{repo}">{repo}</a> under the MIT license.',
+    # Open Graph and SEO metadata
+    "og.tagline": "Model on its own, no market. Picks saved before kickoff.",
+    "og.home_title": "NFL predictions",
+    "og.home_sub": "Week {week}, {season} season",
+    "og.home_empty": "No week published yet",
+    "og.week_title": "Week {week}",
+    "og.week_sub": "{season} NFL season",
+    "og.games_label": "games",
+    "og.flags_label": "gaps >= {n} pts",
+    "og.featured_label": "FEATURED GAMES",
+    "og.alt_home": "ensemblitz: current week NFL predictions",
+    "og.alt_week": "ensemblitz: Week {week} NFL predictions, {season} season",
+    "og.alt_game": "ensemblitz: {away} at {home}, Week {week}, {season}",
+    "og.alt_history": "ensemblitz: record of picks saved before kickoff",
+    "og.alt_method": "ensemblitz: method, backtest and limits",
+    "og.desc_week": (
+        "Week {week} ({season}) NFL predictions: model-only win probabilities, expected points, "
+        "margin and total."
+    ),
+    "og.desc_history": (
+        "Public record of NFL picks saved before kickoff and never edited afterwards."
+    ),
+    "og.desc_method": (
+        "How ensemblitz computes its NFL predictions, 2018-2025 historical results, calibration "
+        "and limits."
+    ),
     "privacy.h": "Privacy and local storage",
     "privacy.storage": (
         "This site sets no tracking cookies. It only stores up to three preferences in your "

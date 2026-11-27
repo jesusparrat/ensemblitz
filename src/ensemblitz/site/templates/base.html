@@ -2,16 +2,32 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="{{ csp }}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{{ t('site.title') }}{% endblock %} | ensemblitz</title>
 <meta name="description" content="{% block description %}{{ tx('site.description') }}{% endblock %}">
+<link rel="canonical" href="{{ canonical_url }}">
+<link rel="alternate" hreflang="es" href="{{ alt_abs.es }}">
+<link rel="alternate" hreflang="en" href="{{ alt_abs.en }}">
+<link rel="alternate" hreflang="x-default" href="{{ alt_abs.es }}">
+<meta property="og:site_name" content="ensemblitz">
+<meta property="og:locale" content="{{ 'es_ES' if lang == 'es' else 'en_US' }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ og_image_url }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ og_image_alt }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
+<meta name="twitter:image" content="{{ og_image_url }}">
 <meta name="theme-color" content="#F3F4F6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1014" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/svg+xml" href="{{ rel }}assets/favicon.svg">
-<link rel="alternate" hreflang="es" href="{{ alt.es }}">
-<link rel="alternate" hreflang="en" href="{{ alt.en }}">
 <link rel="preload" href="{{ rel }}assets/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ rel }}assets/style.css">
 <script src="{{ rel }}assets/theme.js"></script>
@@ -41,5 +57,6 @@
 </footer>
 <p class="sr" id="sort-live" role="status" aria-live="polite"></p>
 <script src="{{ rel }}assets/app.js" defer></script>
-</body>
+{% if goatcounter_code %}<script data-goatcounter="https://{{ goatcounter_code }}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+{% endif %}</body>
 </html>

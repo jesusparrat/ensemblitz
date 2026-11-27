@@ -112,6 +112,12 @@
 <h2 id="privacy">{{ t('privacy.h') }}</h2>
 <p>{{ t('privacy.storage') }}</p>
 <p>{{ t('privacy.hosting') }}</p>
+{% if goatcounter_code %}
+<p>{{ t('method.privacy_on', code=goatcounter_code) }}</p>
+{% else %}
+<p>{{ t('method.privacy_off') }}</p>
+{% endif %}
+<p>{{ t('method.privacy_law') }}</p>
 
 <p class="small">{{ t('method.footer', repo=repo) }}</p>
 {% endblock %}
