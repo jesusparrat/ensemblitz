@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 {% set nav = 'hist' %}
 {% block title %}{{ t('hist.title') }}{% endblock %}
-{% block content %}
-<section class="head" aria-labelledby="h"><div>
-<h1 id="h"><small>{{ t('hist.kicker') }}</small>{{ t('hist.title') }}</h1>
+{% block hero %}
+<section class="hero-band" aria-labelledby="h"><div class="wrap head"><div>
+<h1 id="h">{{ t('hist.title') }}</h1>
 <p class="lede">{{ t('hist.lede') }}</p></div>
 {% if hist.rows %}<div class="read" aria-label="{{ tx('hist.read_aria') }}">
   <div><b>{{ hist.sources.official.ok }}/{{ hist.sources.official.n }}</b><span>{{ t('hist.read_hits') }}</span></div>
   <div><b>{{ shown(hist.sources.official.ok / hist.sources.official.n) }}<i>%</i></b><span>{{ t('hist.read_pct') }}</span></div>
 </div>{% endif %}
-</section>
+</div></section>
+{% endblock %}
+{% block content %}
 
 <h2>{{ t('hist.rule_h') }}</h2>
 <ul class="rules">

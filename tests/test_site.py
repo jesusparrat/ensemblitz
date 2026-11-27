@@ -728,7 +728,7 @@ def test_check_site_guards_catch_c6_c7_c15_c2_and_ignore_comments(tmp_path):
     es_home.write_text(
         orig_home.replace(
             "</body>",
-            '<div class="mkt"><span class="chipf">+11</span> Mercado: 56% (nosotros +11)</div></body>',
+            '<div class="mkt"><span class="sig">+11</span> Mercado: 56% (nosotros +11)</div></body>',
         )
     )
     assert any("duplicate market gap" in e for e in cs.check_output(out))
@@ -740,3 +740,84 @@ def test_check_site_guards_catch_c6_c7_c15_c2_and_ignore_comments(tmp_path):
     meth.write_text(orig_meth.replace("2133", "XXXX"))
     assert any("2141 without reconciling 2133" in e for e in cs.check_output(out))
     meth.write_text(orig_meth)
+
+
+def test_method_fallback_without_baseline_never_prints_na_model_only(tmp_path):
+    # Only backtest.json present, no baseline_2018_2025.json
+    _, out = _build(tmp_path, odds=False, backtest=True)
+    es = _text(out, "metodo.html")
+    en = _text(out, "en/method.html")
+    assert "log loss n/d" not in es and "log loss of n/a" not in en
+    assert "reports/backtest.md" in es and "reports/backtest.md" in en
+
+
+def test_pr4_visual_identity_no_doto_no_kickers_full_bleed_hero_and_signal_bar(tmp_path):
+    _, out = _build(tmp_path, odds=True, backtest=True)
+    css = (out / "assets/style.css").read_text()
+    assert "Doto" not in css and "doto" not in css
+    assert not (out / "assets/fonts/doto-latin-wght-normal.woff2").exists()
+    assert "--paper: #F3F4F6" in css
+    assert ".chipf" not in css
+    for page in (
+        "index.html",
+        "en/index.html",
+        "partido/2026_11_IND_HOU.html",
+        "historial.html",
+        "metodo.html",
+    ):
+        html = _text(out, page)
+        assert 'class="hero-band"' in html, page
+        assert not any(
+            "<small" in hm.group(1).lower()
+            for hm in re.finditer(r"<h1\b[^>]*>(.*?)</h1>", html, re.S | re.I)
+        ), page
+        assert 'class="chipf"' not in html, page
+    # Season/week context preserved naturally below H1 without eyebrow kickers
+    assert "Temporada NFL 2026" in _text(out, "index.html")
+    assert "2026 NFL season" in _text(out, "en/index.html")
+    assert "Jornada 11, temporada 2026." in _text(out, "partido/2026_11_IND_HOU.html")
+    assert "Week 11, 2026 season." in _text(out, "en/game/2026_11_IND_HOU.html")
+
+
+def test_pr4_check_site_guards_fail_when_broken_on_purpose(tmp_path):
+    import importlib.util
+
+    repo_root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "check_site", repo_root / "scripts" / "check_site.py"
+    )
+    cs = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(cs)
+
+    base_css = (repo_root / "src/ensemblitz/site/static/style.css").read_text()
+    assert cs.check_css_rules(base_css) == []
+
+    # Break 1: reintroduce Doto / 3rd font family
+    bad_font = base_css + '\n.x { font-family: "Doto", monospace; }\n'
+    assert any(
+        "forbidden font family" in e or "more than 2 font" in e
+        for e in cs.check_css_rules(bad_font)
+    )
+
+    # Break 2: font-size below 13px
+    bad_size = base_css + "\n.tiny { font-size: 11px; }\n"
+    assert any("below 13px" in e for e in cs.check_css_rules(bad_size))
+
+    # Break 3: pill border-radius
+    bad_pill = base_css + "\n.badge { border-radius: 999px; }\n"
+    assert any("pill border-radius" in e for e in cs.check_css_rules(bad_pill))
+
+    # Break 4: beige token & purple token
+    bad_beige = base_css.replace("--paper: #F3F4F6;", "--paper: #F4ECE1;")
+    assert any("beige" in e for e in cs.check_css_rules(bad_beige))
+    bad_purple = base_css.replace("--ink-2: #4B5260;", "--ink-2: #6D28D9;")
+    assert any("purple" in e for e in cs.check_css_rules(bad_purple))
+
+    # Break 5: eyebrow kicker inside <h1> in built HTML
+    _, out = _build(tmp_path, odds=True, backtest=False)
+    home = out / "index.html"
+    orig = home.read_text()
+    home.write_text(orig.replace('<h1 id="h">', '<h1 id="h"><small>NFL</small>', 1))
+    assert any("eyebrow kicker" in e for e in cs.check_output(out))
+    home.write_text(orig)

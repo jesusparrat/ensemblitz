@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-W, H = 640, 190
-PAD_L, PAD_R, PAD_T, PAD_B = 8, 8, 20, 30
+W, H = 540, 208
+PAD_L, PAD_R, PAD_T, PAD_B = 10, 10, 28, 44
 
 
 def _svg(body: str, h: int = H, label: str = "") -> str:
@@ -59,7 +59,7 @@ def histogram(
         x = PAD_L + (t - lo + 0.5) * bw
         out.append(f'<line class="tick" x1="{x:.1f}" x2="{x:.1f}" y1="{base}" y2="{base + 4}"/>')
         out.append(
-            f'<text class="axis-label" x="{x:.1f}" y="{base + 16}" text-anchor="middle">{t}</text>'
+            f'<text class="axis-label" x="{x:.1f}" y="{base + 18}" text-anchor="middle">{t}</text>'
         )
     if marker is not None and lo <= marker <= hi:
         x = PAD_L + (marker - lo + 0.5) * bw
@@ -67,14 +67,14 @@ def histogram(
         anchor = "end" if x > W * 0.7 else "start"
         dx = -4 if anchor == "end" else 4
         out.append(
-            f'<text class="marker-label" x="{x + dx:.1f}" y="{PAD_T}" '
+            f'<text class="marker-label" x="{x + dx:.1f}" y="{PAD_T - 8}" '
             f'text-anchor="{anchor}">{marker_label}</text>'
         )
     if left_label:
-        out.append(f'<text class="side-label" x="{PAD_L}" y="{H - 2}">{left_label}</text>')
+        out.append(f'<text class="side-label" x="{PAD_L}" y="{H - 4}">{left_label}</text>')
     if right_label:
         out.append(
-            f'<text class="side-label" x="{W - PAD_R}" y="{H - 2}" text-anchor="end">'
+            f'<text class="side-label" x="{W - PAD_R}" y="{H - 4}" text-anchor="end">'
             f"{right_label}</text>"
         )
     return _svg("".join(out), label=label)
@@ -82,8 +82,8 @@ def histogram(
 
 def calibration(points: list[dict], x_label: str, y_label: str, aria: str) -> str:
     """Reliability diagram: predicted vs observed frequency, dot area ~ games in the bin."""
-    size = 300
-    pad = 34
+    size = 320
+    pad = 42
     s = size - 2 * pad
     out = [f'<rect class="plot-bg" x="{pad}" y="{pad}" width="{s}" height="{s}"/>']
     for t in (0, 0.25, 0.5, 0.75, 1):
@@ -92,11 +92,11 @@ def calibration(points: list[dict], x_label: str, y_label: str, aria: str) -> st
         out.append(f'<line class="grid" x1="{x:.1f}" x2="{x:.1f}" y1="{pad}" y2="{pad + s}"/>')
         out.append(f'<line class="grid" x1="{pad}" x2="{pad + s}" y1="{y:.1f}" y2="{y:.1f}"/>')
         out.append(
-            f'<text class="axis-label" x="{x:.1f}" y="{pad + s + 16}" text-anchor="middle">'
+            f'<text class="axis-label" x="{x:.1f}" y="{pad + s + 18}" text-anchor="middle">'
             f"{int(t * 100)}</text>"
         )
         out.append(
-            f'<text class="axis-label" x="{pad - 6}" y="{y + 4:.1f}" text-anchor="end">'
+            f'<text class="axis-label" x="{pad - 8}" y="{y + 4:.1f}" text-anchor="end">'
             f"{int(t * 100)}</text>"
         )
     out.append(f'<line class="diag" x1="{pad}" y1="{pad + s}" x2="{pad + s}" y2="{pad}"/>')
@@ -114,8 +114,8 @@ def calibration(points: list[dict], x_label: str, y_label: str, aria: str) -> st
         f"{x_label}</text>"
     )
     out.append(
-        f'<text class="side-label" x="10" y="{pad + s / 2}" text-anchor="middle" '
-        f'transform="rotate(-90 10 {pad + s / 2})">{y_label}</text>'
+        f'<text class="side-label" x="13" y="{pad + s / 2}" text-anchor="middle" '
+        f'transform="rotate(-90 13 {pad + s / 2})">{y_label}</text>'
     )
     return (
         f'<svg class="chart chart-square" viewBox="0 0 {size} {size}" role="img" '
@@ -126,7 +126,7 @@ def calibration(points: list[dict], x_label: str, y_label: str, aria: str) -> st
 def running_lines(series: dict[str, list[float]], label: str) -> str:
     """Cumulative accuracy lines (values in 0..1). First series is drawn in the accent."""
     n = max(len(v) for v in series.values())
-    h = 180
+    h = 200
     base = h - PAD_B
     top = PAD_T
     out = []
@@ -147,7 +147,7 @@ def running_lines(series: dict[str, list[float]], label: str) -> str:
             pts.append(f"{x:.1f},{y:.1f}")
         out.append(f'<polyline class="line-{k}" points="{" ".join(pts)}"/>')
         out.append(
-            f'<text class="side-label" x="{PAD_L + 30 + k * 120}" y="{h - 4}">'
+            f'<text class="side-label" x="{PAD_L + 30 + k * 165}" y="{h - 6}">'
             f'<tspan class="legend-{k}">&#9632;</tspan> {name}</text>'
         )
     return _svg("".join(out), h=h, label=label)

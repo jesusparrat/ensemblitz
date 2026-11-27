@@ -1,9 +1,11 @@
 """Lightweight checks on the generated site (CI).
 
-Checks: colour contrast of the design tokens, em dashes, language markers on every page,
-jargon and old widgets on the week pages, bookmaker and exchange names, half-translated team
-names, empty filter groups, ET on /en/ (no Madrid), no false closing labels outside method pages,
-no duplicate gap text on flagged cards, and reconciled population counts on method pages.
+Checks: colour contrast of the design tokens, <=2 font families (no Doto/Arial), zero <13px
+text in CSS/SVG, zero pills or eyebrow kickers, no beige/purple palette tokens, em dashes,
+language markers on every page, jargon and old widgets on the week pages, bookmaker and exchange
+names, half-translated team names, empty filter groups, ET on /en/ (no Madrid), no false closing
+labels outside method pages, no duplicate gap text on flagged cards, and reconciled population
+counts on method pages.
 
 Usage: python scripts/check_site.py [output_dir]   (default: site/_build)
 Exits with code 1 if anything fails.
@@ -136,6 +138,81 @@ def check_contrast() -> list[str]:
     return errors
 
 
+GENERIC_FONTS = frozenset(
+    {
+        "inherit",
+        "sans-serif",
+        "serif",
+        "monospace",
+        "system-ui",
+        "-apple-system",
+        "ui-monospace",
+        "ui-sans-serif",
+        "segoe ui",
+        "menlo",
+    }
+)
+
+
+def _rgb(hexcol: str) -> tuple[int, int, int]:
+    h = hexcol.lstrip("#")
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+
+def check_css_rules(css_text: str | None = None) -> list[str]:
+    """Enforce PR 4 hard rules on CSS: <=2 font families, >=13px, no pills, no beige/purple."""
+    css = CSS.read_text() if css_text is None else css_text
+    errors: list[str] = []
+
+    # 1. Max 2 custom font families; ban Doto and Arial everywhere.
+    custom_fonts: set[str] = set()
+    for decl in re.findall(r"font-family\s*:\s*([^;}{]+)", css, re.I):
+        for raw in decl.split(","):
+            name = raw.strip().strip("\"'")
+            if not name or name.startswith("var("):
+                continue
+            low = name.lower()
+            if low in ("doto", "arial"):
+                errors.append(f"css: forbidden font family {name!r}")
+            if low not in GENERIC_FONTS:
+                custom_fonts.add(name)
+    if len(custom_fonts) > 2:
+        errors.append(f"css: more than 2 font families ({sorted(custom_fonts)})")
+
+    # 2. Zero font sizes below 13px in CSS.
+    for m in re.finditer(r"font-size\s*:\s*(\d+(?:\.\d+)?)px", css, re.I):
+        sz = float(m.group(1))
+        if sz < 13.0:
+            errors.append(f"css: font-size below 13px ({m.group(0)})")
+    for m in re.finditer(r"font\s*:[^;}{]*?\b(\d+(?:\.\d+)?)px", css, re.I):
+        sz = float(m.group(1))
+        if sz < 13.0:
+            errors.append(f"css: font shorthand below 13px ({m.group(0).strip()})")
+
+    # 3. No pills and no legacy .chipf badge boxes.
+    if re.search(r"\.chipf\b", css):
+        errors.append("css: legacy .chipf badge selector still present")
+    for m in re.finditer(r"border-radius\s*:\s*(\d+(?:\.\d+)?)(px|%)", css, re.I):
+        val, unit = float(m.group(1)), m.group(2)
+        if (unit == "px" and val >= 20) or (unit == "%" and val >= 50):
+            errors.append(f"css: pill border-radius forbidden ({m.group(0)})")
+
+    # 4. No beige or purple tokens in light/dark palettes.
+    for mode, toks in themes(css).items():
+        for name, hx in toks.items():
+            if name == "flag":
+                continue
+            r, g, b = _rgb(hx)
+            luma = _lum(hx)
+            # Warm beige: light-to-mid neutral shifted clearly yellow/brown (R > B and G > B).
+            if luma > 0.35 and (r - b) >= 6 and (g - b) >= 4:
+                errors.append(f"palette {mode}: beige/warm token {name}={hx}")
+            # Purple/violet: both red and blue clearly elevated above green.
+            if (b - g) >= 10 and (r - g) >= 6:
+                errors.append(f"palette {mode}: purple token {name}={hx}")
+    return errors
+
+
 def _strip_tags(html: str) -> str:
     parser = _VisibleTextParser()
     parser.feed(html)
@@ -207,9 +284,20 @@ def check_output(out: Path) -> list[str]:
             has_2133 = bool(re.search(r"\b2[.,]?133\b", visible))
             if has_2141 and not has_2133:
                 errors.append(f"{rel}: mentions 2141 without reconciling 2133 decided games")
-        # C15: Flagged cards must not repeat the difference in parentheses next to the chip.
+        # PR 4: No eyebrow kickers (<small> inside <h1>), no legacy .chipf, no <13px inline SVG.
+        if any(
+            re.search(r"<small\b", hm.group(1), re.I)
+            for hm in re.finditer(r"<h1\b[^>]*>(.*?)</h1>", text, re.S | re.I)
+        ):
+            errors.append(f"{rel}: eyebrow kicker (<small> inside <h1>) forbidden")
+        if 'class="chipf"' in text:
+            errors.append(f"{rel}: legacy .chipf badge class still present")
+        for m_svg in re.finditer(r'font-size\s*=\s*"(\d+(?:\.\d+)?)"', text, re.I):
+            if float(m_svg.group(1)) < 13.0:
+                errors.append(f"{rel}: inline SVG font-size below 13px ({m_svg.group(0)})")
+        # C15: Flagged cards must not repeat the difference in parentheses next to the signal bar.
         for mkt in re.finditer(r'<div class="mkt"[^>]*>(.*?)</div>', text, re.S):
-            if 'class="chipf"' in mkt.group(1):
+            if 'class="sig"' in mkt.group(1):
                 mkt_vis = _strip_tags(mkt.group(1))
                 if re.search(r"\((nosotros|us)\s", mkt_vis, re.I):
                     errors.append(f"{rel}: duplicate market gap on flagged card")
@@ -232,7 +320,7 @@ def check_output(out: Path) -> list[str]:
 
 def main() -> int:
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "site/_build"
-    errors = check_contrast() + check_output(out) + check_parity(out)
+    errors = check_contrast() + check_css_rules() + check_output(out) + check_parity(out)
     for e in errors:
         print("FAIL:", e)
     if not errors:
