@@ -624,7 +624,7 @@ def test_market_timestamp_distinguishes_fetched_captured_and_read(tmp_path):
             }
         ],
     }
-    (root3 / "predictions/2026/week11/2026-11-18T21:41:36Z.json").write_text(json.dumps(v1))
+    (root3 / "predictions/2026/week11/20261118T214136Z.json").write_text(json.dumps(v1))
     out3 = build_site(root=root3, out=root3 / "site" / "_build")
     en3 = _text(out3, "en/game/2026_11_IND_HOU.html")
     assert "Captured Nov 18, 2026, 3:00 PM ET" in en3
@@ -821,3 +821,11 @@ def test_pr4_check_site_guards_fail_when_broken_on_purpose(tmp_path):
     home.write_text(orig.replace('<h1 id="h">', '<h1 id="h"><small>NFL</small>', 1))
     assert any("eyebrow kicker" in e for e in cs.check_output(out))
     home.write_text(orig)
+
+
+def test_footer_contains_nflverse_cc_by_attribution(tmp_path: Path) -> None:
+    _, out = _build(tmp_path)
+    es = (out / "index.html").read_text(encoding="utf-8")
+    en = (out / "en" / "index.html").read_text(encoding="utf-8")
+    assert "nflverse" in es and "CC-BY 4.0" in es
+    assert "nflverse" in en and "CC-BY 4.0" in en

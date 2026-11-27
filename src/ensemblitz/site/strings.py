@@ -39,7 +39,7 @@ ES: dict[str, str] = {
     "nav.lang_aria": "Read this page in English",
     "nav.theme_aria": "Cambiar entre tema claro y oscuro",
     "foot.generated": "Últimos picks guardados el {when}. Se guardan antes del saque y no se editan.",
-    "foot.license": "Licencia MIT. Tipografías Archivo e IBM Plex Mono con licencia SIL OFL.",
+    "foot.license": "Licencia MIT. Datos de nflverse bajo licencia CC-BY 4.0. Tipografías Archivo e IBM Plex Mono con licencia SIL OFL.",
     # week page
     "week.title": "Jornada {week}",
     "week.h1": "Jornada {week}",
@@ -425,7 +425,7 @@ EN: dict[str, str] = {
     "nav.lang_aria": "Leer esta página en español",
     "nav.theme_aria": "Switch between light and dark theme",
     "foot.generated": "Latest picks saved {when}. Picks are saved before kickoff and never edited.",
-    "foot.license": "MIT license. Typefaces Archivo and IBM Plex Mono under the SIL OFL.",
+    "foot.license": "MIT license. Data from nflverse under CC-BY 4.0. Typefaces Archivo and IBM Plex Mono under the SIL OFL.",
     "week.title": "Week {week}",
     "week.h1": "Week {week}",
     "week.lede": (

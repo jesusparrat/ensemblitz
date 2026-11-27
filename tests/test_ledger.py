@@ -136,3 +136,43 @@ def test_manifest_has_no_self_hash_or_first_commit() -> None:
     assert "MANIFEST.json" not in doc["artifacts"]
     on_disk = {a.rel: a.sha256 for a in L.iter_artifacts(ROOT)}
     assert doc["artifacts"] == on_disk
+
+
+def test_snapshot_filename_is_ntfs_safe() -> None:
+    name = L.snapshot_filename("2026-11-24T18:26:45Z", "deadbeef" * 8, set())
+    assert name == "20261124T182645Z.json"
+    assert ":" not in name
+    collided = L.snapshot_filename("2026-11-24T18:26:45Z", "deadbeef" * 8, {name})
+    assert collided == "20261124T182645Z-deadbeef.json"
+    assert ":" not in collided
+
+
+def test_open_next_weeks_skips_locked_week_with_unplayed_mnf(tmp_path: Path) -> None:
+    import pandas as pd
+
+    from ensemblitz.predict import open_next_weeks
+
+    feats = pd.DataFrame(
+        [
+            {
+                "season": 2026,
+                "week": 12,
+                "played": True,
+                "kickoff_utc": pd.Timestamp("2026-11-26T01:00:00Z"),
+            },
+            {
+                "season": 2026,
+                "week": 12,
+                "played": False,  # MNF score not yet posted
+                "kickoff_utc": pd.Timestamp("2026-12-01T01:15:00Z"),
+            },
+            {
+                "season": 2026,
+                "week": 13,
+                "played": False,
+                "kickoff_utc": pd.Timestamp("2026-12-04T01:15:00Z"),
+            },
+        ]
+    )
+    now = datetime(2026, 12, 1, 7, 0, tzinfo=UTC)
+    assert open_next_weeks(feats, 2026, n=1, now=now, root=tmp_path) == [13]

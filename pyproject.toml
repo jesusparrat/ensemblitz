@@ -1,6 +1,6 @@
 [project]
 name = "ensemblitz"
-version = "0.1.0"
+version = "0.2.0"
 description = "NFL game prediction: dynamic team strength + gradient boosting + market, stacked and calibrated."
 readme = "README.md"
 license = { text = "MIT" }

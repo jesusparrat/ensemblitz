@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  issues: write
 concurrency:
   group: weekly
   cancel-in-progress: false
@@ -47,3 +48,12 @@ jobs:
           git add predictions results reports/odds
           git diff --cached --quiet || git commit -m "chore: weekly predictions and results [skip ci]"
           git push
+      - name: Open failure alert issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue create \
+            --title "Weekly predictions workflow failed (run ${{ github.run_id }})" \
+            --body "$(printf 'The Weekly predictions workflow failed on `%s` (commit `%s`).\n\nRun: %s\n\nInspect the job logs before the next kickoff.' "${{ github.ref_name }}" "${{ github.sha }}" "${RUN_URL}")"

@@ -124,8 +124,8 @@ def test_verify_integrity_fails_when_an_artifact_is_deleted(tmp_path: Path) -> N
 # Isolated Git-based append-only tests (temporary repos, not project history)
 # ---------------------------------------------------------------------------
 
-REL_A = "predictions/2026/week99/2026-01-01T00:00:00Z.json"
-REL_B = "predictions/2026/week99/2026-01-02T00:00:00Z.json"
+REL_A = "predictions/2026/week99/20260101T000000Z.json"
+REL_B = "predictions/2026/week99/20260102T000000Z.json"
 
 
 def test_bootstrap_base_has_no_manifest(tmp_path: Path) -> None:
@@ -194,3 +194,33 @@ def test_empty_base_manifest_is_handled(tmp_path: Path) -> None:
     data_a = _write_snapshot(repo, REL_A)
     _write_manifest(repo, {REL_A: _sha256(data_a)})
     assert _load_mod().verify(repo, base_ref="HEAD") == []
+
+
+def test_colon_filename_fails_integrity(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    (repo / "README").write_text("init\n")
+    _commit(repo, "init")
+    bad_rel = "predictions/2026/week99/2026-01-01T00:00:00Z.json"
+    data = _write_snapshot(repo, bad_rel)
+    _write_manifest(repo, {bad_rel: _sha256(data)})
+    errors = _load_mod().verify(repo, base_ref="HEAD")
+    assert any("Windows NTFS" in e and bad_rel in e for e in errors)
+
+
+def test_ntfs_migration_requires_identical_sha256() -> None:
+    from ensemblitz import ledger as L
+
+    old_rel, new_rel = next(iter(L.LEGACY_NTFS_RENAMES.items()))
+    sha = "a" * 64
+    other_sha = "b" * 64
+    # Exact byte-preserving rename passes.
+    assert L.append_only_violations({new_rel: sha}, {old_rel: sha}) == []
+    # Altered bytes during rename fail red.
+    errs_mutated = L.append_only_violations({new_rel: other_sha}, {old_rel: sha})
+    assert any("changed during NTFS rename" in e for e in errs_mutated)
+    # Unapproved rename fails red.
+    errs_unapproved = L.append_only_violations(
+        {"predictions/2026/week99/20260101T000000Z.json": sha},
+        {"predictions/2026/week99/2026-01-01T00:00:00Z.json": sha},
+    )
+    assert any("deleted from the manifest" in e for e in errs_unapproved)

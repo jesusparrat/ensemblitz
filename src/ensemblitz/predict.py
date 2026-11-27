@@ -32,6 +32,49 @@ def next_weeks(feats: pd.DataFrame, season: int, n: int = 1) -> list[int]:
     return [int(w) for w in sorted(s["week"].unique())[:n]]
 
 
+def _week_kickoffs(feats: pd.DataFrame, season: int, week: int) -> list[dict]:
+    sub = feats[(feats["season"] == season) & (feats["week"] == week)]
+    if "kickoff_utc" not in sub.columns:
+        return []
+    out: list[dict] = []
+    for k in sub["kickoff_utc"]:
+        if pd.isna(k):
+            continue
+        stamp = k.strftime("%Y-%m-%dT%H:%M:%SZ") if hasattr(k, "strftime") else str(k)
+        out.append({"kickoff_utc": stamp})
+    return out
+
+
+def open_next_weeks(
+    feats: pd.DataFrame,
+    season: int,
+    n: int = 1,
+    *,
+    now: datetime | None = None,
+    root: Path | None = None,
+) -> list[int]:
+    """Next unplayed weeks that are not already locked by an earlier kickoff.
+
+    Prevents an automatic run (for example Tuesday morning before Monday Night
+    Football scores land in nflverse) from picking a locked week and crashing
+    with ``WeekLockedError``. Explicit ``--week`` calls still target the
+    requested week and raise ``WeekLockedError`` if it is locked.
+    """
+    now_dt = now or datetime.now(UTC)
+    s = feats[(feats["season"] == season) & ~feats["played"]]
+    open_wks: list[int] = []
+    for w in sorted(s["week"].unique()):
+        wi = int(w)
+        if L.week_is_locked(
+            season, wi, now=now_dt, root=root, games=_week_kickoffs(feats, season, wi)
+        ):
+            continue
+        open_wks.append(wi)
+        if len(open_wks) >= n:
+            break
+    return open_wks
+
+
 def fill_missing_spread(feats: pd.DataFrame) -> pd.DataFrame:
     """Unplayed games with moneylines but no spread get the spread those moneylines imply.
 
@@ -285,10 +328,6 @@ def _odds_quotes() -> dict[tuple[str, str], dict]:
         return {}
     fetched = str(odds["fetched_at"].iloc[0]) if "fetched_at" in odds.columns else None
     out: dict[tuple[str, str], dict] = {}
-    # unique matchups in the cache
-    if "home_name" not in getattr(odds, "columns", []):
-        # flatten() uses home_name; book_probs maps to home/away abbreviations
-        pass
     from ensemblitz.odds.report import book_probs
 
     bp = book_probs(odds)
@@ -437,7 +476,7 @@ def run_predict(
 ) -> list[Path]:
     """Write a new immutable v1 snapshot for each requested week (never overwrites)."""
     frame = build_frame(season)
-    weeks = [week] if week else next_weeks(frame, season, n_weeks)
+    weeks = [week] if week else open_next_weeks(frame, season, n_weeks, root=root)
     if not weeks:
         log.info("no unplayed weeks in %s", season)
         return []
