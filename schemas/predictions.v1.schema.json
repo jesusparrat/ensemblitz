@@ -19,52 +19,143 @@
     "games"
   ],
   "properties": {
-    "schema_version": {"const": "1"},
-    "model_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+-][0-9A-Za-z.]+)?$"},
-    "git_sha": {"$ref": "#/$defs/sha1"},
+    "schema_version": {
+      "const": "1"
+    },
+    "model_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+-][0-9A-Za-z.]+)?$"
+    },
+    "git_sha": {
+      "$ref": "#/$defs/sha1"
+    },
     "reproducible": {
       "type": "boolean",
       "description": "true only if git_sha was read from a clean working tree in production mode. Development artifacts are false."
     },
-    "generated_at_utc": {"$ref": "#/$defs/utc"},
-    "data_cutoff_utc": {"$ref": "#/$defs/utc"},
+    "generated_at_utc": {
+      "$ref": "#/$defs/utc"
+    },
+    "data_cutoff_utc": {
+      "$ref": "#/$defs/utc"
+    },
     "data_snapshot": {
       "type": "object",
       "description": "SHA-256 of every input parquet file, keyed by its path relative to the repository root (for example data/raw/schedules.parquet).",
       "minProperties": 1,
-      "patternProperties": {"^data/[A-Za-z0-9_./-]+\\.parquet$": {"$ref": "#/$defs/sha256"}},
+      "patternProperties": {
+        "^data/[A-Za-z0-9_./-]+\\.parquet$": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
       "additionalProperties": false
     },
-    "season": {"type": "integer", "minimum": 1999, "maximum": 2100},
-    "week": {"type": "integer", "minimum": 1, "maximum": 22},
+    "season": {
+      "type": "integer",
+      "minimum": 1999,
+      "maximum": 2100
+    },
+    "week": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 22
+    },
     "ensemble_weights": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["with_market", "no_market"],
+      "required": [
+        "with_market",
+        "no_market"
+      ],
       "properties": {
-        "with_market": {"$ref": "#/$defs/stack"},
-        "no_market": {"$ref": "#/$defs/stack"}
+        "with_market": {
+          "$ref": "#/$defs/stack"
+        },
+        "no_market": {
+          "$ref": "#/$defs/stack"
+        }
       }
     },
-    "games": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/game"}}
+    "games": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/game"
+      }
+    }
   },
   "$defs": {
-    "utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
-    "sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "team": {"type": "string", "pattern": "^[A-Z]{2,3}$"},
-    "prob": {"type": "number", "minimum": 0, "maximum": 1},
-    "points": {"type": "number", "minimum": 0, "maximum": 100},
-    "margin": {"type": "number", "minimum": -100, "maximum": 100},
+    "utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "team": {
+      "type": "string",
+      "pattern": "^[A-Z]{2,3}$"
+    },
+    "prob": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "points": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "margin": {
+      "type": "number",
+      "minimum": -100,
+      "maximum": 100
+    },
     "stack": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["components", "prob_weights", "bias", "margin_weights"],
+      "required": [
+        "components",
+        "prob_weights",
+        "bias",
+        "margin_weights"
+      ],
       "properties": {
-        "components": {"type": "array", "minItems": 1, "items": {"enum": ["market", "elo", "kf", "lgbm", "lgbm_mkt"]}},
-        "prob_weights": {"type": "array", "minItems": 1, "items": {"type": "number"}},
-        "bias": {"type": "number"},
-        "margin_weights": {"type": "array", "minItems": 1, "items": {"type": "number"}}
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "market",
+              "elo",
+              "kf",
+              "lgbm",
+              "lgbm_mkt"
+            ]
+          }
+        },
+        "prob_weights": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        },
+        "bias": {
+          "type": "number"
+        },
+        "margin_weights": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        }
       }
     },
     "range": {
@@ -72,28 +163,60 @@
       "description": "[q10, q90] of the simulations: the 80% range.",
       "minItems": 2,
       "maxItems": 2,
-      "items": {"type": "number"}
+      "items": {
+        "type": "number"
+      }
     },
     "distribution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["n_sims", "seed", "p_home", "home_points", "away_points", "margin_home", "total"],
+      "required": [
+        "n_sims",
+        "seed",
+        "p_home",
+        "home_points",
+        "away_points",
+        "margin_home",
+        "total"
+      ],
       "properties": {
-        "n_sims": {"type": "integer", "minimum": 1},
-        "seed": {"type": "integer"},
-        "p_home": {"$ref": "#/$defs/prob"},
-        "home_points": {"$ref": "#/$defs/range"},
-        "away_points": {"$ref": "#/$defs/range"},
-        "margin_home": {"$ref": "#/$defs/range"},
-        "total": {"$ref": "#/$defs/range"},
+        "n_sims": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "p_home": {
+          "$ref": "#/$defs/prob"
+        },
+        "home_points": {
+          "$ref": "#/$defs/range"
+        },
+        "away_points": {
+          "$ref": "#/$defs/range"
+        },
+        "margin_home": {
+          "$ref": "#/$defs/range"
+        },
+        "total": {
+          "$ref": "#/$defs/range"
+        },
         "histogram": {
           "type": "object",
           "description": "Optional pre-computed histograms so the site never re-simulates (filled from PR 1b).",
           "additionalProperties": false,
-          "required": ["margin_home", "total"],
+          "required": [
+            "margin_home",
+            "total"
+          ],
           "properties": {
-            "margin_home": {"$ref": "#/$defs/histogram"},
-            "total": {"$ref": "#/$defs/histogram"}
+            "margin_home": {
+              "$ref": "#/$defs/histogram"
+            },
+            "total": {
+              "$ref": "#/$defs/histogram"
+            }
           }
         }
       }
@@ -101,145 +224,880 @@
     "histogram": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["lo", "width", "counts"],
+      "required": [
+        "lo",
+        "width",
+        "counts"
+      ],
       "properties": {
-        "lo": {"type": "number"},
-        "width": {"type": "number", "minimum": 0},
-        "counts": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}}
+        "lo": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0
+        },
+        "counts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       }
     },
     "example_score": {
       "type": "object",
       "description": "Illustrative score only: one plausible score near the expected points, never a forecast of the exact result.",
       "additionalProperties": false,
-      "required": ["home", "away", "prob"],
+      "required": [
+        "home",
+        "away",
+        "prob"
+      ],
       "properties": {
-        "home": {"type": "integer", "minimum": 0},
-        "away": {"type": "integer", "minimum": 0},
-        "prob": {"$ref": "#/$defs/prob"}
+        "home": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "prob": {
+          "$ref": "#/$defs/prob"
+        }
       }
     },
     "headline": {
       "type": "object",
       "description": "The published number: the model on its own (Elo, Kalman and LightGBM stacked, no market input). Margin and total are derived from the two expected points.",
       "additionalProperties": false,
-      "required": ["home_win_prob", "home_points", "away_points", "distribution", "example_score"],
+      "required": [
+        "home_win_prob",
+        "home_points",
+        "away_points",
+        "distribution",
+        "example_score"
+      ],
       "properties": {
-        "home_win_prob": {"$ref": "#/$defs/prob"},
-        "home_points": {"$ref": "#/$defs/points"},
-        "away_points": {"$ref": "#/$defs/points"},
-        "distribution": {"$ref": "#/$defs/distribution"},
-        "example_score": {"$ref": "#/$defs/example_score"}
+        "home_win_prob": {
+          "$ref": "#/$defs/prob"
+        },
+        "home_points": {
+          "$ref": "#/$defs/points"
+        },
+        "away_points": {
+          "$ref": "#/$defs/points"
+        },
+        "distribution": {
+          "$ref": "#/$defs/distribution"
+        },
+        "example_score": {
+          "$ref": "#/$defs/example_score"
+        }
       }
     },
     "ensemble": {
       "type": "object",
       "description": "Reference only: the model blended with the market. With a market line its margin is anchored on the spread (see docs/CONTRACT.md).",
       "additionalProperties": false,
-      "required": ["home_win_prob", "margin_home", "total"],
+      "required": [
+        "home_win_prob",
+        "margin_home",
+        "total"
+      ],
       "properties": {
-        "home_win_prob": {"$ref": "#/$defs/prob"},
-        "margin_home": {"$ref": "#/$defs/margin"},
-        "total": {"$ref": "#/$defs/points"}
+        "home_win_prob": {
+          "$ref": "#/$defs/prob"
+        },
+        "margin_home": {
+          "$ref": "#/$defs/margin"
+        },
+        "total": {
+          "$ref": "#/$defs/points"
+        }
       }
     },
     "components": {
       "type": "object",
       "description": "Home win probability of each fitted model component. The market is not here: it lives in the market list.",
       "additionalProperties": false,
-      "required": ["elo", "kf", "lgbm"],
+      "required": [
+        "elo",
+        "kf",
+        "lgbm"
+      ],
       "properties": {
-        "elo": {"$ref": "#/$defs/prob"},
-        "kf": {"$ref": "#/$defs/prob"},
-        "lgbm": {"$ref": "#/$defs/prob"},
-        "lgbm_mkt": {"anyOf": [{"$ref": "#/$defs/prob"}, {"type": "null"}]}
+        "elo": {
+          "$ref": "#/$defs/prob"
+        },
+        "kf": {
+          "$ref": "#/$defs/prob"
+        },
+        "lgbm": {
+          "$ref": "#/$defs/prob"
+        },
+        "lgbm_mkt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/prob"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
       }
     },
     "market_quote": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source", "captured_at_utc", "is_closing", "home_win_prob", "margin_home", "total_line"],
+      "required": [
+        "source",
+        "captured_at_utc",
+        "is_closing",
+        "home_win_prob",
+        "margin_home",
+        "total_line"
+      ],
       "properties": {
-        "source": {"enum": ["nflverse_line", "odds_api_consensus"]},
-        "captured_at_utc": {"$ref": "#/$defs/utc"},
-        "is_closing": {"type": "boolean", "description": "true only for the last line before kickoff (the closing line). A line saved together with a pre-game prediction is false."},
-        "home_win_prob": {"anyOf": [{"$ref": "#/$defs/prob"}, {"type": "null"}]},
-        "margin_home": {"anyOf": [{"$ref": "#/$defs/margin"}, {"type": "null"}], "description": "Home margin implied by the spread, home minus away (nflverse spread_line sign; the Odds API point is negated)."},
-        "total_line": {"anyOf": [{"$ref": "#/$defs/points"}, {"type": "null"}]},
-        "home_moneyline": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "away_moneyline": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "n_books": {"type": "integer", "minimum": 1}
+        "source": {
+          "enum": [
+            "nflverse_line",
+            "odds_api_consensus"
+          ]
+        },
+        "captured_at_utc": {
+          "$ref": "#/$defs/utc"
+        },
+        "is_closing": {
+          "type": "boolean",
+          "description": "true only for the last line before kickoff (the closing line). A line saved together with a pre-game prediction is false."
+        },
+        "home_win_prob": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/prob"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "margin_home": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/margin"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Home margin implied by the spread, home minus away (nflverse spread_line sign; the Odds API point is negated)."
+        },
+        "total_line": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/points"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "home_moneyline": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "away_moneyline": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "n_books": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "absence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["player", "position", "status", "points"],
+      "required": [
+        "player",
+        "position",
+        "status",
+        "points"
+      ],
       "properties": {
-        "player": {"type": "string", "minLength": 1},
-        "position": {"type": "string"},
-        "status": {"enum": ["out", "doubtful"]},
-        "points": {"type": "number", "minimum": 0}
+        "player": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "out",
+            "doubtful"
+          ]
+        },
+        "points": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     },
     "news_adjustment": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["applied", "applies_to"],
+      "required": [
+        "applied",
+        "applies_to"
+      ],
       "properties": {
-        "applied": {"type": "boolean"},
-        "applies_to": {"enum": ["ensemble", "headline"], "description": "Which block the adjustment moved. Since web v2 it is the ensemble only (audit finding C12)."},
-        "margin_points": {"type": "number"},
-        "home_points_lost": {"type": "number", "minimum": 0},
-        "away_points_lost": {"type": "number", "minimum": 0},
-        "home_win_prob_before": {"$ref": "#/$defs/prob"},
-        "margin_home_before": {"$ref": "#/$defs/margin"},
-        "items": {"type": "array", "items": {"type": "object"}}
+        "applied": {
+          "type": "boolean"
+        },
+        "applies_to": {
+          "enum": [
+            "ensemble",
+            "headline"
+          ],
+          "description": "Which block the adjustment moved. Since web v2 it is the ensemble only (audit finding C12)."
+        },
+        "margin_points": {
+          "type": "number"
+        },
+        "home_points_lost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "away_points_lost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "home_win_prob_before": {
+          "$ref": "#/$defs/prob"
+        },
+        "margin_home_before": {
+          "$ref": "#/$defs/margin"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
       }
     },
     "context": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["home_qb_change", "away_qb_change", "home_rest_days", "away_rest_days", "dome", "weather_known", "temp_f", "wind_mph", "home_out_lag", "away_out_lag"],
+      "required": [
+        "home_qb_change",
+        "away_qb_change",
+        "home_rest_days",
+        "away_rest_days",
+        "dome",
+        "weather_known",
+        "temp_f",
+        "wind_mph",
+        "home_out_lag",
+        "away_out_lag"
+      ],
       "properties": {
-        "home_qb_change": {"type": "boolean"},
-        "away_qb_change": {"type": "boolean"},
-        "home_rest_days": {"type": "integer", "minimum": 0},
-        "away_rest_days": {"type": "integer", "minimum": 0},
-        "dome": {"type": "boolean"},
-        "weather_known": {"type": "boolean"},
-        "temp_f": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "wind_mph": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
-        "home_out_lag": {"type": "integer", "minimum": 0},
-        "away_out_lag": {"type": "integer", "minimum": 0}
+        "home_qb_change": {
+          "type": "boolean"
+        },
+        "away_qb_change": {
+          "type": "boolean"
+        },
+        "home_rest_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away_rest_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dome": {
+          "type": "boolean"
+        },
+        "weather_known": {
+          "type": "boolean"
+        },
+        "temp_f": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "wind_mph": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "home_out_lag": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away_out_lag": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "game": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["game_id", "home_team", "away_team", "kickoff_utc", "generated_at_utc", "headline", "ensemble", "components", "market", "context", "absences", "news_adjustment"],
+      "required": [
+        "game_id",
+        "home_team",
+        "away_team",
+        "kickoff_utc",
+        "generated_at_utc",
+        "headline",
+        "ensemble",
+        "components",
+        "market",
+        "context",
+        "absences",
+        "news_adjustment"
+      ],
       "properties": {
-        "game_id": {"type": "string", "pattern": "^[0-9]{4}_[0-9]{2}_[A-Z]{2,3}_[A-Z]{2,3}$"},
-        "home_team": {"$ref": "#/$defs/team"},
-        "away_team": {"$ref": "#/$defs/team"},
-        "kickoff_utc": {"$ref": "#/$defs/utc"},
-        "generated_at_utc": {"$ref": "#/$defs/utc"},
-        "headline": {"$ref": "#/$defs/headline"},
-        "ensemble": {"$ref": "#/$defs/ensemble"},
-        "components": {"$ref": "#/$defs/components"},
-        "market": {"type": "array", "items": {"$ref": "#/$defs/market_quote"}},
-        "context": {"$ref": "#/$defs/context"},
+        "game_id": {
+          "type": "string",
+          "pattern": "^[0-9]{4}_[0-9]{2}_[A-Z]{2,3}_[A-Z]{2,3}$"
+        },
+        "home_team": {
+          "$ref": "#/$defs/team"
+        },
+        "away_team": {
+          "$ref": "#/$defs/team"
+        },
+        "kickoff_utc": {
+          "$ref": "#/$defs/utc"
+        },
+        "generated_at_utc": {
+          "$ref": "#/$defs/utc"
+        },
+        "headline": {
+          "$ref": "#/$defs/headline"
+        },
+        "ensemble": {
+          "$ref": "#/$defs/ensemble"
+        },
+        "components": {
+          "$ref": "#/$defs/components"
+        },
+        "market": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/market_quote"
+          }
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
         "absences": {
           "type": "object",
           "description": "Context only: not part of any number.",
           "additionalProperties": false,
-          "required": ["home", "away"],
+          "required": [
+            "home",
+            "away"
+          ],
           "properties": {
-            "home": {"type": "array", "items": {"$ref": "#/$defs/absence"}},
-            "away": {"type": "array", "items": {"$ref": "#/$defs/absence"}}
+            "home": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/absence"
+              }
+            },
+            "away": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/absence"
+              }
+            }
           }
         },
-        "news_adjustment": {"$ref": "#/$defs/news_adjustment"}
+        "news_adjustment": {
+          "$ref": "#/$defs/news_adjustment"
+        },
+        "explanation": {
+          "$ref": "#/$defs/explanation"
+        }
+      }
+    },
+    "explanation_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lead_component",
+        "lead_component_margin_home",
+        "top_matchup_id",
+        "lgbm_top_group",
+        "lgbm_top_group_margin_home",
+        "qb_change_teams"
+      ],
+      "properties": {
+        "lead_component": {
+          "enum": [
+            "elo",
+            "kf",
+            "lgbm"
+          ]
+        },
+        "lead_component_margin_home": {
+          "$ref": "#/$defs/margin"
+        },
+        "top_matchup_id": {
+          "enum": [
+            "home_pass",
+            "away_pass",
+            "home_rush",
+            "away_rush"
+          ]
+        },
+        "lgbm_top_group": {
+          "enum": [
+            "pass_game",
+            "rush_game",
+            "efficiency",
+            "qb",
+            "team_strength",
+            "situational"
+          ]
+        },
+        "lgbm_top_group_margin_home": {
+          "$ref": "#/$defs/margin"
+        },
+        "qb_change_teams": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/team"
+          }
+        }
+      }
+    },
+    "explanation_stack": {
+      "type": "object",
+      "description": "Exact model_only stack aggregation: expit(sum(logit_contributions) + prob_bias) = model_only prob; sum(margin_contributions) = model_only margin.",
+      "additionalProperties": false,
+      "required": [
+        "components",
+        "prob_weights",
+        "prob_bias",
+        "logit_contributions",
+        "margin_weights",
+        "margin_contributions"
+      ],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "enum": [
+              "elo",
+              "kf",
+              "lgbm"
+            ]
+          }
+        },
+        "prob_weights": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "prob_bias": {
+          "type": "number"
+        },
+        "logit_contributions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elo",
+            "kf",
+            "lgbm"
+          ],
+          "properties": {
+            "elo": {
+              "type": "number"
+            },
+            "kf": {
+              "type": "number"
+            },
+            "lgbm": {
+              "type": "number"
+            }
+          }
+        },
+        "margin_weights": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "margin_contributions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elo",
+            "kf",
+            "lgbm"
+          ],
+          "properties": {
+            "elo": {
+              "$ref": "#/$defs/margin"
+            },
+            "kf": {
+              "$ref": "#/$defs/margin"
+            },
+            "lgbm": {
+              "$ref": "#/$defs/margin"
+            }
+          }
+        }
+      }
+    },
+    "explanation_lgbm_shap": {
+      "type": "object",
+      "description": "Exact LightGBM TreeSHAP feature-group attributions for the LightGBM component only (never the full stack).",
+      "additionalProperties": false,
+      "required": [
+        "base_margin",
+        "pred_margin",
+        "groups"
+      ],
+      "properties": {
+        "base_margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "pred_margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "groups": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pass_game",
+            "rush_game",
+            "efficiency",
+            "qb",
+            "team_strength",
+            "situational"
+          ],
+          "properties": {
+            "pass_game": {
+              "$ref": "#/$defs/margin"
+            },
+            "rush_game": {
+              "$ref": "#/$defs/margin"
+            },
+            "efficiency": {
+              "$ref": "#/$defs/margin"
+            },
+            "qb": {
+              "$ref": "#/$defs/margin"
+            },
+            "team_strength": {
+              "$ref": "#/$defs/margin"
+            },
+            "situational": {
+              "$ref": "#/$defs/margin"
+            }
+          }
+        }
+      }
+    },
+    "explanation_kalman": {
+      "type": "object",
+      "description": "Exact additive Kalman state-space margin decomposition: hfa + home_off_vs_away_def - away_off_vs_home_def = margin.",
+      "additionalProperties": false,
+      "required": [
+        "margin",
+        "hfa",
+        "home_off",
+        "away_def_allowed",
+        "away_off",
+        "home_def_allowed",
+        "home_off_vs_away_def",
+        "away_off_vs_home_def"
+      ],
+      "properties": {
+        "margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "hfa": {
+          "$ref": "#/$defs/margin"
+        },
+        "home_off": {
+          "$ref": "#/$defs/margin"
+        },
+        "away_def_allowed": {
+          "$ref": "#/$defs/margin"
+        },
+        "away_off": {
+          "$ref": "#/$defs/margin"
+        },
+        "home_def_allowed": {
+          "$ref": "#/$defs/margin"
+        },
+        "home_off_vs_away_def": {
+          "$ref": "#/$defs/margin"
+        },
+        "away_off_vs_home_def": {
+          "$ref": "#/$defs/margin"
+        }
+      }
+    },
+    "explanation_elo": {
+      "type": "object",
+      "description": "Exact additive Elo margin decomposition: team_margin + hfa_margin = margin.",
+      "additionalProperties": false,
+      "required": [
+        "margin",
+        "team_margin",
+        "hfa_margin",
+        "home_rating",
+        "away_rating"
+      ],
+      "properties": {
+        "margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "team_margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "hfa_margin": {
+          "$ref": "#/$defs/margin"
+        },
+        "home_rating": {
+          "type": "number"
+        },
+        "away_rating": {
+          "type": "number"
+        }
+      }
+    },
+    "unit_matchup": {
+      "type": "object",
+      "description": "Descriptive pre-game unit-vs-unit comparison of opponent-adjusted EPA/play (off_epa) and EPA allowed/play (def_epa_allowed). combined_epa = off_epa + def_epa_allowed is descriptive only, not a causal effect or predicted margin contribution.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "unit",
+        "off_team",
+        "def_team",
+        "off_epa",
+        "off_rank",
+        "def_epa_allowed",
+        "def_rank",
+        "combined_epa",
+        "favors"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "home_pass",
+            "away_pass",
+            "home_rush",
+            "away_rush"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "pass",
+            "rush"
+          ]
+        },
+        "off_team": {
+          "$ref": "#/$defs/team"
+        },
+        "def_team": {
+          "$ref": "#/$defs/team"
+        },
+        "off_epa": {
+          "type": "number"
+        },
+        "off_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "def_epa_allowed": {
+          "type": "number"
+        },
+        "def_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "combined_epa": {
+          "type": "number"
+        },
+        "favors": {
+          "$ref": "#/$defs/team"
+        }
+      }
+    },
+    "qb_matchup": {
+      "type": "object",
+      "description": "Pre-game decayed QB EPA per dropback (not opponent-adjusted) and dropback volume from nflverse play-by-play.",
+      "additionalProperties": false,
+      "required": [
+        "home_epa_per_dropback",
+        "away_epa_per_dropback",
+        "diff_epa_per_dropback",
+        "home_dropbacks",
+        "away_dropbacks",
+        "home_qb_change",
+        "away_qb_change"
+      ],
+      "properties": {
+        "home_epa_per_dropback": {
+          "type": "number"
+        },
+        "away_epa_per_dropback": {
+          "type": "number"
+        },
+        "diff_epa_per_dropback": {
+          "type": "number"
+        },
+        "home_dropbacks": {
+          "type": "number",
+          "minimum": 0
+        },
+        "away_dropbacks": {
+          "type": "number",
+          "minimum": 0
+        },
+        "home_qb_change": {
+          "type": "boolean"
+        },
+        "away_qb_change": {
+          "type": "boolean"
+        }
+      }
+    },
+    "injury_context": {
+      "type": "object",
+      "description": "Contextual pre-game injury diagnostics with point-in-time cutoff provenance; not included in probabilities.",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "cutoff_utc",
+        "included_in_model",
+        "home",
+        "away"
+      ],
+      "properties": {
+        "source": {
+          "const": "nflverse_injuries"
+        },
+        "cutoff_utc": {
+          "$ref": "#/$defs/utc"
+        },
+        "included_in_model": {
+          "const": false
+        },
+        "home": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/absence"
+          }
+        },
+        "away": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/absence"
+          }
+        }
+      }
+    },
+    "explanation": {
+      "type": "object",
+      "description": "Optional pre-computed model diagnostics and descriptive matchups (added in PR 5; backward compatible with existing v1 snapshots lacking this field).",
+      "additionalProperties": false,
+      "required": [
+        "season_week",
+        "summary",
+        "stack",
+        "lgbm_shap",
+        "kalman",
+        "elo",
+        "matchups",
+        "qb_matchup",
+        "injury_context"
+      ],
+      "properties": {
+        "season_week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 22
+        },
+        "summary": {
+          "$ref": "#/$defs/explanation_summary"
+        },
+        "stack": {
+          "$ref": "#/$defs/explanation_stack"
+        },
+        "lgbm_shap": {
+          "$ref": "#/$defs/explanation_lgbm_shap"
+        },
+        "kalman": {
+          "$ref": "#/$defs/explanation_kalman"
+        },
+        "elo": {
+          "$ref": "#/$defs/explanation_elo"
+        },
+        "matchups": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/unit_matchup"
+          }
+        },
+        "qb_matchup": {
+          "$ref": "#/$defs/qb_matchup"
+        },
+        "injury_context": {
+          "$ref": "#/$defs/injury_context"
+        }
       }
     }
   }

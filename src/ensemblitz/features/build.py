@@ -61,6 +61,7 @@ def build_features(
     elo = Elo()
     last_qb: dict[str, str] = {}
 
+    all_teams = sorted(set(games["home_team"]).union(set(games["away_team"])))
     rows: list[dict] = []
     cur_season = None
     for (season, _week), batch in games.groupby(["season", "week"], sort=True):
@@ -72,8 +73,9 @@ def build_features(
                 elo.new_season()
             cur_season = season
 
+        pre_ranks = _unit_ranks(off, dfn, all_teams)
         for g in batch.itertuples(index=False):
-            rows.append(_game_features(g, off, dfn, qb_rate, elo, last_qb, inj))
+            rows.append(_game_features(g, off, dfn, qb_rate, elo, last_qb, inj, pre_ranks))
 
         # ---- update state with the batch results (played games only) ----
         for g in batch.itertuples(index=False):
@@ -83,7 +85,25 @@ def build_features(
     return pd.DataFrame(rows)
 
 
-def _game_features(g, off, dfn, qb_rate, elo, last_qb, inj) -> dict:
+def _unit_ranks(
+    off: dict[str, DecayedMean], dfn: dict[str, DecayedMean], teams: list[str]
+) -> dict[str, dict[str, int]]:
+    """Pre-game league ranks (1..N) across ``teams`` before a week batch.
+
+    Offense: higher opponent-adjusted EPA/success rate is better (rank 1 = best).
+    Defense (EPA allowed): lower value is better (rank 1 = best).
+    Ties break deterministically by alphabetical team abbreviation.
+    """
+    ranks: dict[str, dict[str, int]] = {}
+    for u in UNITS:
+        off_order = sorted(teams, key=lambda t: (-off[u].value(t), t))
+        def_order = sorted(teams, key=lambda t: (dfn[u].value(t), t))
+        ranks[f"off_{u}"] = {t: i + 1 for i, t in enumerate(off_order)}
+        ranks[f"def_{u}"] = {t: i + 1 for i, t in enumerate(def_order)}
+    return ranks
+
+
+def _game_features(g, off, dfn, qb_rate, elo, last_qb, inj, pre_ranks=None) -> dict:
     h, a = g.home_team, g.away_team
     neutral = bool(g.neutral)
     f: dict = {
@@ -104,6 +124,11 @@ def _game_features(g, off, dfn, qb_rate, elo, last_qb, inj) -> dict:
         f[f"h_vs_a_{u}"] = f[f"h_off_{u}"] - f[f"a_def_{u}"]  # home offence vs away defence
         f[f"a_vs_h_{u}"] = f[f"a_off_{u}"] - f[f"h_def_{u}"]
         f[f"net_{u}"] = f[f"h_vs_a_{u}"] - f[f"a_vs_h_{u}"]
+        if pre_ranks is not None:
+            f[f"h_off_{u}_rank"] = pre_ranks[f"off_{u}"][h]
+            f[f"a_off_{u}_rank"] = pre_ranks[f"off_{u}"][a]
+            f[f"h_def_{u}_rank"] = pre_ranks[f"def_{u}"][h]
+            f[f"a_def_{u}_rank"] = pre_ranks[f"def_{u}"][a]
     # --- Elo ----------------------------------------------------------------------------------
     f["elo_h"], f["elo_a"] = elo.r[h], elo.r[a]
     f["elo_diff"] = elo.diff(h, a, neutral)

@@ -399,7 +399,16 @@ def test_every_template_and_code_key_exists_in_both_languages():
     used |= set(
         re.findall(r"L\.t(?:ext)?\(\s*\"([A-Za-z0-9_.]+)\"", (here / "build.py").read_text())
     )
-    dynamic = {"comp_", "hist.kind_", "hist.src_", "status_", "fact.venue_"}
+    dynamic = {
+        "comp_",
+        "comp_short_",
+        "hist.kind_",
+        "hist.src_",
+        "status_",
+        "fact.venue_",
+        "grp_",
+        "unit_",
+    }
     missing = {k for k in used if k not in STRINGS["es"] and k not in dynamic}
     assert not missing, missing
     for pre, keys in (
@@ -637,13 +646,20 @@ def test_flagged_card_does_not_duplicate_gap_number(tmp_path):
     root = _repo(tmp_path, True, False)
     odds_p = root / "reports/odds/2026_week11.json"
     od = json.loads(odds_p.read_text())
-    od["games"][0]["consensus_home_prob_shin"] = 0.55  # 64% vs 55% -> +9 flag
+    # +9 pp is below the fixed >= 10 pp threshold, so it must NOT be flagged.
+    od["games"][0]["consensus_home_prob_shin"] = 0.55  # 64% vs 55% -> +9
+    odds_p.write_text(json.dumps(od))
+    out_unflagged = build_site(root=root, out=root / "site" / "_build_9")
+    assert "is-flagged" not in _text(out_unflagged, "index.html")
+
+    # +11 pp meets the fixed >= 10 pp threshold and must be flagged without duplicating the gap.
+    od["games"][0]["consensus_home_prob_shin"] = 0.53  # 64% vs 53% -> +11
     odds_p.write_text(json.dumps(od))
     out = build_site(root=root, out=root / "site" / "_build")
     es = _text(out, "index.html")
     en = _text(out, "en/index.html")
-    assert "+9" in es and "(nosotros +9)" not in es
-    assert "+9" in en and "(us +9)" not in en
+    assert "is-flagged" in es and "+11" in es and "(nosotros +11)" not in es
+    assert "is-flagged" in en and "+11" in en and "(us +11)" not in en
 
 
 def test_data_stamp_v0_fallback_and_wall_clock_invariance(tmp_path, monkeypatch):
@@ -829,3 +845,76 @@ def test_footer_contains_nflverse_cc_by_attribution(tmp_path: Path) -> None:
     en = (out / "en" / "index.html").read_text(encoding="utf-8")
     assert "nflverse" in es and "CC-BY 4.0" in es
     assert "nflverse" in en and "CC-BY 4.0" in en
+
+
+def test_pr5_matchups_placement_two_level_ux_and_check_site(tmp_path: Path) -> None:
+    import importlib.util
+    import subprocess
+    import sys
+
+    spec = importlib.util.spec_from_file_location(
+        "test_explain", Path(__file__).resolve().parent / "test_explain.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    _minimal_v1_doc = mod._minimal_v1_doc
+    _sample_explanation = mod._sample_explanation
+
+    root = tmp_path / "repo"
+    (root / "predictions/2026/week12").mkdir(parents=True)
+    v1 = _minimal_v1_doc(with_explanation=True)
+    v1["games"][0]["explanation"] = _sample_explanation(season_week=2)  # triggers early-season note
+    v1["games"][0]["kickoff_utc"] = "2099-11-29T18:00:00Z"
+    (root / "predictions/2026/week12/20261124T180000Z.json").write_text(json.dumps(v1))
+    out = root / "site/_build"
+    build_site(root=root, out=out)
+
+    es_game = _text(out, "partido/2026_12_IND_HOU.html")
+    en_game = _text(out, "en/game/2026_12_IND_HOU.html")
+    es_week = _text(out, "index.html")
+    en_week = _text(out, "en/index.html")
+
+    # Placement: Matchups to watch immediately after Expected points and before Against the market.
+    assert (
+        es_game.index("Puntos esperados")
+        < es_game.index("Duelos a vigilar")
+        < es_game.index("Frente al mercado")
+    )
+    assert (
+        en_game.index("Expected points")
+        < en_game.index("Matchups to watch")
+        < en_game.index("Against the market")
+    )
+
+    # Level 1 visible: plain-language v1 summary + matchups + early-season note + injury provenance cutoff.
+    assert "Duelo más marcado" in es_week and "forma reciente" not in es_week
+    assert "Biggest unit mismatch" in en_week and "recent form" not in en_week
+    assert "Inicio de temporada" in es_game and "Early season" in en_game
+    assert "Test Player" in es_game and "no entra en ninguna probabilidad" in es_game
+    assert "Test Player" in en_game and "not included in any probability" in en_game
+
+    # Level 2 inside <details class="tech">: separated Stack, LightGBM TreeSHAP, Kalman, and Elo.
+    tech_es = es_game.split('<details class="tech">', 1)[1]
+    tech_en = en_game.split('<details class="tech">', 1)[1]
+    visible_es = es_game.split('<details class="tech">', 1)[0]
+    assert "TreeSHAP" in tech_es and "TreeSHAP" not in visible_es
+    assert "Agregación exacta del titular" in tech_es
+    assert "Descomposición exacta de Kalman" in tech_es
+    assert "Descomposición exacta de Elo" in tech_es
+    assert "Exact headline stack aggregation" in tech_en
+    assert "LightGBM TreeSHAP attributions (LightGBM component only)" in tech_en
+    assert "Exact Kalman decomposition" in tech_en
+    assert "Exact Elo decomposition" in tech_en
+
+    # Site guard script passes cleanly on v1 rendered output with explanation.
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts/check_site.py"),
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr

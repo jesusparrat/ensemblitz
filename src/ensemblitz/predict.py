@@ -11,6 +11,7 @@ import pandas as pd
 
 from ensemblitz import config as C
 from ensemblitz import contract as K
+from ensemblitz import explain as X
 from ensemblitz import ledger as L
 from ensemblitz import news as N
 from ensemblitz import pipeline as P
@@ -108,9 +109,10 @@ def predict_frame(frame: pd.DataFrame, season: int, weeks: list[int]) -> pd.Data
     df = frame.copy()
     target = df[(df["season"] == season) & df["week"].isin(weeks) & ~df["played"]]
     train = df[df["played"] & df["result"].notna()]
-    df.loc[target.index, "lgbm_margin"] = gbm.fit_predict(
+    lgbm_pred, lgbm_contrib = gbm.fit_predict_with_contrib(
         train, target, feature_columns(False), False
     )
+    df.loc[target.index, "lgbm_margin"] = lgbm_pred
     df.loc[target.index, "lgbm_mkt_margin"] = gbm.fit_predict(
         train, target, feature_columns(True), True
     )
@@ -126,6 +128,8 @@ def predict_frame(frame: pd.DataFrame, season: int, weeks: list[int]) -> pd.Data
     out["nomkt_margin"] = nm.margin(out)
     out["nomkt_total"] = nm.total(out)
     out.attrs["ensemble_weights"] = ens.weights()
+    out.attrs["no_market_stack"] = nm
+    out.attrs["lgbm_contrib"] = lgbm_contrib.loc[out.index]
     return out
 
 
@@ -397,6 +401,7 @@ def v1_game_record(
     news_adj: dict | None,
     absences: dict[str, list[dict]] | None,
     quotes: dict[tuple[str, str], dict],
+    explanation: dict | None = None,
 ) -> dict:
     """One v1 game record. The headline is the model on its own."""
     components = {c: _f(r[f"{c}_prob"]) for c in ("elo", "kf", "lgbm", "lgbm_mkt")}
@@ -461,6 +466,7 @@ def v1_game_record(
             "away": (absences or {}).get(r["away_team"], []),
         },
         "news_adjustment": _news_v1(news_adj),
+        **({"explanation": explanation} if explanation is not None else {}),
     }
 
 
@@ -482,21 +488,32 @@ def run_predict(
         return []
     rows = predict_frame(frame, season, weeks)
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    weights = rows.attrs.get("ensemble_weights", {})
+    no_market_stack = rows.attrs.get("no_market_stack")
+    lgbm_contrib = rows.attrs.get("lgbm_contrib")
+    if lgbm_contrib is not None:
+        lgbm_contrib = lgbm_contrib.reset_index(drop=True)
     rows = rows.reset_index(drop=True)
     audits = apply_news(rows, now) if use_news else [None] * len(rows)
     sim = simulate_rows(rows)
     ab = _absences(rows)
     quotes = _odds_quotes()
-    recs = [
-        v1_game_record(
-            r, sim, i, now, audits[i], ab.get((int(r["season"]), int(r["week"]))), quotes
-        )
-        for i, r in rows.iterrows()
-    ]
-    weights = rows.attrs.get("ensemble_weights", {})
     prov = K.provenance(root, production=production)
     cutoff = K.data_cutoff_utc(root=root)
     snapshot = K.data_snapshot(root=root)
+    recs = []
+    for i, r in rows.iterrows():
+        wk_ab = ab.get((int(r["season"]), int(r["week"])))
+        game_ab = {
+            "home": (wk_ab or {}).get(r["home_team"], []),
+            "away": (wk_ab or {}).get(r["away_team"], []),
+        }
+        expl = (
+            X.build_game_explanation(r, lgbm_contrib.iloc[i], no_market_stack, game_ab, cutoff)
+            if (no_market_stack is not None and lgbm_contrib is not None)
+            else None
+        )
+        recs.append(v1_game_record(r, sim, i, now, audits[i], wk_ab, quotes, expl))
     # data_cutoff cannot be later than the run; clamp only if equal clocks differ by rounding
     if cutoff > now:
         raise K.ContractError(f"data_cutoff_utc {cutoff} is later than generated_at_utc {now}")

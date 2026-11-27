@@ -81,6 +81,11 @@ def run_kf(games: pd.DataFrame, params: KFParams, until_season: int | None = Non
                     var,
                     mu + hfa / 2 + x[h] + x[N + a],
                     mu - hfa / 2 + x[a] + x[N + h],
+                    hfa,
+                    float(x[h]),
+                    float(x[N + a]),
+                    float(x[a]),
+                    float(x[N + h]),
                 )
             )
         for r in batch.itertuples(index=False):
@@ -100,7 +105,20 @@ def run_kf(games: pd.DataFrame, params: KFParams, until_season: int | None = Non
             pts_sum += r.home_score + r.away_score
             pts_n += 2
     df = pd.DataFrame(
-        out, columns=["game_id", "kf_margin", "kf_total", "kf_var", "kf_pts_h", "kf_pts_a"]
+        out,
+        columns=[
+            "game_id",
+            "kf_margin",
+            "kf_total",
+            "kf_var",
+            "kf_pts_h",
+            "kf_pts_a",
+            "kf_hfa",
+            "kf_h_off",
+            "kf_a_def",
+            "kf_a_off",
+            "kf_h_def",
+        ],
     )
     df["kf_sd"] = np.sqrt(df["kf_var"])
     df["kf_prob"] = ndtr(df["kf_margin"] / df["kf_sd"])
