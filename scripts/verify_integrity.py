@@ -1,9 +1,11 @@
-"""Fail if a published prediction snapshot was modified, deleted or substituted.
+"""Fail if a published prediction snapshot was modified, deleted, substituted or mutated.
 
 Exit 0 when every artifact in predictions/MANIFEST.json matches its SHA-256, every
-snapshot on disk is listed, and (when git history is available) each blob was first
-committed before the kickoff of the games it contains. New weeks are added by
-extending the manifest; existing hashes must not change.
+snapshot on disk is listed, and across all snapshots of each ``(season, week)`` ordered
+by publication time, every game past kickoff preserves its exact canonical JSON record
+(``ledger.canonical_game_json``) from the latest snapshot published strictly before that
+game's kickoff. New weeks or mid-week updates are added by extending the manifest;
+existing hashes must not change.
 
 The working-tree manifest is also compared against the artifacts map in ``--base-ref``
 (default ``HEAD``). The manifest may only grow: every entry present in the base ref
@@ -78,6 +80,9 @@ def verify(root: Path, base_ref: str = "HEAD") -> list[str]:
         if rel in manifest and K.sha256_file(path) != manifest[rel]:
             continue
         ok_paths.append(path)
+
+    # Collect valid snapshots per (season, week) for cross-snapshot per-game immutability.
+    by_week: dict[tuple[int, int], list[tuple[str, str, dict, bool]]] = {}
     for path in ok_paths:
         rel = path.relative_to(root).as_posix()
         try:
@@ -93,13 +98,56 @@ def verify(root: Path, base_ref: str = "HEAD") -> list[str]:
         except (OSError, KeyError, ValueError, json.JSONDecodeError) as exc:
             errors.append(f"{rel}: {exc}")
             continue
-        pub = L.first_publication_utc(path=path, root=root)
-        if pub is None:
-            continue  # not yet committed: weekly job verifies hashes before the commit
-        if art.first_kickoff_utc and pub >= art.first_kickoff_utc:
-            errors.append(
-                f"{rel}: first published at {pub}, which is not before kickoff {art.first_kickoff_utc}"
-            )
+        git_pub = L.first_publication_utc(path=path, root=root)
+        pub = git_pub or art.generated_at_utc
+        by_week.setdefault((art.season, art.week), []).append((pub, rel, doc, git_pub is not None))
+
+    for (_season, _week), entries in sorted(by_week.items()):
+        entries.sort(key=lambda item: (L.parse_utc(item[0]), item[1]))
+        # game_id -> (canonical_json, kickoff_utc, source_rel)
+        frozen: dict[str, tuple[str, str, str]] = {}
+        for pub, rel, doc, _in_git in entries:
+            pub_dt = L.parse_utc(pub)
+            games = doc.get("games") or []
+            seen_ids: set[str] = set()
+            has_open_game = False
+
+            for g in games:
+                gid = g.get("game_id")
+                kick = g.get("kickoff_utc")
+                if not gid or not kick:
+                    continue
+                seen_ids.add(gid)
+                kick_dt = L.parse_utc(kick)
+                canon = L.canonical_game_json(g)
+                if pub_dt < kick_dt:
+                    has_open_game = True
+                    frozen[gid] = (canon, kick, rel)
+                else:
+                    if gid not in frozen:
+                        errors.append(
+                            f"{rel}: game {gid} published at {pub}, which is not before "
+                            f"kickoff {kick} (no prior pre-kickoff snapshot)"
+                        )
+                    else:
+                        expected_canon, _kick_str, prev_rel = frozen[gid]
+                        if canon != expected_canon:
+                            errors.append(
+                                f"{rel}: started game {gid} (kickoff {kick}) mutated after "
+                                f"kickoff; canonical record differs from {prev_rel}"
+                            )
+
+            for gid, (_expected_canon, kick_str, prev_rel) in sorted(frozen.items()):
+                if L.parse_utc(kick_str) <= pub_dt and gid not in seen_ids:
+                    errors.append(
+                        f"{rel}: started game {gid} (kickoff {kick_str}) dropped after "
+                        f"kickoff; must preserve canonical record from {prev_rel}"
+                    )
+
+            if games and not has_open_game:
+                errors.append(
+                    f"{rel}: published at {pub}, after all games in the week had passed kickoff"
+                )
     return errors
 
 

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from collections.abc import Iterable
 from datetime import date
+from pathlib import Path
 
 import pandas as pd
 
@@ -55,15 +57,58 @@ def update_schedules(seasons: Iterable[int]) -> pd.DataFrame:
     return df
 
 
+def pbp_schema_hash() -> str:
+    """Short SHA-256 digest of ``PBP_COLS`` for Actions cache keys and validation."""
+    payload = "\n".join(PBP_COLS).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()[:16]
+
+
+def is_valid_pbp_cache(path: Path, expected_season: int | None = None) -> bool:
+    """Return True only if ``path`` is a readable, non-empty parquet with all ``PBP_COLS``."""
+    if not path.is_file() or path.stat().st_size == 0:
+        return False
+    try:
+        df = pd.read_parquet(path)
+    except Exception as exc:
+        log.warning("invalid cached pbp %s (%s)", path.name, exc)
+        return False
+    if df.empty:
+        log.warning("empty cached pbp %s", path.name)
+        return False
+    missing = [c for c in PBP_COLS if c not in df.columns]
+    if missing:
+        log.warning("cached pbp %s missing required columns %s", path.name, missing)
+        return False
+    if expected_season is not None:
+        seasons = set(pd.to_numeric(df["season"], errors="coerce").dropna().astype(int).unique())
+        if seasons != {int(expected_season)}:
+            log.warning(
+                "cached pbp %s has seasons %s (expected {%s})",
+                path.name,
+                sorted(seasons),
+                expected_season,
+            )
+            return False
+    return True
+
+
 def update_pbp(seasons: Iterable[int], refresh_from: int | None = None) -> None:
-    """Cache slim play-by-play per season. Past seasons are only downloaded once."""
+    """Cache slim play-by-play per season.
+
+    Closed seasons (``s < refresh_from``) reuse a cached parquet only after passing
+    ``is_valid_pbp_cache`` (readable, non-empty, all ``PBP_COLS`` present, matching
+    season). The current season (``s >= refresh_from``) is always refreshed from nflverse.
+    """
     import nflreadpy as nfl
 
     _ensure_dirs()
     for s in seasons:
         path = C.RAW_DIR / f"pbp_{s}.parquet"
-        if path.exists() and (refresh_from is None or s < refresh_from):
-            continue
+        if refresh_from is None or s < refresh_from:
+            if is_valid_pbp_cache(path, expected_season=s):
+                continue
+            if path.exists():
+                log.warning("cached pbp %s failed validation; re-downloading", s)
         log.info("downloading pbp %s", s)
         try:
             pbp = nfl.load_pbp([s]).to_pandas()

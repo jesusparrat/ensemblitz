@@ -103,7 +103,10 @@ def predict(
     force: bool = typer.Option(
         False,
         "--force",
-        help="Write a new snapshot for a week that already has one (refused after first kickoff)",
+        help=(
+            "Write a new snapshot for a week that already has one "
+            "(freezes games at or past kickoff; refused once all games have started)"
+        ),
     ),
     production: bool = typer.Option(
         False, "--production", help="Require a clean git tree and mark the snapshot reproducible"

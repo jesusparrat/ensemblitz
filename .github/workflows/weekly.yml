@@ -2,10 +2,15 @@ name: Weekly predictions
 on:
   schedule:
     - cron: "0 7 * * 2"   # Tuesday 07:00 UTC = 08:00 (winter) / 09:00 (summer) Madrid
+    # Friday 22:00 UTC follows the usual Friday injury report for Sunday games.
+    # It does not guarantee final-report coverage for Thursday, Monday, or other non-Sunday games.
+    - cron: "0 22 * * 5"
   workflow_dispatch:
 permissions:
   contents: write
   issues: write
+  id-token: write
+  attestations: write
 concurrency:
   group: weekly
   cancel-in-progress: false
@@ -18,29 +23,82 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: true  # needed by the final git push (job token, contents: write)
           fetch-depth: 0  # verify_integrity looks up the first commit of each snapshot blob
-      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0
       - run: uv lock --check  # uv.lock must match pyproject.toml
       - run: uv sync --frozen  # Python from .python-version
+      - name: Compute closed-season PBP cache key
+        id: pbp_cache
+        run: |
+          uv run python - <<'PY' >> "$GITHUB_OUTPUT"
+          from ensemblitz import config as C
+          from ensemblitz.data.download import current_season, pbp_schema_hash
+
+          cur = current_season()
+          print(f"first_season={C.FIRST_SEASON}")
+          print(f"current_season={cur}")
+          print(f"last_closed={cur - 1}")
+          print(f"schema_hash={pbp_schema_hash()}")
+          PY
+      - name: Cache closed-season PBP parquets
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: |
+            data/raw/pbp_*.parquet
+            !data/raw/pbp_${{ steps.pbp_cache.outputs.current_season }}.parquet
+          key: pbp-closed-${{ steps.pbp_cache.outputs.first_season }}-${{ steps.pbp_cache.outputs.last_closed }}-${{ steps.pbp_cache.outputs.schema_hash }}-${{ hashFiles('uv.lock') }}
       - name: Update nflverse data
         run: uv run ensemblitz update
+      - name: Check for open games
+        id: open_games
+        run: |
+          uv run python - <<'PY' >> "$GITHUB_OUTPUT"
+          from ensemblitz.predict import has_open_games
+
+          print(f"has_open={str(has_open_games()).lower()}")
+          PY
       - name: Fetch odds (before predict, so the consensus is frozen with the snapshot)
+        if: steps.open_games.outputs.has_open == 'true'
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: uv run ensemblitz odds --no-report
       - name: Predict next week
+        if: steps.open_games.outputs.has_open == 'true'
         run: uv run ensemblitz predict --production --force
       - name: Grade finished games
         run: uv run ensemblitz grade
       - name: Odds comparison report (from the cache, no second API call)
+        if: steps.open_games.outputs.has_open == 'true'
         run: uv run ensemblitz odds --no-fetch
       - name: Validate outputs and integrity (no NaN, no empty weeks, no secrets, hashes)
         run: uv run python scripts/validate_outputs.py
       - name: Verify prediction integrity
         run: uv run python scripts/verify_integrity.py --base-ref HEAD
+      - name: Collect finalized prediction artifacts for attestation
+        id: attest_targets
+        run: |
+          uv run python - <<'PY'
+          import os
+          from pathlib import Path
+          from ensemblitz import ledger as L
+
+          root = Path.cwd()
+          base = L.manifest_entries_at_ref(root, "HEAD")
+          current = L.load_manifest(root)
+          added = sorted(k for k in current if k not in base)
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          with out.open("a", encoding="utf-8") as fh:
+              fh.write(f"has_new={'true' if added else 'false'}\n")
+              if added:
+                  fh.write("subjects<<EOF\n")
+                  fh.write(f"{L.MANIFEST_REL}\n")
+                  for rel in added:
+                      fh.write(f"{rel}\n")
+                  fh.write("EOF\n")
+          PY
       - name: Commit predictions and results
         run: |
           git config user.name "ensemblitz-bot"
@@ -48,6 +106,11 @@ jobs:
           git add predictions results reports/odds
           git diff --cached --quiet || git commit -m "chore: weekly predictions and results [skip ci]"
           git push
+      - name: Attest finalized manifest and new snapshot(s)
+        if: steps.attest_targets.outputs.has_new == 'true'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
+        with:
+          subject-path: ${{ steps.attest_targets.outputs.subjects }}
       - name: Open failure alert issue
         if: failure()
         env:

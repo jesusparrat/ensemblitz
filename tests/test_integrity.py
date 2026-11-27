@@ -224,3 +224,146 @@ def test_ntfs_migration_requires_identical_sha256() -> None:
         {"predictions/2026/week99/2026-01-01T00:00:00Z.json": sha},
     )
     assert any("deleted from the manifest" in e for e in errs_unapproved)
+
+
+# ---------------------------------------------------------------------------
+# Per-game canonical immutability across Tuesday -> Friday snapshots
+# ---------------------------------------------------------------------------
+
+
+def _commit_at(repo: Path, message: str, iso_utc: str) -> None:
+    import os
+
+    env = {**os.environ, "GIT_AUTHOR_DATE": iso_utc, "GIT_COMMITTER_DATE": iso_utc}
+    subprocess.run(["git", "add", "-A"], cwd=repo, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=repo,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _midweek_doc(
+    *,
+    generated: str,
+    thu_market: float = 0.58,
+    thu_note: str = "lgbm",
+    sun_prob: float = 0.55,
+    include_thu: bool = True,
+) -> dict:
+    thu = {
+        "game_id": "2026_99_AAA_BBB",
+        "home_team": "BBB",
+        "away_team": "AAA",
+        "kickoff_utc": "2026-11-27T01:15:00Z",
+        "generated_at": "2026-11-24T07:00:00Z",
+        "home_win_prob": {"ensemble": 0.62, "market": thu_market},
+        "market": {"spread_line": 3.0, "market_prob": thu_market},
+        "explanation": {"summary": {"lead_component": thu_note}},
+    }
+    sun = {
+        "game_id": "2026_99_CCC_DDD",
+        "home_team": "DDD",
+        "away_team": "CCC",
+        "kickoff_utc": "2026-11-29T18:00:00Z",
+        "generated_at": generated,
+        "home_win_prob": {"ensemble": sun_prob, "market": 0.52},
+        "market": {"spread_line": 1.5, "market_prob": 0.52},
+        "explanation": {"summary": {"lead_component": "elo"}},
+    }
+    return {
+        "season": 2026,
+        "week": 99,
+        "generated_at": generated,
+        "games": ([thu, sun] if include_thu else [sun]),
+    }
+
+
+def _write_doc(repo: Path, rel: str, doc: dict) -> bytes:
+    path = repo / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = (json.dumps(doc, indent=1) + "\n").encode()
+    path.write_bytes(data)
+    return data
+
+
+def test_thursday_to_friday_frozen_game_passes_integrity(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    rel_tue = "predictions/2026/week99/20261124T070000Z.json"
+    rel_fri = "predictions/2026/week99/20261127T220000Z.json"
+
+    tue_data = _write_doc(repo, rel_tue, _midweek_doc(generated="2026-11-24T07:00:00Z"))
+    _write_manifest(repo, {rel_tue: _sha256(tue_data)})
+    _commit_at(repo, "tuesday snapshot", "2026-11-24T07:00:00Z")
+
+    # Friday: Thu kicked off at 2026-11-27T01:15Z (preserved identically), Sun updated.
+    fri_data = _write_doc(
+        repo,
+        rel_fri,
+        _midweek_doc(generated="2026-11-27T22:00:00Z", sun_prob=0.69),
+    )
+    _write_manifest(repo, {rel_tue: _sha256(tue_data), rel_fri: _sha256(fri_data)})
+    _commit_at(repo, "friday snapshot", "2026-11-27T22:00:00Z")
+
+    assert _load_mod().verify(repo, base_ref="HEAD~1") == []
+
+
+def test_mutated_started_game_explanation_and_market_fail_integrity(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    rel_tue = "predictions/2026/week99/20261124T070000Z.json"
+    rel_fri = "predictions/2026/week99/20261127T220000Z.json"
+
+    tue_data = _write_doc(repo, rel_tue, _midweek_doc(generated="2026-11-24T07:00:00Z"))
+    _write_manifest(repo, {rel_tue: _sha256(tue_data)})
+    _commit_at(repo, "tuesday snapshot", "2026-11-24T07:00:00Z")
+
+    # Red test 1: mutate ONLY explanation on started Thursday game.
+    fri_bad_exp = _write_doc(
+        repo,
+        rel_fri,
+        _midweek_doc(generated="2026-11-27T22:00:00Z", thu_note="kf", sun_prob=0.69),
+    )
+    _write_manifest(repo, {rel_tue: _sha256(tue_data), rel_fri: _sha256(fri_bad_exp)})
+    errs_exp = _load_mod().verify(repo, base_ref="HEAD")
+    assert any("mutated after kickoff" in e and "2026_99_AAA_BBB" in e for e in errs_exp)
+
+    # Red test 2: mutate ONLY market on started Thursday game.
+    fri_bad_mkt = _write_doc(
+        repo,
+        rel_fri,
+        _midweek_doc(generated="2026-11-27T22:00:00Z", thu_market=0.61, sun_prob=0.69),
+    )
+    _write_manifest(repo, {rel_tue: _sha256(tue_data), rel_fri: _sha256(fri_bad_mkt)})
+    errs_mkt = _load_mod().verify(repo, base_ref="HEAD")
+    assert any("mutated after kickoff" in e and "2026_99_AAA_BBB" in e for e in errs_mkt)
+
+    # Red test 3: drop started Thursday game completely.
+    fri_dropped = _write_doc(
+        repo,
+        rel_fri,
+        _midweek_doc(generated="2026-11-27T22:00:00Z", include_thu=False, sun_prob=0.69),
+    )
+    _write_manifest(repo, {rel_tue: _sha256(tue_data), rel_fri: _sha256(fri_dropped)})
+    errs_drop = _load_mod().verify(repo, base_ref="HEAD")
+    assert any("dropped after kickoff" in e and "2026_99_AAA_BBB" in e for e in errs_drop)
+
+
+def test_snapshot_after_all_games_started_fails_integrity(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    rel_tue = "predictions/2026/week99/20261124T070000Z.json"
+    rel_mon = "predictions/2026/week99/20261130T080000Z.json"
+
+    tue_data = _write_doc(repo, rel_tue, _midweek_doc(generated="2026-11-24T07:00:00Z"))
+    _write_manifest(repo, {rel_tue: _sha256(tue_data)})
+    _commit_at(repo, "tuesday snapshot", "2026-11-24T07:00:00Z")
+
+    # Monday snapshot after both Thu and Sun kicked off must fail even if games are unchanged.
+    mon_doc = _midweek_doc(generated="2026-11-30T08:00:00Z")
+    mon_doc["games"][1]["generated_at"] = "2026-11-24T07:00:00Z"
+    mon_data = _write_doc(repo, rel_mon, mon_doc)
+    _write_manifest(repo, {rel_tue: _sha256(tue_data), rel_mon: _sha256(mon_data)})
+    errs = _load_mod().verify(repo, base_ref="HEAD")
+    assert any("after all games in the week had passed kickoff" in e for e in errs)
