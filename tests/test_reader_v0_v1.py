@@ -67,7 +67,7 @@ def test_pre_v2_snapshot_is_read_as_ensemble_headline() -> None:
     from ensemblitz import ledger as L
 
     # First published week 12: no model_only block, the published number was the ensemble.
-    path = ROOT / "predictions" / "2026" / "week12" / "2026-11-17T20:45:59Z.json"
+    path = ROOT / "predictions" / "2026" / "week12" / "20261117T204559Z.json"
     loaded = contract_io.load_week(path)
     assert loaded.version == "0"
     assert loaded.headline_kind == "ensemble"

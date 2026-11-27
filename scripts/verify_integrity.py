@@ -56,6 +56,8 @@ def verify(root: Path, base_ref: str = "HEAD") -> list[str]:
 
     paths = {p.relative_to(root).as_posix(): p for p in L.iter_snapshot_paths(root)}
     for rel, digest in manifest.items():
+        if ":" in rel:
+            errors.append(f"{rel}: snapshot path contains ':' (incompatible with Windows NTFS)")
         path = paths.get(rel) or (root / rel)
         if not path.exists():
             errors.append(f"{rel}: listed in the manifest but missing on disk")

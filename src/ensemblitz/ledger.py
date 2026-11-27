@@ -7,6 +7,7 @@ first kickoff; historical corrections follow the procedure in ``docs/LEDGER.md``
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -19,12 +20,46 @@ from ensemblitz import contract as K
 
 MANIFEST_NAME = "MANIFEST.json"
 MANIFEST_REL = f"predictions/{MANIFEST_NAME}"
-# Filenames like 2026-11-24T18:26:45Z.json or, on a generated_at collision, with a hash suffix.
-SNAPSHOT_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)(?:-([0-9a-f]{8}))?\.json$")
+# Filenames use colon-free ISO-8601 basic UTC (20261124T182645Z.json) for NTFS compatibility;
+# the regex also recognises the legacy extended form so historical references stay readable.
+SNAPSHOT_NAME = re.compile(
+    r"^(?:\d{8}T\d{6}Z|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)(?:-([0-9a-f]{8}))?\.json$"
+)
 # Commits that published predictions/2026/week12.json, in order, as approved for this PR.
 WEEK12_HISTORY = ("22f65ff", "081affe", "475a36a", "ae9f088", "7690ac8")
 # The same four commits also published week 11 (week 11 was not rewritten in 7690ac8).
 WEEK11_HISTORY = ("22f65ff", "081affe", "475a36a", "ae9f088")
+# Approved one-time NTFS filename migration (documented in docs/LEDGER.md).
+# Each entry maps the historical colon path to its byte-identical colon-free path.
+LEGACY_NTFS_RENAMES: dict[str, str] = {
+    "predictions/2026/week11/2026-11-17T20:45:59Z.json": (
+        "predictions/2026/week11/20261117T204559Z.json"
+    ),
+    "predictions/2026/week11/2026-11-17T21:23:30Z-cca816c5.json": (
+        "predictions/2026/week11/20261117T212330Z-cca816c5.json"
+    ),
+    "predictions/2026/week11/2026-11-17T21:23:30Z.json": (
+        "predictions/2026/week11/20261117T212330Z.json"
+    ),
+    "predictions/2026/week11/2026-11-18T21:41:36Z.json": (
+        "predictions/2026/week11/20261118T214136Z.json"
+    ),
+    "predictions/2026/week12/2026-11-17T20:45:59Z.json": (
+        "predictions/2026/week12/20261117T204559Z.json"
+    ),
+    "predictions/2026/week12/2026-11-17T21:23:30Z.json": (
+        "predictions/2026/week12/20261117T212330Z.json"
+    ),
+    "predictions/2026/week12/2026-11-17T22:07:00Z.json": (
+        "predictions/2026/week12/20261117T220700Z.json"
+    ),
+    "predictions/2026/week12/2026-11-18T21:41:36Z.json": (
+        "predictions/2026/week12/20261118T214136Z.json"
+    ),
+    "predictions/2026/week12/2026-11-24T18:26:45Z.json": (
+        "predictions/2026/week12/20261124T182645Z.json"
+    ),
+}
 
 
 class LedgerError(RuntimeError):
@@ -69,11 +104,16 @@ def week_dir(season: int, week: int, root: Path | None = None) -> Path:
 
 
 def snapshot_filename(generated_at_utc: str, digest: str, existing: set[str]) -> str:
-    """Unique filename for a snapshot. The hash suffix is used only on collision."""
-    base = f"{generated_at_utc}.json"
+    """Unique colon-free filename for a snapshot (ISO-8601 basic UTC, NTFS-safe).
+
+    The hash suffix is used only on a timestamp collision. The ``generated_at_utc``
+    field inside the JSON remains ISO-8601 extended (with colons).
+    """
+    stamp = _parse_utc(generated_at_utc).strftime("%Y%m%dT%H%M%SZ")
+    base = f"{stamp}.json"
     if base not in existing:
         return base
-    return f"{generated_at_utc}-{digest[:8]}.json"
+    return f"{stamp}-{digest[:8]}.json"
 
 
 def iter_snapshot_paths(root: Path | None = None) -> list[Path]:
@@ -241,13 +281,26 @@ def manifest_entries_at_ref(root: Path, ref: str) -> dict:
 
 
 def append_only_violations(current: dict, base: dict) -> list[str]:
-    """The manifest may only grow: every base entry must still exist unchanged."""
+    """The manifest may only grow: every base entry must still exist unchanged.
+
+    Allows only the approved one-time NTFS filename migration listed in
+    ``LEGACY_NTFS_RENAMES`` when the renamed path keeps the exact same SHA-256.
+    """
     errors: list[str] = []
     for key, base_value in base.items():
-        if key not in current:
+        if key in current:
+            if current[key] != base_value:
+                errors.append(f"{key}: historical manifest entry changed")
+            continue
+        renamed = LEGACY_NTFS_RENAMES.get(key)
+        if renamed and current.get(renamed) == base_value:
+            continue
+        if renamed and renamed in current:
+            errors.append(
+                f"{key}: historical manifest entry changed during NTFS rename to {renamed}"
+            )
+        else:
             errors.append(f"{key}: deleted from the manifest (append-only)")
-        elif current[key] != base_value:
-            errors.append(f"{key}: historical manifest entry changed")
     return errors
 
 
@@ -358,7 +411,7 @@ def write_snapshot(
         )
     generated = doc["generated_at_utc"]
     payload = json.dumps(doc, indent=1) + "\n"
-    digest = __import__("hashlib").sha256(payload.encode()).hexdigest()
+    digest = hashlib.sha256(payload.encode()).hexdigest()
     names = {p.name for p in week_dir(season, week, root).glob("*.json")}
     name = snapshot_filename(generated, digest, names)
     dest = week_dir(season, week, root) / name
@@ -401,7 +454,7 @@ def rebuild_historical(root: Path | None = None, repo: Path | None = None) -> li
             raw = _cat_blob(repo, rev, rel)
             header = json.loads(raw)
             generated = header["generated_at"]
-            digest = __import__("hashlib").sha256(raw).hexdigest()
+            digest = hashlib.sha256(raw).hexdigest()
             name = snapshot_filename(generated, digest, names)
             dest = directory / name
             if dest.exists():
@@ -420,6 +473,7 @@ def rebuild_historical(root: Path | None = None, repo: Path | None = None) -> li
 
 
 __all__ = [
+    "LEGACY_NTFS_RENAMES",
     "MANIFEST_REL",
     "WEEK11_HISTORY",
     "WEEK12_HISTORY",

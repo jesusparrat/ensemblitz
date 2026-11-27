@@ -4,7 +4,7 @@ This is the procedure that keeps published picks append-only. The contract itsel
 
 ## Snapshots
 
-- Every run writes a new file: `predictions/<season>/week<WW>/<generated_at_utc>.json`.
+- Every run writes a new file: `predictions/<season>/week<WW>/<YYYYMMDDTHHMMSSZ>.json` (colon-free ISO-8601 basic UTC for Windows NTFS compatibility; the `generated_at_utc` field inside the JSON remains extended ISO-8601 `YYYY-MM-DDTHH:MM:SSZ`).
 - Existing snapshots are never overwritten. The v0 files `predictions/2026/week11.json` and `week12.json` stay as they were published and are never migrated.
 - Re-doing a week that already has a snapshot requires `ensemblitz predict --force`.
 - **No option**, including `--force`, writes a new snapshot after the week's first kickoff. Mid-week updates of remaining games are out of scope until a later PR decides otherwise.
@@ -12,13 +12,31 @@ This is the procedure that keeps published picks append-only. The contract itsel
 
 ## Manifest
 
-`predictions/MANIFEST.json` stores only a map of `path → SHA-256`. It has no `first_commit` field and does not include its own hash. The time of publication is proven by git history: `scripts/verify_integrity.py` looks up the first commit that contained those bytes (by blob, so a copy of a historical file still resolves to the original publication) and checks that it is before kickoff.
+`predictions/MANIFEST.json` stores only a map of `path -> SHA-256`. It has no `first_commit` field and does not include its own hash. The time of publication is proven by git history: `scripts/verify_integrity.py` looks up the first commit that contained those bytes (by blob, so a copy of a historical file still resolves to the original publication) and checks that it is before kickoff.
 
-`verify_integrity.py` runs in CI and in the weekly job before the commit. It fails on a modified, deleted or substituted artifact. Adding a new week only extends the manifest; existing hashes must not change.
+`verify_integrity.py` runs in CI and in the weekly job before the commit. It fails on a modified, deleted or substituted artifact, and rejects snapshot paths containing `:` so the repository stays cloneable on Windows NTFS. Adding a new week only extends the manifest; existing hashes must not change.
 
 ## Historical snapshots
 
 The five published versions of `predictions/2026/week12.json` are stored byte-for-byte under `predictions/2026/week12/`, taken from commits `22f65ff`, `081affe`, `475a36a`, `ae9f088` and `7690ac8`. Week 11 is stored the same way from its four commits. They remain v0 on disk and are read through the v0 reader.
+
+### One-time NTFS filename migration (PR 4.5)
+
+The initial ledger commit stored those nine historical copies using extended ISO-8601 filenames containing `:` (for example `2026-11-17T20:45:59Z.json`), which Windows NTFS refuses to check out (`core.protectNTFS`). With explicit approval from the repository owner, PR 4.5 performed a single byte-preserving rename of those nine paths to basic ISO-8601 (`YYYYMMDDTHHMMSSZ.json`):
+
+| Previous path | Migrated path | SHA-256 (unchanged) |
+|---|---|---|
+| `predictions/2026/week11/2026-11-17T20:45:59Z.json` | `predictions/2026/week11/20261117T204559Z.json` | `ce08340046c0...` |
+| `predictions/2026/week11/2026-11-17T21:23:30Z-cca816c5.json` | `predictions/2026/week11/20261117T212330Z-cca816c5.json` | `cca816c53cef...` |
+| `predictions/2026/week11/2026-11-17T21:23:30Z.json` | `predictions/2026/week11/20261117T212330Z.json` | `f65bcee44ad2...` |
+| `predictions/2026/week11/2026-11-18T21:41:36Z.json` | `predictions/2026/week11/20261118T214136Z.json` | `2196b6016ec7...` |
+| `predictions/2026/week12/2026-11-17T20:45:59Z.json` | `predictions/2026/week12/20261117T204559Z.json` | `3230d81646e2...` |
+| `predictions/2026/week12/2026-11-17T21:23:30Z.json` | `predictions/2026/week12/20261117T212330Z.json` | `256a896323d1...` |
+| `predictions/2026/week12/2026-11-17T22:07:00Z.json` | `predictions/2026/week12/20261117T220700Z.json` | `1d01bf9c9544...` |
+| `predictions/2026/week12/2026-11-18T21:41:36Z.json` | `predictions/2026/week12/20261118T214136Z.json` | `47c7603df3d9...` |
+| `predictions/2026/week12/2026-11-24T18:26:45Z.json` | `predictions/2026/week12/20261124T182645Z.json` | `b67b41eb079a...` |
+
+No byte inside any snapshot changed, every SHA-256 in `predictions/MANIFEST.json` stayed identical, and `first_publication_utc()` still resolves each blob to its original pre-kickoff commit.
 
 ## Historical rectification
 

@@ -68,7 +68,7 @@ A model change that improves the baseline is accepted by regenerating the artefa
 ### Work rules
 
 - One topic per PR, on its own branch from the latest `main`. Nothing is merged without Jesús saying so. No force-push to `main`, no direct commits.
-- Each PR description (in Spanish) lists: what changes, why, the files, the checks with their numbers and what is left for later.
+- Each PR description (in English) lists: what changes, why, the files, the checks with their numbers and what is left for later.
 - The environment is locked: dependencies change only by editing `pyproject.toml` and committing the regenerated `uv.lock` in the same PR. CI runs `uv lock --check` and `uv sync --frozen`; `UV_FROZEN=1` keeps `uv run` from re-resolving.
 - No paid or quota-consuming call (The Odds API, agents) without need; prefer cached data.
 
