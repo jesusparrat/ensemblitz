@@ -54,12 +54,14 @@ def open_next_weeks(
     now: datetime | None = None,
     root: Path | None = None,
 ) -> list[int]:
-    """Next unplayed weeks that are not already locked by an earlier kickoff.
+    """Next unplayed weeks that still have at least one game with ``kickoff_utc > now``.
 
-    Prevents an automatic run (for example Tuesday morning before Monday Night
-    Football scores land in nflverse) from picking a locked week and crashing
-    with ``WeekLockedError``. Explicit ``--week`` calls still target the
-    requested week and raise ``WeekLockedError`` if it is locked.
+    A week remains open for mid-week updates (for example Friday after Thursday Night
+    Football) while any game has ``kickoff_utc > now``; games at or past kickoff are
+    frozen to their latest pre-kickoff canonical record. Once all games in a week have
+    passed kickoff (for example Tuesday morning before Monday Night Football scores land
+    in nflverse), the week is locked and skipped here. Explicit ``--week`` calls still
+    target the requested week and raise ``WeekLockedError`` if all games have started.
     """
     now_dt = now or datetime.now(UTC)
     s = feats[(feats["season"] == season) & ~feats["played"]]
@@ -74,6 +76,25 @@ def open_next_weeks(
         if len(open_wks) >= n:
             break
     return open_wks
+
+
+def has_open_games(
+    season: int | None = None,
+    *,
+    now: datetime | None = None,
+    root: Path | None = None,
+    schedules: pd.DataFrame | None = None,
+) -> bool:
+    """Return True if at least one unplayed game in ``season`` has ``kickoff_utc > now``.
+
+    Reads only the schedules table so automated workflows can skip Odds API calls cleanly
+    when no open games remain, without fitting the full model pipeline.
+    """
+    from ensemblitz.data import download, load
+
+    season = season or download.current_season()
+    sched = schedules if schedules is not None else load.load_schedules()
+    return bool(open_next_weeks(sched, season, n=1, now=now, root=root))
 
 
 def fill_missing_spread(feats: pd.DataFrame) -> pd.DataFrame:
@@ -479,27 +500,42 @@ def run_predict(
     force: bool = False,
     production: bool = False,
     root: Path | None = None,
+    now: datetime | None = None,
 ) -> list[Path]:
-    """Write a new immutable v1 snapshot for each requested week (never overwrites)."""
+    """Write a new immutable v1 snapshot for each requested week (never overwrites).
+
+    Any game in the target week with ``kickoff_utc <= now`` is automatically frozen to
+    its exact canonical record from the latest snapshot published strictly before that
+    game's kickoff.
+    """
+    now_dt = (now or datetime.now(UTC)).astimezone(UTC)
     frame = build_frame(season)
-    weeks = [week] if week else open_next_weeks(frame, season, n_weeks, root=root)
+    weeks = [week] if week else open_next_weeks(frame, season, n_weeks, now=now_dt, root=root)
     if not weeks:
-        log.info("no unplayed weeks in %s", season)
+        log.info("no open unplayed weeks in %s", season)
         return []
+    for w in weeks:
+        wk_kicks = _week_kickoffs(frame, season, w)
+        if L.week_is_locked(season, w, now=now_dt, root=root, games=wk_kicks):
+            last = L.last_kickoff_utc(season, w, root, wk_kicks)
+            raise L.WeekLockedError(
+                f"{season} week {w} is locked: all games have passed kickoff (last kickoff {last}). "
+                "A historical correction follows docs/LEDGER.md; --force cannot unlock it."
+            )
     rows = predict_frame(frame, season, weeks)
-    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_str = now_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     weights = rows.attrs.get("ensemble_weights", {})
     no_market_stack = rows.attrs.get("no_market_stack")
     lgbm_contrib = rows.attrs.get("lgbm_contrib")
     if lgbm_contrib is not None:
         lgbm_contrib = lgbm_contrib.reset_index(drop=True)
     rows = rows.reset_index(drop=True)
-    audits = apply_news(rows, now) if use_news else [None] * len(rows)
+    audits = apply_news(rows, now_str) if use_news else [None] * len(rows)
     sim = simulate_rows(rows)
     ab = _absences(rows)
     quotes = _odds_quotes()
     prov = K.provenance(root, production=production)
-    cutoff = K.data_cutoff_utc(root=root)
+    cutoff = K.data_cutoff_utc(root=root, now=now_dt)
     snapshot = K.data_snapshot(root=root)
     recs = []
     for i, r in rows.iterrows():
@@ -513,19 +549,20 @@ def run_predict(
             if (no_market_stack is not None and lgbm_contrib is not None)
             else None
         )
-        recs.append(v1_game_record(r, sim, i, now, audits[i], wk_ab, quotes, expl))
+        recs.append(v1_game_record(r, sim, i, now_str, audits[i], wk_ab, quotes, expl))
     # data_cutoff cannot be later than the run; clamp only if equal clocks differ by rounding
-    if cutoff > now:
-        raise K.ContractError(f"data_cutoff_utc {cutoff} is later than generated_at_utc {now}")
+    if cutoff > now_str:
+        raise K.ContractError(f"data_cutoff_utc {cutoff} is later than generated_at_utc {now_str}")
     paths = []
     for w in weeks:
         week_games = [g for g in recs if _week_of(g) == w]
+        week_games = L.freeze_started_games(season, w, week_games, now=now_dt, root=root)
         doc = {
             "schema_version": K.SCHEMA_VERSION,
             "model_version": C.MODEL_VERSION,
             "git_sha": prov["git_sha"],
             "reproducible": prov["reproducible"],
-            "generated_at_utc": now,
+            "generated_at_utc": now_str,
             "data_cutoff_utc": cutoff,
             "data_snapshot": snapshot,
             "season": season,
@@ -536,7 +573,7 @@ def run_predict(
         errors = K.validate_week(doc)
         if errors:
             raise K.ContractError("invalid v1 snapshot: " + "; ".join(errors[:8]))
-        paths.append(L.write_snapshot(doc, root=root, force=force))
+        paths.append(L.write_snapshot(doc, root=root, force=force, now=now_dt))
     return paths
 
 
@@ -544,4 +581,4 @@ def _week_of(g: dict) -> int:
     return int(g["game_id"].split("_")[1])
 
 
-__all__ = ["pred_path", "run_predict"]
+__all__ = ["has_open_games", "open_next_weeks", "pred_path", "run_predict"]

@@ -40,7 +40,7 @@
     <a href="{{ u('home') }}"{% if nav == 'home' %} aria-current="page"{% elif nav == 'game' %} class="parent"{% endif %}>{{ t('nav.week') }}</a>
     <a href="{{ u('history') }}"{% if nav == 'hist' %} aria-current="page"{% endif %}>{{ t('nav.history') }}</a>
     <a href="{{ u('method') }}"{% if nav == 'method' %} aria-current="page"{% endif %}>{{ t('nav.method') }}</a>
-    <a href="{{ repo }}">{{ t('nav.code') }}</a>
+    <a href="{{ u('verify') }}"{% if nav == 'verify' %} aria-current="page"{% endif %}>{{ t('nav.verify') }}</a>
     <i class="ind" aria-hidden="true"></i>
   </nav>
   <div class="right"><span class="stamp">{{ t('nav.data_of', when=data_at) }}</span>
@@ -53,7 +53,7 @@
 </main>
 <footer class="wrap foot">
   <span>{{ t('foot.generated', when=generated_at) }}</span>
-  <span><a href="{{ repo }}">github.com/jesusparrat/ensemblitz</a>. {{ t('foot.license') }}</span>
+  <span>{{ t('nav.code') }}: <a href="{{ repo }}">github.com/jesusparrat/ensemblitz</a>. {{ t('foot.license') }}</span>
 </footer>
 <p class="sr" id="sort-live" role="status" aria-live="polite"></p>
 <script src="{{ rel }}assets/app.js" defer></script>

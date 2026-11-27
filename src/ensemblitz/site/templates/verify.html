@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% set nav = 'verify' %}
+{% block title %}{{ t('verify.title') }}{% endblock %}
+{% block description %}{{ tx('verify.description') }}{% endblock %}
+{% block hero %}
+<section class="hero-band" aria-labelledby="h"><div class="wrap head">
+  <div>
+    <h1 id="h">{{ t('verify.title') }}</h1>
+    <p class="lede">{{ t('verify.lede') }}</p>
+  </div>
+  <div class="read" aria-label="{{ tx('verify.read_aria') }}">
+    <div><b>{{ manifest_entries|length }}</b><span>{{ t('verify.read_count') }}</span></div>
+  </div>
+</div></section>
+{% endblock %}
+{% block content %}
+
+<h2>{{ t('verify.scope_h') }}</h2>
+<div class="verify-notice">
+  <p>{{ t('verify.scope_browser') }}</p>
+  <p>{{ t('verify.scope_attest') }}</p>
+</div>
+
+<h2>{{ t('verify.checker_h') }}</h2>
+<p>{{ t('verify.checker_lede') }}</p>
+<div class="verify-box" id="verify-checker"
+  data-match="{{ tx('verify.status_match') }}"
+  data-mismatch="{{ tx('verify.status_mismatch') }}"
+  data-error="{{ tx('verify.status_error') }}"
+  data-unsupported="{{ tx('verify.status_unsupported') }}"
+  data-lbl-file="{{ tx('verify.res_file') }}"
+  data-lbl-sha="{{ tx('verify.res_sha') }}"
+  data-lbl-paths="{{ tx('verify.res_paths') }}"
+  data-match-note="{{ tx('verify.res_match_note') }}"
+  data-mismatch-note="{{ tx('verify.res_mismatch_note') }}">
+  <label class="verify-label" for="verify-file">{{ t('verify.file_label') }}</label>
+  <input class="verify-input" id="verify-file" type="file" accept=".json,application/json">
+  <noscript><p class="small">{{ t('verify.noscript') }}</p></noscript>
+  <div class="verify-result" id="verify-result" role="status" aria-live="polite">
+    <p class="small">{{ t('verify.idle') }}</p>
+  </div>
+</div>
+<script type="application/json" id="manifest-data">{{ manifest_json|safe }}</script>
+
+<h2>{{ t('verify.cli_h') }}</h2>
+<p>{{ t('verify.cli_lede') }}</p>
+<p class="small"><b>{{ t('verify.cli_manifest_label') }}</b></p>
+<pre class="cmd"><code>gh attestation verify predictions/MANIFEST.json --repo {{ repo_slug }}</code></pre>
+<p class="small"><b>{{ t('verify.cli_snapshot_label') }}</b></p>
+<pre class="cmd"><code>gh attestation verify {{ sample_snapshot }} --repo {{ repo_slug }}</code></pre>
+<p class="small">{{ t('verify.cli_note') }} <a href="{{ repo }}/blob/main/docs/LEDGER.md">docs/LEDGER.md</a>.</p>
+
+<h2>{{ t('verify.manifest_h') }}</h2>
+<p>{{ t('verify.manifest_lede') }}</p>
+{% if manifest_entries %}
+<table class="stack verify-table">
+<thead><tr><th>{{ t('verify.col_path') }}</th><th>{{ t('verify.col_sha') }}</th><th>{{ t('verify.col_link') }}</th></tr></thead>
+<tbody>
+{% for e in manifest_entries %}
+<tr>
+  <td data-label="{{ tx('verify.col_path') }}"><code class="hash-path">{{ e.path }}</code></td>
+  <td data-label="{{ tx('verify.col_sha') }}"><code class="hash">{{ e.sha256 }}</code></td>
+  <td data-label="{{ tx('verify.col_link') }}"><a href="{{ e.url }}" rel="noopener">{{ t('verify.view_gh') }}</a></td>
+</tr>
+{% endfor %}
+</tbody></table>
+{% else %}
+<div class="empty"><p>{{ t('verify.empty') }}</p></div>
+{% endif %}
+
+<h2 id="privacy">{{ t('privacy.h') }}</h2>
+<p>{{ t('privacy.storage') }}</p>
+<p>{{ t('privacy.hosting') }}</p>
+{% endblock %}

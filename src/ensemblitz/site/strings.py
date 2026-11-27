@@ -34,6 +34,7 @@ ES: dict[str, str] = {
     "nav.week": "Jornada",
     "nav.history": "Historial",
     "nav.method": "Método",
+    "nav.verify": "Verificar",
     "nav.code": "Código",
     "nav.data_of": "Datos del {when}",
     "nav.lang_aria": "Read this page in English",
@@ -44,9 +45,9 @@ ES: dict[str, str] = {
     "week.title": "Jornada {week}",
     "week.h1": "Jornada {week}",
     "week.lede": (
-        "Temporada NFL {season}. Para cada partido: quién gana, con qué probabilidad, cuántos puntos "
-        "se esperan de cada equipo, el margen y el total. Predicción de nuestro modelo sin copiar "
-        "al mercado. Horas de Madrid."
+        "Temporada NFL {season}: probabilidades, puntos esperados y márgenes de un modelo "
+        "estadístico propio que no usa las cuotas, guardados antes del saque. Comparamos cada "
+        "lectura con el mercado como referencia; horas de Madrid."
     ),
     "week.read_aria": "Resumen de la jornada",
     "week.read_games": "partidos en la jornada",
@@ -69,6 +70,10 @@ ES: dict[str, str] = {
     "filter.label": "Filtrar partidos",
     "filter.all": "Todos",
     "filter.flags": "Donde diferimos del mercado",
+    "filter.team": "Mi equipo",
+    "filter.empty": "Ningún partido coincide con los filtros activos.",
+    "team.label": "Seguir equipo",
+    "team.none": "Ninguno",
     "cols.time": "Hora",
     "cols.game": "Partido",
     "cols.win": "Gana",
@@ -170,6 +175,9 @@ ES: dict[str, str] = {
     "game.tech_prob": "Probabilidad de {team}",
     "game.tech_note": "Los tres primeros modelos forman el número del titular. LightGBM sobre el mercado y la mezcla usan la referencia pre-partido de nflverse como entrada.",
     "game.back": "Volver a la jornada {week}",
+    "game.copy_link": "Copiar enlace",
+    "game.copied": "Enlace copiado",
+    "game.copy_fail": "No se pudo copiar el enlace",
     "fact.rest": "Descanso",
     "fact.rest_v": "{home} {h} días, {away} {a} días",
     "fact.trip": "Viaje del visitante",
@@ -539,6 +547,95 @@ ES: dict[str, str] = {
         "Cómo calcula ensemblitz sus pronósticos NFL, resultados históricos 2018-2025, "
         "calibración y límites."
     ),
+    # privacy and local storage
+    "privacy.h": "Privacidad y almacenamiento local",
+    "privacy.storage": (
+        "Este sitio no instala cookies de seguimiento. Solo guarda hasta tres preferencias en el "
+        "almacenamiento local de tu navegador (<code>localStorage</code>): <code>ens-theme</code> "
+        "(tema claro u oscuro), <code>ens-lang</code> (idioma español o inglés) y "
+        "<code>ens-team</code> (tu equipo seguido de la NFL). Esos valores permanecen en tu "
+        "dispositivo, no se envían a ningún servidor y puedes borrarlos en cualquier momento "
+        "desde los ajustes del navegador."
+    ),
+    "privacy.hosting": (
+        "No usar cookies no equivale a carecer de obligaciones o consideraciones de privacidad. "
+        "Las páginas estáticas se sirven desde GitHub Pages, que como proveedor de alojamiento "
+        "puede procesar metadatos técnicos estándar de la petición HTTP (como la dirección IP o "
+        "el agente de usuario) conforme a la declaración de privacidad de GitHub. El comprobador "
+        "SHA-256 de la página de verificación procesa el archivo íntegramente en tu navegador sin "
+        "subirlo a ningún servidor."
+    ),
+    # verify page
+    "verify.title": "Verificar",
+    "verify.description": (
+        "Comprueba la huella SHA-256 de cualquier snapshot publicado frente a "
+        "predictions/MANIFEST.json y aprende a verificar las atestaciones en terminal."
+    ),
+    "verify.lede": (
+        "Cada jornada se publica como un archivo JSON inmutable registrado en "
+        "predictions/MANIFEST.json. Aquí puedes comprobar su SHA-256 en tu navegador o verificar "
+        "la procedencia completa con GitHub CLI."
+    ),
+    "verify.read_aria": "Resumen de verificación",
+    "verify.read_count": "archivos registrados en MANIFEST.json",
+    "verify.scope_h": "Qué prueba cada comprobación",
+    "verify.scope_browser": (
+        "<b>En el navegador (solo SHA-256):</b> esta página calcula únicamente la huella "
+        "criptográfica SHA-256 del archivo que selecciones y la compara con la copia incrustada "
+        "de <code>predictions/MANIFEST.json</code>. <b>No verifica firmas Sigstore ni "
+        "atestaciones de GitHub en el navegador.</b>"
+    ),
+    "verify.scope_attest": (
+        "<b>Con <code>gh attestation verify</code> (integridad y procedencia):</b> las "
+        "atestaciones de GitHub y las huellas SHA-256 demuestran integridad del archivo y "
+        "procedencia del flujo de publicación (que el archivo fue generado por el workflow del "
+        "repositorio y no se alteró después). <b>No demuestran corrección estadística, validez "
+        "del modelo ni ventaja predictiva.</b>"
+    ),
+    "verify.checker_h": "Comprobador local de SHA-256",
+    "verify.checker_lede": (
+        "Selecciona un archivo <code>.json</code> descargado del repositorio. El cálculo se "
+        "ejecuta en tu dispositivo con Web Crypto API (<code>crypto.subtle.digest</code>) y no "
+        "realiza ninguna llamada de red."
+    ),
+    "verify.file_label": "Seleccionar archivo JSON de predicciones",
+    "verify.noscript": (
+        "Activa JavaScript para calcular el SHA-256 en el navegador, o utiliza los comandos de "
+        "terminal que figuran más abajo."
+    ),
+    "verify.idle": "Elige un archivo JSON para calcular su SHA-256 y compararlo con predictions/MANIFEST.json.",
+    "verify.status_match": "Coincide con MANIFEST.json",
+    "verify.status_mismatch": "No figura en MANIFEST.json",
+    "verify.status_error": "No se pudo calcular el SHA-256",
+    "verify.status_unsupported": "Web Crypto API (crypto.subtle) no está disponible en este contexto del navegador.",
+    "verify.res_file": "Archivo",
+    "verify.res_sha": "SHA-256 calculado",
+    "verify.res_paths": "Ruta coincidente",
+    "verify.res_match_note": (
+        "Huella SHA-256 idéntica a la registrada en predictions/MANIFEST.json. Esta comprobación "
+        "en el navegador no verifica firmas Sigstore; usa gh attestation verify para comprobar "
+        "la procedencia."
+    ),
+    "verify.res_mismatch_note": (
+        "El SHA-256 calculado no coincide con ningún archivo de la copia incrustada de "
+        "predictions/MANIFEST.json."
+    ),
+    "verify.cli_h": "Verificación completa en terminal (gh attestation verify)",
+    "verify.cli_lede": (
+        "Para comprobar las firmas criptográficas Sigstore y la procedencia de GitHub Actions, "
+        "descarga el archivo y ejecuta GitHub CLI tanto sobre el manifiesto como sobre el "
+        "snapshot concreto:"
+    ),
+    "verify.cli_manifest_label": "1. Verificar el manifiesto (predictions/MANIFEST.json):",
+    "verify.cli_snapshot_label": "2. Verificar un snapshot individual:",
+    "verify.cli_note": "Procedimiento completo del registro inmutable en",
+    "verify.manifest_h": "Snapshots registrados en predictions/MANIFEST.json",
+    "verify.manifest_lede": "Listado completo de rutas y huellas SHA-256 publicadas en el repositorio.",
+    "verify.col_path": "Archivo",
+    "verify.col_sha": "SHA-256",
+    "verify.col_link": "Repositorio",
+    "verify.view_gh": "Ver en GitHub",
+    "verify.empty": "Todavía no hay archivos registrados en predictions/MANIFEST.json.",
 }
 
 EN: dict[str, str] = {
@@ -564,6 +661,7 @@ EN: dict[str, str] = {
     "nav.week": "Week",
     "nav.history": "Record",
     "nav.method": "Method",
+    "nav.verify": "Verify",
     "nav.code": "Code",
     "nav.data_of": "Data from {when}",
     "nav.lang_aria": "Leer esta página en español",
@@ -573,9 +671,9 @@ EN: dict[str, str] = {
     "week.title": "Week {week}",
     "week.h1": "Week {week}",
     "week.lede": (
-        "{season} NFL season. For every game: who wins, how likely that is, how many points we expect "
-        "from each team, the margin and the total. Our model's own forecast, not a copy of the "
-        "betting market. All times ET."
+        "{season} NFL season: win probabilities, expected points and margins from our own "
+        "statistical model without betting odds, saved before kickoff. Every forecast sits beside "
+        "the market as a reference; all times ET."
     ),
     "week.read_aria": "Week summary",
     "week.read_games": "games this week",
@@ -598,6 +696,10 @@ EN: dict[str, str] = {
     "filter.label": "Filter games",
     "filter.all": "All",
     "filter.flags": "Where we differ from the market",
+    "filter.team": "My team",
+    "filter.empty": "No games match the active filters.",
+    "team.label": "Follow team",
+    "team.none": "None",
     "cols.time": "Time",
     "cols.game": "Game",
     "cols.win": "Winner",
@@ -694,6 +796,9 @@ EN: dict[str, str] = {
     "game.tech_prob": "{team} probability",
     "game.tech_note": "The first three models make up the headline number. LightGBM on top of the market and the blend take the pre-game nflverse reference as input.",
     "game.back": "Back to week {week}",
+    "game.copy_link": "Copy link",
+    "game.copied": "Link copied",
+    "game.copy_fail": "Could not copy link",
     "fact.rest": "Rest",
     "fact.rest_v": "{home} {h} days, {away} {a} days",
     "fact.trip": "Visitor's trip",
@@ -1052,6 +1157,89 @@ EN: dict[str, str] = {
         "How ensemblitz computes its NFL predictions, 2018-2025 historical results, calibration "
         "and limits."
     ),
+    "privacy.h": "Privacy and local storage",
+    "privacy.storage": (
+        "This site sets no tracking cookies. It only stores up to three preferences in your "
+        "browser's local storage (<code>localStorage</code>): <code>ens-theme</code> (light or "
+        "dark theme), <code>ens-lang</code> (Spanish or English language) and "
+        "<code>ens-team</code> (your followed NFL team). Those values stay on your device, are "
+        "never sent to any server, and can be cleared at any time in your browser settings."
+    ),
+    "privacy.hosting": (
+        "Using zero cookies does not mean zero privacy obligations or considerations. The static "
+        "pages are hosted on GitHub Pages, which as hosting infrastructure may process standard "
+        "HTTP request metadata (such as IP address or user agent) under GitHub's privacy "
+        "statement. The SHA-256 checker on the verification page hashes the chosen file strictly "
+        "inside your browser without uploading it to any server."
+    ),
+    "verify.title": "Verify",
+    "verify.description": (
+        "Check the SHA-256 digest of any published snapshot against predictions/MANIFEST.json "
+        "and verify GitHub attestations from the command line."
+    ),
+    "verify.lede": (
+        "Every week is published as an immutable JSON snapshot indexed in "
+        "predictions/MANIFEST.json. Check its SHA-256 locally in your browser or verify full "
+        "provenance with the GitHub CLI."
+    ),
+    "verify.read_aria": "Verification summary",
+    "verify.read_count": "artifacts indexed in MANIFEST.json",
+    "verify.scope_h": "What each check proves",
+    "verify.scope_browser": (
+        "<b>In the browser (SHA-256 only):</b> this page computes only the SHA-256 digest of the "
+        "file you pick and compares it against the embedded copy of "
+        "<code>predictions/MANIFEST.json</code>. <b>It does not verify Sigstore signatures or "
+        "GitHub attestations in the browser.</b>"
+    ),
+    "verify.scope_attest": (
+        "<b>With <code>gh attestation verify</code> (integrity and provenance):</b> GitHub "
+        "attestations and SHA-256 digests prove artifact integrity and workflow provenance (that "
+        "the file was generated by the repository workflow and left unaltered afterward). "
+        "<b>They do not prove statistical correctness, model validity, or predictive edge.</b>"
+    ),
+    "verify.checker_h": "Local SHA-256 checker",
+    "verify.checker_lede": (
+        "Pick a <code>.json</code> snapshot downloaded from the repository. Hashing runs locally "
+        "on your device using the Web Crypto API (<code>crypto.subtle.digest</code>) with zero "
+        "network requests."
+    ),
+    "verify.file_label": "Select prediction JSON file",
+    "verify.noscript": (
+        "Enable JavaScript to compute SHA-256 in the browser, or use the command-line "
+        "instructions below."
+    ),
+    "verify.idle": "Choose a JSON file to compute its SHA-256 and compare it against predictions/MANIFEST.json.",
+    "verify.status_match": "Matches MANIFEST.json",
+    "verify.status_mismatch": "Not found in MANIFEST.json",
+    "verify.status_error": "Could not compute SHA-256",
+    "verify.status_unsupported": "Web Crypto API (crypto.subtle) is not available in this browser context.",
+    "verify.res_file": "File",
+    "verify.res_sha": "Computed SHA-256",
+    "verify.res_paths": "Matching path",
+    "verify.res_match_note": (
+        "SHA-256 digest matches the entry recorded in predictions/MANIFEST.json. This browser "
+        "check does not verify Sigstore signatures; use gh attestation verify to check workflow "
+        "provenance."
+    ),
+    "verify.res_mismatch_note": (
+        "The computed SHA-256 does not match any artifact in the embedded copy of "
+        "predictions/MANIFEST.json."
+    ),
+    "verify.cli_h": "Full command-line verification (gh attestation verify)",
+    "verify.cli_lede": (
+        "To verify cryptographic Sigstore signatures and GitHub Actions provenance, download the "
+        "files and run the GitHub CLI on both the manifest and the specific snapshot:"
+    ),
+    "verify.cli_manifest_label": "1. Verify the manifest (predictions/MANIFEST.json):",
+    "verify.cli_snapshot_label": "2. Verify an individual snapshot:",
+    "verify.cli_note": "Full append-only ledger procedure in",
+    "verify.manifest_h": "Snapshots indexed in predictions/MANIFEST.json",
+    "verify.manifest_lede": "Complete index of published paths and SHA-256 digests in the repository.",
+    "verify.col_path": "Artifact",
+    "verify.col_sha": "SHA-256",
+    "verify.col_link": "Repository",
+    "verify.view_gh": "View on GitHub",
+    "verify.empty": "No artifacts are indexed in predictions/MANIFEST.json yet.",
 }
 
 STRINGS = {"es": ES, "en": EN}
