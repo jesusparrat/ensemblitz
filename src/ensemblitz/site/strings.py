@@ -61,7 +61,7 @@ ES: dict[str, str] = {
         "Puntos esperados por equipo y, entre paréntesis, el rango que cubre el 80\u202f% de los "
         "resultados simulados."
     ),
-    "week.legend_flag": "Filete amarillo: nuestra probabilidad se separa {n} puntos o más de la del mercado.",
+    "week.legend_flag": "Filete amarillo: nuestra probabilidad se separa {n} puntos o más de la del mercado (desacuerdo entre lecturas, no ventaja).",
     "week.legacy": (
         "Algunos partidos de esta jornada se guardaron antes del cambio de modelo y muestran el "
         "pick de entonces, que mezclaba modelo y mercado. Se indica en cada uno."
@@ -147,8 +147,10 @@ ES: dict[str, str] = {
     "game.market_src_nflverse": "El mercado es la línea pre-partido de nflverse, sin su margen.",
     "game.market_note": "Es solo una referencia: no usamos sus cifras para calcular las nuestras.",
     "game.flag_text": (
-        "El modelo da a {fav} un {ours} y el mercado un {mkt}: {d} puntos de diferencia. A partir de "
-        "{n} puntos, una de las dos lecturas deja algo fuera. No sabemos cuál."
+        "El modelo da a {fav} un {ours} y el mercado un {mkt}: {d} puntos de diferencia. En "
+        "2018-2025, con brechas de {n} puntos o más (506 de 2133 partidos), el modelo acertó un "
+        "59,9\u202f% (IC 95\u202f%: 56,1\u202f% a 63,7\u202f%) frente al 65,8\u202f% del mercado histórico "
+        "(61,5\u202f% a 70,2\u202f%). Esta marca indica desacuerdo entre lecturas, no una ventaja."
     ),
     "game.close_text": "El modelo da a {fav} un {ours} y el mercado un {mkt}: lecturas parecidas.",
     "game.context_h": "Contexto",
@@ -192,6 +194,83 @@ ES: dict[str, str] = {
     "why_home": "Partido parejo: la ventaja de jugar en casa inclina el pick hacia {team}.",
     "why_away_close": "Partido parejo: {team} es algo mejor, incluso jugando fuera.",
     "why_form": "Lo que más pesa: la forma reciente. El modelo ve a {team} claramente por encima de {other}.",
+    "why_v1": (
+        "Duelo más marcado: ataque de {unit} de {off} (#{off_rank}) frente a defensa de {unit} "
+        "de {dfn} (#{def_rank}). El mayor peso del margen en el modelo procede de {comp}."
+    ),
+    "why_v1_qb": (
+        "Cambio de QB titular en {qb_teams}. Duelo más marcado: ataque de {unit} de {off} "
+        "(#{off_rank}) frente a defensa de {unit} de {dfn} (#{def_rank}); mayor peso del margen "
+        "en {comp}."
+    ),
+    "unit_pass": "pase",
+    "unit_rush": "carrera",
+    "comp_short_elo": "Elo",
+    "comp_short_kf": "Kalman",
+    "comp_short_lgbm": "LightGBM",
+    "game.matchups_h": "Duelos a vigilar",
+    "game.m_col_unit": "Duelo",
+    "game.m_col_off": "Ataque (EPA/jug.)",
+    "game.m_col_def": "Defensa permitida",
+    "game.m_col_comp": "Comparativa",
+    "game.m_row": "{unit}: {off} vs {dfn}",
+    "game.m_rank_val": "#{rank} ({val})",
+    "game.m_favors": "Inclina hacia {team} ({val})",
+    "game.m_note": (
+        "EPA por jugada ajustada por rival en ataque (más alto = mejor) y EPA permitida por "
+        "jugada en defensa (más bajo = mejor), con rankings pre-partido 1 a 32 (empates por "
+        "orden alfabético). La comparativa suma ataque más defensa permitida: es una lectura "
+        "descriptiva, no un efecto causal ni una predicción de margen."
+    ),
+    "game.m_early_note": (
+        "Inicio de temporada (jornada {week}): los ratings pre-partido combinan pocos partidos "
+        "recientes con encogimiento fuerte hacia la media de la liga."
+    ),
+    "game.qb_h": "Quarterbacks (EPA por dropback)",
+    "game.qb_row": "{team}",
+    "game.qb_val": "{epa} EPA/dropback ({db} dropbacks efectivos)",
+    "game.qb_diff_label": "Diferencia (local menos visitante)",
+    "game.qb_note": (
+        "Media ponderada con decaimiento temporal de EPA por dropback del titular previsto "
+        "(datos pre-partido de nflverse, sin ajuste por rival)."
+    ),
+    "game.absences_cutoff": (
+        "Diagnóstico de contexto de nflverse (corte {when}); no entra en ninguna probabilidad ni margen."
+    ),
+    "game.tech_stack_h": "Agregación exacta del titular (stack sin mercado)",
+    "game.tech_stack_col_pw": "Peso logit",
+    "game.tech_stack_col_lc": "Aporte logit",
+    "game.tech_stack_col_mw": "Peso margen",
+    "game.tech_stack_col_mc": "Aporte margen",
+    "game.tech_stack_bias": "Sesgo logit (Platt)",
+    "game.tech_stack_note": (
+        "Probabilidad del titular = sigmoide(suma de aportes logit + sesgo). Margen del titular = "
+        "suma de aportes de margen (local menos visitante)."
+    ),
+    "game.tech_lgbm_h": "Atribuciones TreeSHAP de LightGBM (solo componente LightGBM)",
+    "game.tech_lgbm_col_grp": "Grupo de variables",
+    "game.tech_lgbm_col_val": "Aporte al margen de LightGBM",
+    "game.tech_lgbm_base": "Valor base de LightGBM",
+    "game.tech_lgbm_pred": "Margen predicho por LightGBM",
+    "game.tech_lgbm_note": (
+        "Descomposición exacta TreeSHAP del componente LightGBM sin mercado (local menos visitante). "
+        "No explica el stack completo ni redistribuye pesos de Kalman o Elo."
+    ),
+    "grp_pass_game": "Juego aéreo (EPA pase)",
+    "grp_rush_game": "Juego terrestre (EPA carrera)",
+    "grp_efficiency": "Tasa de éxito",
+    "grp_qb": "Quarterback (EPA/dropback y cambios)",
+    "grp_team_strength": "Fuerza global previa (Kalman y Elo)",
+    "grp_situational": "Situacional (descanso, viaje, campo, clima)",
+    "game.tech_kf_h": "Descomposición exacta de Kalman (solo componente Kalman)",
+    "game.tech_kf_hfa": "Factor campo de Kalman",
+    "game.tech_kf_h_vs_a": "Ataque {home} + defensa permitida {away}",
+    "game.tech_kf_a_vs_h": "Menos (ataque {away} + defensa permitida {home})",
+    "game.tech_kf_total": "Margen de Kalman (local menos visitante)",
+    "game.tech_elo_h": "Descomposición exacta de Elo (solo componente Elo)",
+    "game.tech_elo_team": "Diferencial de rating ({home} {hr} vs {away} {ar})",
+    "game.tech_elo_hfa": "Factor campo de Elo",
+    "game.tech_elo_total": "Margen de Elo (local menos visitante)",
     # model components
     "comp_ensemble_model_only": "Modelo solo (sin mercado)",
     "comp_elo": "Elo con margen de victoria",
@@ -334,11 +413,31 @@ ES: dict[str, str] = {
     "method.market_3": "La diferencia con el mercado se calcula con los porcentajes tal como los lees: 68\u202f% menos 66\u202f% son 2 puntos.",
     "method.why_h": "La frase de «por qué»",
     "method.why_1": (
-        "Cada partido lleva una frase con el motivo principal. Es una regla sobre los datos del "
-        "partido, no una descomposición del modelo. Mira, por este orden: cambio de quarterback "
-        "titular, ventaja clara de descanso para el favorito, viaje largo contra un favorito local, "
-        "viento fuerte, ventaja de campo en un partido parejo y, si nada de eso aplica, la forma "
-        "reciente de los equipos."
+        "En los snapshots v1 nuevos, cada ficha muestra dos niveles separados. En la parte visible "
+        "aparecen los duelos descriptivos unidad contra unidad (EPA por jugada ajustada por rival "
+        "en ataque y EPA permitida por jugada en defensa, con rankings pre-partido 1 a 32 y "
+        "desempate alfabético) y el EPA por dropback con memoria exponencial de los quarterbacks "
+        "(sin ajuste por rival). El indicador combinado (EPA de ataque más EPA permitida en defensa) "
+        "es estrictamente descriptivo, no un efecto causal ni una contribución al margen. En las "
+        "primeras jornadas de cada temporada los ratings llevan fuerte encogimiento hacia la media."
+    ),
+    "method.why_2": (
+        "Dentro del detalle técnico se separan cuatro capas sin mezclar modelos distintos: (1) la "
+        "agregación exacta del stack del titular (pesos en logit y sesgo para la probabilidad; "
+        "pesos NNLS para el margen sobre Elo, Kalman y LightGBM), (2) las contribuciones exactas "
+        "TreeSHAP de LightGBM por grupo de variables (solo para LightGBM, nunca para el stack "
+        "completo), (3) la descomposición aditiva exacta de Kalman (factor campo más ataque local "
+        "frente a defensa visitante menos ataque visitante frente a defensa local) y (4) la "
+        "descomposición aditiva de Elo (diferencial de rating más factor campo). Los snapshots "
+        "congelados v0 anteriores a este cambio conservan la regla previa sobre entradas."
+    ),
+    "method.market_4": (
+        "Marcamos con filete amarillo las diferencias de 10 puntos o más entre los porcentajes "
+        "mostrados. En el histórico 2018-2025 (2133 partidos decididos), esa brecha ocurrió en "
+        "506 partidos (23,7\u202f%): el modelo acertó el 59,9\u202f% (IC 95\u202f% por bloques "
+        "de 2 semanas: 56,1\u202f% a 63,7\u202f%; log loss 0,673) frente al 65,8\u202f% del "
+        "cierre de mercado (61,5\u202f% a 70,2\u202f%; log loss 0,607; diferencia de acierto "
+        "-5,9 puntos, IC -11,5 a -0,4). Señala desacuerdo entre lecturas, no una oportunidad."
     ),
     "method.inj_h": "Lesiones",
     "method.inj_1": (
@@ -446,7 +545,7 @@ EN: dict[str, str] = {
         "Expected points per team and, in brackets, the range covering 80% of the simulated "
         "outcomes."
     ),
-    "week.legend_flag": "Yellow bar: our probability is {n} points or more away from the market's.",
+    "week.legend_flag": "Yellow bar: our probability is {n} points or more away from the market's (a reading gap, not an edge).",
     "week.legacy": (
         "Some games this week were saved before the model change and show the pick of that time, "
         "which blended the model with the market. Each one says so."
@@ -527,8 +626,10 @@ EN: dict[str, str] = {
     "game.market_src_nflverse": "The market is the pre-game nflverse line, with its margin removed.",
     "game.market_note": "It is only a reference: we do not use its numbers to compute ours.",
     "game.flag_text": (
-        "The model gives {fav} {ours} and the market {mkt}: a gap of {d} points. From {n} points "
-        "up, one of the two readings is missing something. We do not know which."
+        "The model gives {fav} {ours} and the market {mkt}: a gap of {d} points. In 2018-2025, on "
+        "gaps of {n} points or more (506 of 2,133 games), the model was right 59.9% of the time "
+        "(95% CI: 56.1% to 63.7%) against 65.8% for the historical market (61.5% to 70.2%). This "
+        "mark flags a reading disagreement, not an edge."
     ),
     "game.close_text": "The model gives {fav} {ours} and the market {mkt}: similar readings.",
     "game.context_h": "Context",
@@ -571,6 +672,82 @@ EN: dict[str, str] = {
     "why_home": "A close game: home-field advantage tilts the pick towards {team}.",
     "why_away_close": "A close game: {team} are slightly better, even on the road.",
     "why_form": "The biggest factor: recent form. The model sees {team} clearly ahead of {other}.",
+    "why_v1": (
+        "Biggest unit mismatch: {off} {unit} offense (#{off_rank}) vs {dfn} {unit} defense "
+        "(#{def_rank}). The largest share of the model margin comes from {comp}."
+    ),
+    "why_v1_qb": (
+        "Starting QB change for {qb_teams}. Biggest unit mismatch: {off} {unit} offense "
+        "(#{off_rank}) vs {dfn} {unit} defense (#{def_rank}); largest margin share from {comp}."
+    ),
+    "unit_pass": "pass",
+    "unit_rush": "rush",
+    "comp_short_elo": "Elo",
+    "comp_short_kf": "Kalman",
+    "comp_short_lgbm": "LightGBM",
+    "game.matchups_h": "Matchups to watch",
+    "game.m_col_unit": "Matchup",
+    "game.m_col_off": "Offense (EPA/play)",
+    "game.m_col_def": "Defense allowed",
+    "game.m_col_comp": "Comparison",
+    "game.m_row": "{unit}: {off} vs {dfn}",
+    "game.m_rank_val": "#{rank} ({val})",
+    "game.m_favors": "Tilts to {team} ({val})",
+    "game.m_note": (
+        "Opponent-adjusted EPA per play on offense (higher is better) and opponent-adjusted EPA "
+        "allowed per play on defense (lower is better), with pre-game league ranks 1 to 32 "
+        "(alphabetical tie-breaking). The comparison adds offense EPA and defense EPA allowed: it "
+        "is a descriptive indicator only, not a causal effect or a predicted margin contribution."
+    ),
+    "game.m_early_note": (
+        "Early season (week {week}): pre-game ratings combine limited recent plays with heavy "
+        "prior shrinkage toward the league average."
+    ),
+    "game.qb_h": "Quarterbacks (EPA per dropback)",
+    "game.qb_row": "{team}",
+    "game.qb_val": "{epa} EPA/dropback ({db} decayed dropbacks)",
+    "game.qb_diff_label": "Difference (home minus away)",
+    "game.qb_note": (
+        "Time-decayed EPA per dropback for the scheduled starter (pre-game nflverse play-by-play, "
+        "not opponent-adjusted)."
+    ),
+    "game.absences_cutoff": (
+        "Contextual diagnostic from nflverse (cutoff {when}); not included in any probability or margin."
+    ),
+    "game.tech_stack_h": "Exact headline stack aggregation (no-market stack)",
+    "game.tech_stack_col_pw": "Logit weight",
+    "game.tech_stack_col_lc": "Logit term",
+    "game.tech_stack_col_mw": "Margin weight",
+    "game.tech_stack_col_mc": "Margin term",
+    "game.tech_stack_bias": "Logit bias (Platt)",
+    "game.tech_stack_note": (
+        "Headline win probability = sigmoid(sum of logit terms + bias). Headline margin = sum of "
+        "margin terms (home minus away)."
+    ),
+    "game.tech_lgbm_h": "LightGBM TreeSHAP attributions (LightGBM component only)",
+    "game.tech_lgbm_col_grp": "Feature group",
+    "game.tech_lgbm_col_val": "LightGBM margin term",
+    "game.tech_lgbm_base": "LightGBM base margin",
+    "game.tech_lgbm_pred": "LightGBM predicted margin",
+    "game.tech_lgbm_note": (
+        "Exact TreeSHAP decomposition of the no-market LightGBM component (home minus away). It "
+        "does not explain the complete stack and does not redistribute Kalman or Elo weights."
+    ),
+    "grp_pass_game": "Passing game (pass EPA)",
+    "grp_rush_game": "Rushing game (rush EPA)",
+    "grp_efficiency": "Success rate",
+    "grp_qb": "Quarterback (EPA/dropback and changes)",
+    "grp_team_strength": "Prior team strength (Kalman and Elo)",
+    "grp_situational": "Situational (rest, travel, venue, weather)",
+    "game.tech_kf_h": "Exact Kalman decomposition (Kalman component only)",
+    "game.tech_kf_hfa": "Kalman home-field advantage",
+    "game.tech_kf_h_vs_a": "{home} offense + {away} defense allowed",
+    "game.tech_kf_a_vs_h": "Minus ({away} offense + {home} defense allowed)",
+    "game.tech_kf_total": "Kalman margin (home minus away)",
+    "game.tech_elo_h": "Exact Elo decomposition (Elo component only)",
+    "game.tech_elo_team": "Rating gap ({home} {hr} vs {away} {ar})",
+    "game.tech_elo_hfa": "Elo home-field advantage",
+    "game.tech_elo_total": "Elo margin (home minus away)",
     "comp_ensemble_model_only": "Model only (no market)",
     "comp_elo": "Elo with margin of victory",
     "comp_kf": "Kalman (dynamic strength)",
@@ -706,10 +883,30 @@ EN: dict[str, str] = {
     "method.market_3": "The difference from the market uses the percentages as you read them: 68% minus 66% is 2 points.",
     "method.why_h": 'The "why" sentence',
     "method.why_1": (
-        "Every game carries one sentence with its main reason. It is a rule over the game's "
-        "inputs, not a decomposition of the model. It checks, in this order: a quarterback change, "
-        "a clear rest edge for the favourite, a long trip against a home favourite, strong wind, "
-        "home-field advantage in a close game and, if none applies, the teams' recent form."
+        "In new v1 snapshots, each game page has two separate levels. Visible by default are the "
+        "descriptive unit-vs-unit matchups (opponent-adjusted EPA per play on offense and "
+        "opponent-adjusted EPA allowed per play on defense, with pre-game ranks 1 to 32 and "
+        "alphabetical tie-breaking) and decayed quarterback EPA per dropback (not "
+        "opponent-adjusted). The combined indicator (offense EPA plus defense EPA allowed) is "
+        "strictly descriptive, not a causal effect or a predicted margin contribution. Early in "
+        "each season, ratings carry heavy prior shrinkage toward the league mean."
+    ),
+    "method.why_2": (
+        "Inside technical detail, four layers stay strictly separate without merging distinct "
+        "models: (1) the exact headline stack aggregation (logit weights and bias for win "
+        "probability; NNLS margin weights over Elo, Kalman and LightGBM), (2) exact LightGBM "
+        "TreeSHAP feature-group attributions (LightGBM component only, never the full stack), "
+        "(3) Kalman's exact additive margin decomposition (home-field advantage plus home offense "
+        "vs away defense minus away offense vs home defense), and (4) Elo's exact additive margin "
+        "decomposition (rating gap plus Elo home-field advantage). Frozen v0 snapshots written "
+        "before this change keep the earlier input-rule summary."
+    ),
+    "method.market_4": (
+        "A yellow bar marks gaps of 10 percentage points or more between printed probabilities. "
+        "In the 2018-2025 record (2,133 decided games), that occurred in 506 games (23.7%): the "
+        "model was right 59.9% of the time (2-week block 95% CI: 56.1% to 63.7%; log loss 0.673) "
+        "against 65.8% for the closing market (61.5% to 70.2%; log loss 0.607; accuracy gap "
+        "-5.9 points, 95% CI -11.5 to -0.4). It flags a reading gap, not a profitable edge."
     ),
     "method.inj_h": "Injuries",
     "method.inj_1": (

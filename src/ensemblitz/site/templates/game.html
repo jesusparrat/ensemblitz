@@ -35,6 +35,25 @@
 </tbody></table>
 <p class="small">{{ t('game.range_note') }} {{ t('game.example', away=g.away, a=g.example.away, home=g.home, h=g.example.home) }}</p>
 
+{% if g.explanation %}
+<h2>{{ t('game.matchups_h') }}</h2>
+<table class="stack">
+<thead><tr><th>{{ t('game.m_col_unit') }}</th><th>{{ t('game.m_col_off') }}</th><th>{{ t('game.m_col_def') }}</th><th>{{ t('game.m_col_comp') }}</th></tr></thead>
+<tbody>
+{% for m in g.explanation.matchups %}
+<tr{% if loop.index <= 2 %} class="hl"{% endif %}><td data-label="{{ tx('game.m_col_unit') }}">{{ t('game.m_row', unit=t('unit_' + m.unit)|capitalize, off=m.off_team, dfn=m.def_team) }}</td><td data-label="{{ tx('game.m_col_off') }}">{{ t('game.m_rank_val', rank=m.off_rank, val=signed(m.off_epa, 3)) }}</td><td data-label="{{ tx('game.m_col_def') }}">{{ t('game.m_rank_val', rank=m.def_rank, val=signed(m.def_epa_allowed, 3)) }}</td><td data-label="{{ tx('game.m_col_comp') }}">{{ t('game.m_favors', team=m.favors, val=signed(m.combined_epa, 3)) }}</td></tr>
+{% endfor %}
+</tbody></table>
+<p class="small">{{ t('game.m_note') }}{% if g.explanation.season_week <= 4 %} {{ t('game.m_early_note', week=g.explanation.season_week) }}{% endif %}</p>
+<h3 class="sub-h">{{ t('game.qb_h') }}</h3>
+<dl class="facts">
+  <dt>{{ t('game.qb_row', team=g.away) }}</dt><dd>{{ t('game.qb_val', epa=signed(g.explanation.qb_matchup.away_epa_per_dropback, 3), db=n(g.explanation.qb_matchup.away_dropbacks, 0)) }}</dd>
+  <dt>{{ t('game.qb_row', team=g.home) }}</dt><dd>{{ t('game.qb_val', epa=signed(g.explanation.qb_matchup.home_epa_per_dropback, 3), db=n(g.explanation.qb_matchup.home_dropbacks, 0)) }}</dd>
+  <dt>{{ t('game.qb_diff_label') }}</dt><dd>{{ signed(g.explanation.qb_matchup.diff_epa_per_dropback, 3) }}</dd>
+</dl>
+<p class="small">{{ t('game.qb_note') }}</p>
+{% endif %}
+
 <h2>{{ t('game.market_h') }}</h2>
 <div class="cols2"><div>
   <dl class="facts">
@@ -65,7 +84,7 @@
 {% if g.absences %}
 <h3 class="sub-h">{{ t('game.absences_h') }}</h3>
 <ul class="reasons">{% for a in g.absences %}<li>{{ t('game.absence', player=a.player, team=a.team, status=news_status(a.status), pts=n(a.points, 1)) }}</li>{% endfor %}</ul>
-<p class="small">{{ t('game.absences_note') }}</p>
+<p class="small">{% if g.injury_cutoff_utc %}{{ t('game.absences_cutoff', when=stamp(g.injury_cutoff_utc)) }}{% else %}{{ t('game.absences_note') }}{% endif %}</p>
 {% endif %}
 {% if g.news %}
 <h3 class="sub-h">{{ t('news.title') }}</h3>
@@ -92,6 +111,46 @@
   {% endif %}{% endfor %}
   </tbody></table>
   <p class="small">{{ t('game.tech_note') }} <a href="{{ u('method') }}">{{ t('notes.method') }}</a></p>
+  {% if g.explanation %}
+  {% set ex = g.explanation %}
+  <h3 class="sub-h">{{ t('game.tech_stack_h') }}</h3>
+  <table class="stack">
+  <thead><tr><th>{{ t('game.tech_src') }}</th><th>{{ t('game.tech_stack_col_pw') }}</th><th>{{ t('game.tech_stack_col_lc') }}</th><th>{{ t('game.tech_stack_col_mw') }}</th><th>{{ t('game.tech_stack_col_mc') }}</th></tr></thead>
+  <tbody>
+  {% for c in ex.stack.components %}
+  <tr><td data-label="{{ tx('game.tech_src') }}">{{ t('comp_' + c) }}</td><td data-label="{{ tx('game.tech_stack_col_pw') }}">{{ n(ex.stack.prob_weights[loop.index0], 3) }}</td><td data-label="{{ tx('game.tech_stack_col_lc') }}">{{ signed(ex.stack.logit_contributions[c], 3) }}</td><td data-label="{{ tx('game.tech_stack_col_mw') }}">{{ n(ex.stack.margin_weights[loop.index0], 3) }}</td><td data-label="{{ tx('game.tech_stack_col_mc') }}">{{ signed(ex.stack.margin_contributions[c], 2) }}</td></tr>
+  {% endfor %}
+  <tr><td data-label="{{ tx('game.tech_src') }}">{{ t('game.tech_stack_bias') }}</td><td data-label="{{ tx('game.tech_stack_col_pw') }}">{{ t('na') }}</td><td data-label="{{ tx('game.tech_stack_col_lc') }}">{{ signed(ex.stack.prob_bias, 3) }}</td><td data-label="{{ tx('game.tech_stack_col_mw') }}">{{ t('na') }}</td><td data-label="{{ tx('game.tech_stack_col_mc') }}">{{ t('na') }}</td></tr>
+  </tbody></table>
+  <p class="small">{{ t('game.tech_stack_note') }}</p>
+
+  <h3 class="sub-h">{{ t('game.tech_lgbm_h') }}</h3>
+  <table class="fit">
+  <thead><tr><th>{{ t('game.tech_lgbm_col_grp') }}</th><th>{{ t('game.tech_lgbm_col_val') }}</th></tr></thead>
+  <tbody>
+  {% for gk in ['pass_game', 'rush_game', 'efficiency', 'qb', 'team_strength', 'situational'] %}
+  <tr><td>{{ t('grp_' + gk) }}</td><td>{{ signed(ex.lgbm_shap.groups[gk], 2) }}</td></tr>
+  {% endfor %}
+  <tr><td>{{ t('game.tech_lgbm_base') }}</td><td>{{ signed(ex.lgbm_shap.base_margin, 2) }}</td></tr>
+  <tr class="hl"><td>{{ t('game.tech_lgbm_pred') }}</td><td>{{ signed(ex.lgbm_shap.pred_margin, 2) }}</td></tr>
+  </tbody></table>
+  <p class="small">{{ t('game.tech_lgbm_note') }}</p>
+
+  <h3 class="sub-h">{{ t('game.tech_kf_h') }}</h3>
+  <dl class="facts">
+    <dt>{{ t('game.tech_kf_hfa') }}</dt><dd>{{ signed(ex.kalman.hfa, 2) }}</dd>
+    <dt>{{ t('game.tech_kf_h_vs_a', home=g.home, away=g.away) }}</dt><dd>{{ signed(ex.kalman.home_off_vs_away_def, 2) }}</dd>
+    <dt>{{ t('game.tech_kf_a_vs_h', home=g.home, away=g.away) }}</dt><dd>{{ signed(-ex.kalman.away_off_vs_home_def, 2) }}</dd>
+    <dt>{{ t('game.tech_kf_total') }}</dt><dd>{{ signed(ex.kalman.margin, 2) }}</dd>
+  </dl>
+
+  <h3 class="sub-h">{{ t('game.tech_elo_h') }}</h3>
+  <dl class="facts">
+    <dt>{{ t('game.tech_elo_team', home=g.home, hr=n(ex.elo.home_rating, 0), away=g.away, ar=n(ex.elo.away_rating, 0)) }}</dt><dd>{{ signed(ex.elo.team_margin, 2) }}</dd>
+    <dt>{{ t('game.tech_elo_hfa') }}</dt><dd>{{ signed(ex.elo.hfa_margin, 2) }}</dd>
+    <dt>{{ t('game.tech_elo_total') }}</dt><dd>{{ signed(ex.elo.margin, 2) }}</dd>
+  </dl>
+  {% endif %}
 </details>
 
 <a class="backlink" href="{{ u('week', week) }}">{{ t('game.back', week=week) }}</a>

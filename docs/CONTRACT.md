@@ -128,3 +128,18 @@ The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 5. **Reader.** `contract_io.load_week(path)` returns the v1 model for v0 and v1 files. `grade.py` and `site/build.py` read only through it. The site does not call the simulator: printed ranges come from the stored quantiles, and charts come from `headline.distribution.histogram` when it is present (v0 files have no histogram, so those game pages have no chart).
 6. **Writer.** `predict.py` writes v1 with `contract.provenance(production=True)` in the weekly workflow and `production=False` locally, plus `contract.data_snapshot()` and `contract.data_cutoff_utc()`.
 7. **Odds.** The weekly job fetches The Odds API *before* `predict`, so the consensus line is frozen in `market[]` with the snapshot. The comparison report is written afterwards from the cache, without a second API call.
+
+
+## Optional `explanation` block (PR 5)
+
+New v1 snapshots include an optional `explanation` object on each game. Existing v1 snapshots without `explanation` and legacy v0 snapshots remain valid (backward compatibility with existing snapshots; older consumers expecting strict unknown-key rejection should upgrade). The site formats `explanation` without recomputing attributions, rankings or injury values.
+
+Each diagnostic layer is kept mathematically separate:
+
+- **`stack`:** exact `model_only` stack aggregation over `["elo", "kf", "lgbm"]`. Win probability is `expit(sum_c w_c * logit(p_c) + prob_bias)` and margin is `sum_c mw_c * margin_c` (NNLS blend).
+- **`lgbm_shap`:** exact LightGBM C++ TreeSHAP contributions (`pred_contrib=True`) grouped into 6 semantic buckets (`pass_game`, `rush_game`, `efficiency`, `qb`, `team_strength`, `situational`) such that `base_margin + sum(groups) == pred_margin`. Applies to the LightGBM component only, never the full stack.
+- **`kalman`:** exact state-space margin decomposition `hfa + (home_off + away_def_allowed) - (away_off + home_def_allowed) == margin` (Kalman component only).
+- **`elo`:** exact Elo margin decomposition `team_margin + hfa_margin == margin`, where `team_margin = (home_rating - away_rating) / 25.0` (Elo component only).
+- **`matchups`:** four descriptive pre-game unit-vs-unit comparisons (`home_pass`, `away_pass`, `home_rush`, `away_rush`) computed from `features/build.py` opponent-adjusted EPA per play (`off_epa`, higher is better offense) and opponent-adjusted EPA allowed per play (`def_epa_allowed`, lower is better defense, higher is worse defense). Each game batch updates `off[u]` with `obs - opponent_pre_def[u]` and `dfn[u]` with `obs - opponent_pre_off[u]` under exponential decay (`decay=0.92`, prior shrinkage `150` pass plays / `100` rush plays, preseason retention `0.55`). Ranks `1..32` are computed strictly before each week batch with deterministic alphabetical tie-breaking; early-season weeks carry strong shrinkage towards zero. The descriptive indicator `combined_epa = off_epa + def_epa_allowed` is positive when the matchup tilts toward the offense and negative when it tilts toward the defense; it is a descriptive comparison only, not a causal effect or predicted margin contribution.
+- **`qb_matchup`:** pre-game decayed QB EPA per dropback (`qb_rate`, `decay=0.97`, prior `200` dropbacks, preseason retention `0.80`; not opponent-adjusted), decayed dropback volume and starter-change flags. No player names are invented when absent from the source schedule.
+- **`injury_context`:** serialized contextual injury diagnostics from `impact.py` (`source: "nflverse_injuries"`, `cutoff_utc`, `included_in_model: false`, `home`, `away`). Contextual only and never included in probabilities.

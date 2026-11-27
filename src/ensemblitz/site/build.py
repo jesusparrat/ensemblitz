@@ -26,7 +26,7 @@ from ensemblitz.site.names import full
 
 HERE = Path(__file__).parent
 REPO_URL = "https://github.com/jesusparrat/ensemblitz"
-FLAG_PP = 5  # whole points between our number and the market that raise a flag
+FLAG_PP = 10  # fixed >= 10 printed percentage points gap that marks a reading disagreement
 HFA = 1.8  # home-field advantage in points (Kalman hyper-parameter, see reports/backtest.json)
 ROUTES = {
     "es": {
@@ -236,7 +236,11 @@ def _game(
     def side(p: float | None) -> float | None:
         return None if p is None else (p if pick_home else 1 - p)
 
-    ab = g.get("absences") or {"home": [], "away": []}
+    expl = g.get("explanation")
+    inj_ctx = (
+        expl["injury_context"] if isinstance(expl, dict) and expl.get("injury_context") else None
+    )
+    ab = inj_ctx if inj_ctx is not None else (g.get("absences") or {"home": [], "away": []})
     market_view = {
         "spread_line": nfl.get("margin_home"),
         "total_line": nfl.get("total_line"),
@@ -274,6 +278,8 @@ def _game(
         "comps": {k: side(v) for k, v in comps.items()},
         "market": market_view,
         "why": _why(g, home, away, pick_home, abs(margin_d)),
+        "explanation": expl,
+        "injury_cutoff_utc": inj_ctx["cutoff_utc"] if inj_ctx is not None else None,
         "facts": _facts(g),
         "absences": [
             {**a, "team": team}
@@ -618,7 +624,40 @@ def build_site(root: Path | None = None, out: Path | None = None) -> Path:
 
 
 def why_text(L: Lang, g: dict) -> Markup:
-    """One plain sentence for the biggest reason, in the reader's language."""
+    """One plain sentence for the game summary, in the reader's language.
+
+    For v1 snapshots with a pre-computed ``explanation`` block, formats the largest
+    descriptive pre-game unit mismatch and the leading stack component (plus any QB
+    change) without recomputing attributions in the site layer. Legacy v0 snapshots
+    without ``explanation`` fall back to the earlier input rule.
+    """
+    expl = g.get("explanation")
+    if isinstance(expl, dict) and expl.get("matchups") and expl.get("summary"):
+        top = expl["matchups"][0]
+        summ = expl["summary"]
+        unit_label = L.text(f"unit_{top['unit']}")
+        comp_label = L.text(f"comp_short_{summ['lead_component']}")
+        qb_teams = summ.get("qb_change_teams") or []
+        if qb_teams:
+            return L.t(
+                "why_v1_qb",
+                qb_teams=" / ".join(qb_teams),
+                unit=unit_label,
+                off=top["off_team"],
+                off_rank=top["off_rank"],
+                dfn=top["def_team"],
+                def_rank=top["def_rank"],
+                comp=comp_label,
+            )
+        return L.t(
+            "why_v1",
+            unit=unit_label,
+            off=top["off_team"],
+            off_rank=top["off_rank"],
+            dfn=top["def_team"],
+            def_rank=top["def_rank"],
+            comp=comp_label,
+        )
     w = dict(g["why"])
     key = w.pop("key")
     if key == "why_trip":
