@@ -1,12 +1,17 @@
-"""Append-only prediction ledger: immutable snapshots, SHA-256 manifest, kickoff lock.
+"""Append-only prediction ledger: immutable snapshots, SHA-256 manifest, per-game kickoff lock.
 
 Every production run writes a new file. Existing snapshots are never overwritten.
-Re-doing a week requires ``--force``. No option writes a new snapshot after the week's
-first kickoff; historical corrections follow the procedure in ``docs/LEDGER.md``.
+Re-doing a week requires ``--force``. While any game in a week has ``kickoff_utc > now``,
+a new append-only snapshot may be written, with every game at or past kickoff
+(``kickoff_utc <= now``) frozen to its exact canonical JSON record from the latest
+snapshot published strictly before that game's kickoff. Once all games in the week have
+passed kickoff, no option writes a new snapshot; historical corrections follow the
+procedure in ``docs/LEDGER.md``.
 """
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -71,7 +76,7 @@ class SnapshotExistsError(LedgerError):
 
 
 class WeekLockedError(LedgerError):
-    """The week's first kickoff has passed; no new snapshot is allowed."""
+    """All games in the week have passed kickoff, or a started game was mutated."""
 
 
 @dataclass(frozen=True)
@@ -84,6 +89,18 @@ class Artifact:
     generated_at_utc: str
     first_kickoff_utc: str
     n_games: int
+    last_kickoff_utc: str = ""
+
+
+def canonical_game_json(game: dict) -> str:
+    """Canonical UTF-8 JSON serialization of one game record covering every game-level field.
+
+    Per-game immutability across snapshots is defined strictly over this canonical JSON
+    string (sorted keys, compact separators, ``ensure_ascii=False``), covering headline,
+    probabilities, margin, pick, market, explanation, absences, context and metadata.
+    Never call parsed-dict equality "byte-for-byte".
+    """
+    return json.dumps(game, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def predictions_root(root: Path | None = None) -> Path:
@@ -151,21 +168,22 @@ def unexpected_prediction_files(root: Path | None = None) -> list[Path]:
     return sorted(p for p in pred.rglob("*.json") if p not in known)
 
 
-def _read_header(path: Path) -> tuple[int, int, str, str, int]:
+def _read_header(path: Path) -> tuple[int, int, str, str, str, int]:
     doc = json.loads(path.read_text())
     games = doc.get("games") or []
     generated = doc.get("generated_at_utc") or doc.get("generated_at")
     kicks = [g["kickoff_utc"] for g in games if g.get("kickoff_utc")]
-    first = min(kicks) if kicks else generated
-    return int(doc["season"]), int(doc["week"]), generated, first, len(games)
+    first = min(kicks, key=_parse_utc) if kicks else generated
+    last = max(kicks, key=_parse_utc) if kicks else generated
+    return int(doc["season"]), int(doc["week"]), generated, first, last, len(games)
 
 
 def describe(path: Path, root: Path | None = None) -> Artifact:
     root = (root or C.ROOT).resolve()
     path = path.resolve()
-    season, week, generated, first, n = _read_header(path)
+    season, week, generated, first, last, n = _read_header(path)
     rel = path.relative_to(root).as_posix()
-    return Artifact(path, rel, season, week, K.sha256_file(path), generated, first, n)
+    return Artifact(path, rel, season, week, K.sha256_file(path), generated, first, n, last)
 
 
 def iter_artifacts(root: Path | None = None) -> list[Artifact]:
@@ -202,14 +220,31 @@ def first_kickoff_utc(
     if games:
         kicks.extend(g["kickoff_utc"] for g in games if g.get("kickoff_utc"))
     for a in artifacts_for_week(season, week, root):
-        kicks.append(a.first_kickoff_utc)
-    return min(kicks) if kicks else None
+        if a.first_kickoff_utc:
+            kicks.append(a.first_kickoff_utc)
+    return min(kicks, key=_parse_utc) if kicks else None
+
+
+def last_kickoff_utc(
+    season: int, week: int, root: Path | None = None, games: list[dict] | None = None
+) -> str | None:
+    kicks = []
+    if games:
+        kicks.extend(g["kickoff_utc"] for g in games if g.get("kickoff_utc"))
+    for a in artifacts_for_week(season, week, root):
+        last = a.last_kickoff_utc or a.first_kickoff_utc
+        if last:
+            kicks.append(last)
+    return max(kicks, key=_parse_utc) if kicks else None
 
 
 def _parse_utc(stamp: str) -> datetime:
     if stamp.endswith("Z"):
         stamp = stamp[:-1] + "+00:00"
     return datetime.fromisoformat(stamp).astimezone(UTC)
+
+
+parse_utc = _parse_utc
 
 
 def week_is_locked(
@@ -219,11 +254,91 @@ def week_is_locked(
     root: Path | None = None,
     games: list[dict] | None = None,
 ) -> bool:
-    first = first_kickoff_utc(season, week, root, games)
-    if first is None:
+    """True only when every game in the week has passed kickoff (``kickoff_utc <= now``)."""
+    last = last_kickoff_utc(season, week, root, games)
+    if last is None:
         return False
     now = now or datetime.now(UTC)
-    return _parse_utc(first) <= now.astimezone(UTC)
+    return _parse_utc(last) <= now.astimezone(UTC)
+
+
+def latest_pre_kickoff_games(
+    season: int, week: int, root: Path | None = None
+) -> dict[str, tuple[dict, str, str]]:
+    """For each game in ``(season, week)``, its raw record from the latest snapshot
+    published strictly before that game's ``kickoff_utc``.
+
+    Tie-breaking uses ``(publication_time_utc, artifact.rel)``.
+    Returns ``{game_id: (game_dict, published_utc, rel)}``.
+    """
+    best: dict[str, tuple[datetime, str, str, dict]] = {}
+    for art in artifacts_for_week(season, week, root):
+        doc = json.loads(art.path.read_text())
+        pub = publication_time_utc(art, root)
+        pub_dt = _parse_utc(pub)
+        for g in doc.get("games") or []:
+            kick = g.get("kickoff_utc")
+            if not kick:
+                continue
+            if pub_dt >= _parse_utc(kick):
+                continue
+            gid = g["game_id"]
+            prev = best.get(gid)
+            if prev is None or (pub_dt, art.rel) > (prev[0], prev[1]):
+                best[gid] = (pub_dt, art.rel, pub, g)
+    return {gid: (g, pub, rel) for gid, (_dt, rel, pub, g) in best.items()}
+
+
+def freeze_started_games(
+    season: int,
+    week: int,
+    games: list[dict],
+    *,
+    now: datetime | None = None,
+    root: Path | None = None,
+) -> list[dict]:
+    """Freeze every game with ``kickoff_utc <= now`` to its latest pre-kickoff record.
+
+    Also preserves already-started games from earlier pre-kickoff snapshots that are no
+    longer in ``games`` (for example a Thursday game already marked played by Friday).
+    Raises :class:`WeekLockedError` if all games have passed kickoff or if a started game
+    has no prior snapshot published strictly before its kickoff.
+    """
+    now_utc = (now or datetime.now(UTC)).astimezone(UTC)
+    pre_kickoff = latest_pre_kickoff_games(season, week, root=root)
+    frozen_out: list[dict] = []
+    seen: set[str] = set()
+
+    for gid, (frozen_game, _pub, _rel) in sorted(
+        pre_kickoff.items(), key=lambda kv: (kv[1][0].get("kickoff_utc", ""), kv[0])
+    ):
+        if _parse_utc(frozen_game["kickoff_utc"]) <= now_utc:
+            frozen_out.append(copy.deepcopy(frozen_game))
+            seen.add(gid)
+
+    for g in games:
+        gid = g["game_id"]
+        if gid in seen:
+            continue
+        if _parse_utc(g["kickoff_utc"]) <= now_utc:
+            if gid not in pre_kickoff:
+                raise WeekLockedError(
+                    f"{season} week {week}: game {gid} kicked off at {g['kickoff_utc']} "
+                    "with no prior pre-kickoff snapshot."
+                )
+            frozen_out.append(copy.deepcopy(pre_kickoff[gid][0]))
+            seen.add(gid)
+        else:
+            frozen_out.append(g)
+            seen.add(gid)
+
+    if not any(_parse_utc(g["kickoff_utc"]) > now_utc for g in frozen_out):
+        last = last_kickoff_utc(season, week, root, frozen_out)
+        raise WeekLockedError(
+            f"{season} week {week} is locked: all games have passed kickoff (last kickoff {last}). "
+            "A historical correction follows docs/LEDGER.md; --force cannot unlock it."
+        )
+    return frozen_out
 
 
 def load_manifest(root: Path | None = None) -> dict[str, str]:
@@ -387,28 +502,61 @@ def write_snapshot(
     root: Path | None = None,
     force: bool = False,
     now: datetime | None = None,
+    freeze_started: bool = False,
 ) -> Path:
     """Write a new immutable snapshot and add it to the manifest. Never overwrites.
 
-    Refuses if the week already has a snapshot and ``force`` is false, and refuses
-    unconditionally once the week's first kickoff has passed.
+    Refuses if the week already has a snapshot and ``force`` is false, refuses
+    unconditionally once all games in the week have passed kickoff, and enforces
+    per-game canonical immutability for every game with ``kickoff_utc <= now``.
+    When ``freeze_started=True``, games with ``kickoff_utc <= now`` are automatically
+    replaced with their frozen pre-kickoff canonical records before writing.
     """
     root = (root or C.ROOT).resolve()
     season, week = int(doc["season"]), int(doc["week"])
-    games = doc.get("games") or []
-    now = now or datetime.now(UTC)
-    if week_is_locked(season, week, now=now, root=root, games=games):
-        first = first_kickoff_utc(season, week, root, games)
+    games = list(doc.get("games") or [])
+    now_utc = (now or datetime.now(UTC)).astimezone(UTC)
+    if week_is_locked(season, week, now=now_utc, root=root, games=games):
+        last = last_kickoff_utc(season, week, root, games)
         raise WeekLockedError(
-            f"{season} week {week} is locked: first kickoff {first} has passed. "
+            f"{season} week {week} is locked: all games have passed kickoff (last kickoff {last}). "
             "A historical correction follows docs/LEDGER.md; --force cannot unlock it."
         )
     existing = artifacts_for_week(season, week, root)
     if existing and not force:
         raise SnapshotExistsError(
             f"{season} week {week} already has {len(existing)} snapshot(s). "
-            "Pass --force to write a new one (only before the first kickoff)."
+            "Pass --force to write a new one while open games remain."
         )
+    if freeze_started:
+        games = freeze_started_games(season, week, games, now=now_utc, root=root)
+        doc = {**doc, "games": games}
+
+    pre_kickoff = latest_pre_kickoff_games(season, week, root=root)
+    incoming_ids = {g["game_id"] for g in games}
+    for gid, (frozen_game, _pub, frozen_rel) in pre_kickoff.items():
+        if _parse_utc(frozen_game["kickoff_utc"]) <= now_utc and gid not in incoming_ids:
+            raise WeekLockedError(
+                f"{season} week {week}: started game {gid} is missing from the new snapshot; "
+                f"must preserve frozen canonical record from {frozen_rel}."
+            )
+    for g in games:
+        kick = g.get("kickoff_utc")
+        if not kick or _parse_utc(kick) > now_utc:
+            continue
+        gid = g["game_id"]
+        if gid not in pre_kickoff:
+            raise WeekLockedError(
+                f"{season} week {week}: started game {gid} (kickoff {kick}) "
+                "has no prior pre-kickoff snapshot."
+            )
+        frozen_game, _pub, frozen_rel = pre_kickoff[gid]
+        if canonical_game_json(g) != canonical_game_json(frozen_game):
+            raise WeekLockedError(
+                f"{season} week {week}: started game {gid} differs from its frozen canonical "
+                f"record in {frozen_rel}."
+            )
+
     generated = doc["generated_at_utc"]
     payload = json.dumps(doc, indent=1) + "\n"
     digest = hashlib.sha256(payload.encode()).hexdigest()
@@ -483,16 +631,21 @@ __all__ = [
     "WeekLockedError",
     "add_to_manifest",
     "artifacts_for_week",
+    "canonical_game_json",
     "describe",
     "first_kickoff_utc",
     "first_publication_utc",
+    "freeze_started_games",
     "iter_artifacts",
     "iter_latest",
     "iter_snapshot_paths",
+    "last_kickoff_utc",
     "latest_artifact",
+    "latest_pre_kickoff_games",
     "legacy_week_path",
     "load_manifest",
     "manifest_path",
+    "parse_utc",
     "publication_time_utc",
     "rebuild_historical",
     "refresh_manifest",

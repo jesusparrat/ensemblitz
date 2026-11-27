@@ -34,7 +34,7 @@ def _view(g: dict, published_at: str | None = None, headline_kind: str | None = 
         pm = K.margin_home(h) if kind == "model_only" else g["ensemble"]["margin_home"]
         pt = K.total(h) if kind == "model_only" else g["ensemble"]["total"]
         pick = (
-            K.pick(h)
+            K.pick(g)
             if kind == "model_only"
             else (g["home_team"] if g["ensemble"]["home_win_prob"] >= 0.5 else g["away_team"])
         )
@@ -94,7 +94,7 @@ def grade_games(
         if g["game_id"] not in res.index:
             continue
         s = res.loc[g["game_id"]]
-        if pd.isna(s["result"]) or g["generated_at"] >= g["kickoff_utc"]:
+        if pd.isna(s["result"]) or L.parse_utc(g["generated_at"]) >= L.parse_utc(g["kickoff_utc"]):
             continue
         margin = float(s["result"])
         headline = g.get("headline", LEGACY_HEADLINE)
@@ -135,30 +135,50 @@ def grade_games(
     return out
 
 
-def run_grade(root: Path | None = None) -> dict:
-    """Grade the latest snapshot of each game that was published before kickoff."""
+def select_pre_kickoff_picks(
+    root: Path | None = None,
+) -> dict[str, tuple[dict, str, str, str, int, int]]:
+    """Select each game's latest snapshot published strictly before ``g['kickoff_utc']``.
+
+    Tie-breaking uses ``(published_dt, art.rel)``. Headline kind is taken per game from
+    ``loaded.headline_kinds[game_id]``. Games with no snapshot published strictly before
+    kickoff are omitted (ungradable) and never fall back to a post-kickoff snapshot.
+
+    Returns ``{game_id: (game, published_utc, art_rel, headline_kind, season, week)}``.
+    """
     root = (root or C.ROOT).resolve()
-    sched = load.load_schedules()
-    # One official pick per game: the latest snapshot published before kickoff.
-    by_id: dict[str, tuple[dict, str, str, int, int]] = {}
+    by_id: dict[str, tuple[dict, str, str, str, int, int]] = {}
     for art in L.iter_artifacts(root):
         loaded = contract_io.load_week(art.path)
         published = L.publication_time_utc(art, root)
+        pub_dt = L.parse_utc(published)
         for g in loaded.doc["games"]:
-            if published >= g["kickoff_utc"]:
+            if pub_dt >= L.parse_utc(g["kickoff_utc"]):
                 continue
-            prev = by_id.get(g["game_id"])
-            if prev is None or (published, art.rel) > (prev[1], ""):
-                by_id[g["game_id"]] = (
+            gid = g["game_id"]
+            kind = loaded.headline_kinds.get(gid, loaded.headline_kind)
+            prev = by_id.get(gid)
+            if prev is None or (pub_dt, art.rel) > (L.parse_utc(prev[1]), prev[2]):
+                by_id[gid] = (
                     g,
                     published,
-                    loaded.headline_kind,
+                    art.rel,
+                    kind,
                     loaded.doc["season"],
                     loaded.doc["week"],
                 )
+    return by_id
+
+
+def run_grade(root: Path | None = None, schedule: pd.DataFrame | None = None) -> dict:
+    """Grade the latest snapshot of each game that was published strictly before kickoff."""
+    resolved_root = (root or C.ROOT).resolve()
+    results_dir = (resolved_root / "results") if root is not None else C.RESULTS_DIR
+    sched = schedule if schedule is not None else load.load_schedules()
+    by_id = select_pre_kickoff_picks(resolved_root)
     # Attach season/week for the grader and group by week for the results files.
     buckets: dict[tuple[int, int], list[tuple[dict, str, str]]] = {}
-    for _gid, (g, published, kind, season, week) in by_id.items():
+    for _gid, (g, published, _rel, kind, season, week) in by_id.items():
         g = {**g, "season": season, "week": week}
         buckets.setdefault((season, week), []).append((g, published, kind))
     graded: list[dict] = []
@@ -168,14 +188,14 @@ def run_grade(root: Path | None = None) -> dict:
         kinds = [k for _, _, k in items]
         rows = grade_games(games, sched, published_at=pubs, headline_kind=kinds)
         if rows:
-            d = C.RESULTS_DIR / str(season)
+            d = results_dir / str(season)
             d.mkdir(parents=True, exist_ok=True)
             (d / f"week{week:02d}.json").write_text(json.dumps(rows, indent=1))
             graded += rows
     summary = summarize(graded)
-    C.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    (C.RESULTS_DIR / "summary.json").write_text(json.dumps(summary, indent=1))
-    (C.RESULTS_DIR / "summary.md").write_text(summary_md(summary))
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "summary.json").write_text(json.dumps(summary, indent=1))
+    (results_dir / "summary.md").write_text(summary_md(summary))
     return summary
 
 
@@ -233,4 +253,4 @@ def summary_md(s: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-__all__ = ["grade_games", "run_grade"]
+__all__ = ["grade_games", "run_grade", "select_pre_kickoff_picks"]

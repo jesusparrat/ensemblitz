@@ -1,20 +1,52 @@
 # Prediction ledger
 
-This is the procedure that keeps published picks append-only. The contract itself is in [`CONTRACT.md`](CONTRACT.md).
+This is the procedure that keeps published picks append-only and per-game immutable. The contract itself is in [`CONTRACT.md`](CONTRACT.md).
 
-## Snapshots
+## Snapshots and per-game immutability
 
 - Every run writes a new file: `predictions/<season>/week<WW>/<YYYYMMDDTHHMMSSZ>.json` (colon-free ISO-8601 basic UTC for Windows NTFS compatibility; the `generated_at_utc` field inside the JSON remains extended ISO-8601 `YYYY-MM-DDTHH:MM:SSZ`).
 - Existing snapshots are never overwritten. The v0 files `predictions/2026/week11.json` and `week12.json` stay as they were published and are never migrated.
 - Re-doing a week that already has a snapshot requires `ensemblitz predict --force`.
-- **No option**, including `--force`, writes a new snapshot after the week's first kickoff. Mid-week updates of remaining games are out of scope until a later PR decides otherwise.
+- **Per-game kickoff freeze:** while at least one game in `(season, week)` still has `kickoff_utc > now`, a new append-only snapshot may be written. Every game in that week whose `kickoff_utc <= now` is automatically frozen to its exact canonical JSON record from the latest snapshot published strictly before that game's kickoff.
+- **Canonical game serialization contract:** per-game immutability is defined strictly over `ledger.canonical_game_json(game)`:
+  ```python
+  json.dumps(game, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+  ```
+  This covers every game-level field in the record (headline, probabilities, margin, pick, ensemble, components, market, explanation, absences, context, news adjustment and metadata). Mutating any single field of a started game, or dropping a started game, fails both `ledger.write_snapshot()` (`WeekLockedError`) and `scripts/verify_integrity.py`.
+- **No option**, including `--force`, writes a new snapshot once all games in the week have passed kickoff (`kickoff_utc <= now` for every game).
+- **Grading:** `grade.py` selects, per game, the latest snapshot published strictly before `g["kickoff_utc"]` using `(publication_time_utc, artifact.rel)` tie-breaking and per-game `headline_kinds[game_id]`. If no snapshot was published strictly before a game's kickoff, that game is skipped (ungradable) and never falls back to a post-kickoff snapshot.
 - The HTML site and the grader read through `contract_io.load_week`. The site does not re-simulate or recompute probabilities, margins, totals or weights.
+
+## Scheduled publication cadence
+
+`.github/workflows/weekly.yml` runs on two scheduled slots (plus `workflow_dispatch`):
+
+- **Tuesday 07:00 UTC:** initial weekly snapshot for the upcoming slate.
+- **Friday 22:00 UTC:** mid-week refresh for games whose kickoff is still in the future, freezing Thursday Night Football (and any other already-started game) to its exact canonical pre-kickoff record.
+
+Friday 22:00 UTC follows the usual Friday injury report for Sunday games. It does not guarantee final-report coverage for Thursday, Monday, Saturday, international, or other non-Sunday games. When no open games remain (for example in the off-season), the workflow skips the Odds API fetch and prediction run cleanly.
 
 ## Manifest
 
-`predictions/MANIFEST.json` stores only a map of `path -> SHA-256`. It has no `first_commit` field and does not include its own hash. The time of publication is proven by git history: `scripts/verify_integrity.py` looks up the first commit that contained those bytes (by blob, so a copy of a historical file still resolves to the original publication) and checks that it is before kickoff.
+`predictions/MANIFEST.json` stores only a map of `path -> SHA-256`. It has no `first_commit` field and does not include its own hash. The time of publication is proven by git history: `scripts/verify_integrity.py` looks up the first commit that contained those bytes (by blob, so a copy of a historical file still resolves to the original publication) and verifies, across all snapshots of each `(season, week)` ordered by publication time, that every game at or past kickoff matches its canonical pre-kickoff record.
 
-`verify_integrity.py` runs in CI and in the weekly job before the commit. It fails on a modified, deleted or substituted artifact, and rejects snapshot paths containing `:` so the repository stays cloneable on Windows NTFS. Adding a new week only extends the manifest; existing hashes must not change.
+`verify_integrity.py` runs in CI and in the weekly job before the commit. It fails on a modified, deleted, substituted or post-kickoff mutated artifact, and rejects snapshot paths containing `:` so the repository stays cloneable on Windows NTFS. Adding a new snapshot only extends the manifest; existing hashes must not change.
+
+## GitHub Artifact Attestations
+
+After `validate_outputs.py`, `verify_integrity.py --base-ref HEAD`, and the commit/push succeed in `.github/workflows/weekly.yml`, the workflow invokes `actions/attest` (v4, pinned by commit SHA) to generate signed SLSA build provenance attestations for **both**:
+
+1. The finalized `predictions/MANIFEST.json`.
+2. Every exact new snapshot file added to `predictions/MANIFEST.json` by that run.
+
+Neither file is modified after attestation. Anyone can verify either artifact independently with the GitHub CLI:
+
+```bash
+gh attestation verify predictions/MANIFEST.json --owner jesusparrat
+gh attestation verify predictions/<season>/week<WW>/<YYYYMMDDTHHMMSSZ>.json --owner jesusparrat
+```
+
+**Scope of attestations:** attestations prove **artifact integrity** (exact file bytes) and **workflow provenance** (which repository, commit and GitHub Actions workflow run produced those files). They do **not** prove statistical correctness, calibration, feature quality or model validity.
 
 ## Historical snapshots
 
