@@ -39,15 +39,14 @@ ES: dict[str, str] = {
     "nav.lang_aria": "Read this page in English",
     "nav.theme_aria": "Cambiar entre tema claro y oscuro",
     "foot.generated": "Últimos picks guardados el {when}. Se guardan antes del saque y no se editan.",
-    "foot.license": "Licencia MIT. Tipografías Archivo, Doto e IBM Plex Mono con licencia SIL OFL.",
+    "foot.license": "Licencia MIT. Tipografías Archivo e IBM Plex Mono con licencia SIL OFL.",
     # week page
     "week.title": "Jornada {week}",
-    "week.kicker": "NFL, temporada {season}",
     "week.h1": "Jornada {week}",
     "week.lede": (
-        "Para cada partido: quién gana, con qué probabilidad, cuántos puntos se esperan de cada "
-        "equipo, el margen y el total. Es la predicción de nuestro modelo, sin copiar al mercado. "
-        "Horas de Madrid."
+        "Temporada NFL {season}. Para cada partido: quién gana, con qué probabilidad, cuántos puntos "
+        "se esperan de cada equipo, el margen y el total. Predicción de nuestro modelo sin copiar "
+        "al mercado. Horas de Madrid."
     ),
     "week.read_aria": "Resumen de la jornada",
     "week.read_games": "partidos en la jornada",
@@ -62,7 +61,7 @@ ES: dict[str, str] = {
         "Puntos esperados por equipo y, entre paréntesis, el rango que cubre el 80\u202f% de los "
         "resultados simulados."
     ),
-    "week.legend_flag": "Amarillo: nuestra probabilidad se separa {n} puntos o más de la del mercado.",
+    "week.legend_flag": "Filete amarillo: nuestra probabilidad se separa {n} puntos o más de la del mercado.",
     "week.legacy": (
         "Algunos partidos de esta jornada se guardaron antes del cambio de modelo y muestran el "
         "pick de entonces, que mezclaba modelo y mercado. Se indica en cada uno."
@@ -105,7 +104,7 @@ ES: dict[str, str] = {
     "news.source": "fuente",
     # game page
     "game.description": "{away} en {home}: gana {fav} con un {p}. Puntos esperados, margen, total y contexto.",
-    "game.kicker": "Jornada {week}, temporada {season}",
+    "game.week_ctx": "Jornada {week}, temporada {season}.",
     "game.tz_note": "(hora de Madrid)",
     "game.read_aria": "Resumen del partido",
     "game.margin_of": "margen, {txt}",
@@ -210,8 +209,7 @@ ES: dict[str, str] = {
     "model_ens": "Modelo mezclado con el mercado",
     # history
     "hist.title": "Historial",
-    "hist.kicker": "Picks guardados antes del saque",
-    "hist.lede": "Qué dijimos antes de cada partido y qué pasó. Sin cambiar nada después.",
+    "hist.lede": "Picks guardados antes del saque: qué dijimos antes de cada partido y qué pasó, sin cambiar nada después.",
     "hist.read_aria": "Resumen del historial",
     "hist.read_hits": "picks acertados",
     "hist.read_pct": "de acierto",
@@ -275,7 +273,6 @@ ES: dict[str, str] = {
     "empty.lede": "Aún no hay predicciones publicadas. Se generan cada martes por la mañana.",
     # method
     "method.title": "Método",
-    "method.kicker": "Cómo funciona y qué tan bien lo hace",
     "method.lede": "Qué número mostramos, de dónde sale, cómo se mide y, sobre todo, lo que todavía no sabemos hacer.",
     "method.number_h": "El número que mostramos",
     "method.number_1": (
@@ -375,6 +372,10 @@ ES: dict[str, str] = {
         "tampoco demuestra ventaja frente al cierre. Informe completo:"
     ),
     "method.verdict_audit": "Auditoría estadística PR 2:",
+    "method.verdict_bt": (
+        "¿Le ganamos a la línea de cierre? No. La mezcla tiene un log loss de {ens} frente a {mkt} "
+        "del cierre: no demuestra ventaja frente al mercado. Tabla completa:"
+    ),
     "method.limits_h": "Límites",
     "method.limit_1": "El objetivo realista es un 65 a 70\u202f% de aciertos directos. Nadie con un método público está cerca del 90\u202f%; quien lo promete suele usar datos del futuro sin darse cuenta.",
     "method.limit_2": "No tenemos ventaja demostrada sobre el mercado. Para ganarle hace falta información que él no tenga y probarla fuera de muestra.",
@@ -424,14 +425,13 @@ EN: dict[str, str] = {
     "nav.lang_aria": "Leer esta página en español",
     "nav.theme_aria": "Switch between light and dark theme",
     "foot.generated": "Latest picks saved {when}. Picks are saved before kickoff and never edited.",
-    "foot.license": "MIT license. Typefaces Archivo, Doto and IBM Plex Mono under the SIL OFL.",
+    "foot.license": "MIT license. Typefaces Archivo and IBM Plex Mono under the SIL OFL.",
     "week.title": "Week {week}",
-    "week.kicker": "NFL, {season} season",
     "week.h1": "Week {week}",
     "week.lede": (
-        "For every game: who wins, how likely that is, how many points we expect from each team, "
-        "the margin and the total. This is our model's own forecast, not a copy of the betting "
-        "market. All times ET."
+        "{season} NFL season. For every game: who wins, how likely that is, how many points we expect "
+        "from each team, the margin and the total. Our model's own forecast, not a copy of the "
+        "betting market. All times ET."
     ),
     "week.read_aria": "Week summary",
     "week.read_games": "games this week",
@@ -446,7 +446,7 @@ EN: dict[str, str] = {
         "Expected points per team and, in brackets, the range covering 80% of the simulated "
         "outcomes."
     ),
-    "week.legend_flag": "Yellow: our probability is {n} points or more away from the market's.",
+    "week.legend_flag": "Yellow bar: our probability is {n} points or more away from the market's.",
     "week.legacy": (
         "Some games this week were saved before the model change and show the pick of that time, "
         "which blended the model with the market. Each one says so."
@@ -486,7 +486,7 @@ EN: dict[str, str] = {
     "news.note": "Context: not applied to the forecast figures.",
     "news.source": "source",
     "game.description": "{away} at {home}: {fav} wins with {p}. Expected points, margin, total and context.",
-    "game.kicker": "Week {week}, {season} season",
+    "game.week_ctx": "Week {week}, {season} season.",
     "game.tz_note": "ET",
     "game.read_aria": "Game summary",
     "game.margin_of": "margin, {txt}",
@@ -586,8 +586,7 @@ EN: dict[str, str] = {
     "model_sim": "Simulator (Kalman parameters)",
     "model_ens": "Model blended with the market",
     "hist.title": "Record",
-    "hist.kicker": "Picks saved before kickoff",
-    "hist.lede": "What we said before each game and what happened. Nothing changed afterwards.",
+    "hist.lede": "Picks saved before kickoff: what we said before each game and what happened, with nothing changed afterwards.",
     "hist.read_aria": "Record summary",
     "hist.read_hits": "picks correct",
     "hist.read_pct": "accuracy",
@@ -647,7 +646,6 @@ EN: dict[str, str] = {
     "empty.h1": "No week yet",
     "empty.lede": "No predictions have been published yet. They are generated every Tuesday morning.",
     "method.title": "Method",
-    "method.kicker": "How it works and how well it does",
     "method.lede": "Which number we show, where it comes from, how it is measured and, above all, what we cannot do yet.",
     "method.number_h": "The number we show",
     "method.number_1": (
@@ -745,6 +743,10 @@ EN: dict[str, str] = {
         "shows no robust edge over the closing line either. Full report:"
     ),
     "method.verdict_audit": "PR 2 statistical audit:",
+    "method.verdict_bt": (
+        "Do we beat the closing line? No. The blend has a log loss of {ens} against {mkt} for the "
+        "closing line: no demonstrated edge over the market. Full table:"
+    ),
     "method.limits_h": "Limits",
     "method.limit_1": "A realistic target is 65 to 70% straight-up accuracy. Nobody with a public method is near 90%; whoever promises it is usually using future data without noticing.",
     "method.limit_2": "We have no demonstrated edge over the market. Beating it takes information it lacks, proven out of sample.",

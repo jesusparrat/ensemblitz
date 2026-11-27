@@ -1,140 +1,75 @@
 # DESIGN.md, ensemblitz
 
-Status: visual direction approved by Jesús (grey paper, condensed Archivo, a single flag-yellow accent). Web v2 changes the structure, not the look: one clear card per game, in two languages. Implemented in `src/ensemblitz/site/`. Any change of visual direction is his call (antislop R-37). Agent rules are in `AGENTS.md` and `.cursor/rules/antislop.mdc`.
+Status: PR 4 visual identity approved by Jesús. Editorial sports-data panel on neutral cool grey (`#F3F4F6`), two self-hosted typefaces (`Archivo` and `IBM Plex Mono`), full-bleed hero band without eyebrow kickers, and a left vertical yellow signal bar for market disagreement. Implemented in `src/ensemblitz/site/`. Any change of visual direction requires Jesús's approval (antislop R-37). Agent rules live in `AGENTS.md` and `.cursor/rules/antislop.mdc`.
 
-## 1. Design reading
+## 1. Design direction
 
-A forecast panel for NFL fans who check on Sunday night (Madrid time), mostly from a phone, in the language of a **stadium scoreboard and a betting notepad**. Dial: **ENERGY 3 / RHYTHM 3 / MOTION 2**.
+An NFL forecast panel read on desktop and phone, combining the sobriety of an editorial stat sheet with clear hierarchy. Dial: **ENERGY 3 / RHYTHM 3 / MOTION 2**.
 
-- ENERGY 3: week headline at up to 164 px in black condensed, dot-matrix numerals, one flag yellow that only appears where we differ from the market.
-- RHYTHM 3: asymmetric 7/5 header, dense list grouped by day, two-column footnotes. No two sections share a composition.
-- MOTION 2: a sliding navigation indicator, hover on rows, nothing in a loop.
+- **Hard rules (enforced in CI by `scripts/check_site.py`):**
+  - **Max 2 font families:** `Archivo` (editorial headlines, UI, prose) and `IBM Plex Mono` (all data figures, probabilities, summary readouts, dates). No `Doto`, no `Arial`, no third family.
+  - **Max 3 body text sizes:** `13px` (metadata, table cells, captions, SVG labels), `15px` (body copy, controls, facts, navigation), `17px` (hero lede and subheads). Display headlines (`34px` to `136px` in condensed `Archivo`) and featured data readouts (`36px` to `44px` in `IBM Plex Mono`) are documented separately as display/readout roles.
+  - **Minimum 13 px everywhere:** zero visible text below `13px`, including table sort indicators, tags, mobile labels, and SVG chart labels.
+  - **No pills:** no capsule badges or `border-radius` above `2px` (`--r-s`).
+  - **No eyebrow kickers:** no `<small>` kicker stacked above `<h1>`. Context such as season or week sits naturally in the lead copy below `<h1>`.
+  - **No nested cards:** game rows sit directly on dotted rules; flagged games lift onto `--surface` with a `4px` left vertical yellow bar rather than boxes inside boxes.
+  - **No beige and no purple:** neutral cool grey paper (`#F3F4F6`) and slate dark mode (`#0E1014`).
+  - **No official NFL logos or derivatives.**
 
-Identity question: with the name removed it is still ensemblitz because of three things: dot-matrix numerals, extreme condensed headlines, and the yellow flag chip.
+## 2. Typography (self-hosted SIL OFL 1.1 woff2, no CDN)
 
-## 2. What web v2 changes and what it keeps
+| Role | Font | Sizes | Use |
+|---|---|---|---|
+| Display headlines | **Archivo** (variable, `wdth 62`, `wght 800`) | `34px`, `40px`, `clamp(56px..136px)` | Hero `<h1>`, day/section `<h2>`, card matchup `<h3>` |
+| Body and UI | **Archivo** (`wdth 100`, `wght 400-700`) | `13px`, `15px`, `17px` | Metadata/captions (`13px`), prose/controls (`15px`), lede (`17px`) |
+| Featured readouts | **IBM Plex Mono** (`wght 600`, tabular) | `36px`, `44px` | Hero summary counters and card win probability |
+| Inline figures | **IBM Plex Mono** (`wght 400-600`, tabular) | `13px`, `15px`, `17px` | Kickoff times, points, ranges, margins, totals, table cells, dates |
 
-Keeps: near-black ink on light paper, one accent, table-like rows with thin rules, mono for figures, sober tone, Madrid times, dark mode, the typefaces and every colour token.
+## 3. Colour (3 neutrals + 1 signal accent)
 
-Changes (all from review feedback):
-- **One number per question.** Each game answers, in this order: who wins and how likely, expected points per team with an 80% range, margin, total, one plain sentence of why. The market sits beside it as a reference.
-- **The headline is the model on its own** (no market input). The market is shown as "Market: 66% (us +2)". The blended ensemble lives only in the technical detail of a game page, in history, and on the Method page.
-- **The 20-cell bar is gone.** A single continuous bar fills to the winner's probability, with a hairline at 50%.
-- **No exact score on the front page.** The example score appears only on the game page, labelled as an example.
-- **No jargon on week pages**: no "ensemble", "pp", "sin comisión", simulation counts or "how to read the table". It all lives on the Method page and in its glossary.
-- **No injury counts.** Only notable absences, per player, in points of value, labelled as context that is not part of any number.
-- **No per-bookmaker prices, no expected value.** Only the consensus line.
-- **Two languages.** Spanish at the root, English under `/en/`, a switch in the header that behaves like the theme toggle and is remembered.
-- The "flags" section is gone. A flagged game gets a yellow chip on its own card, and the filter chips (All, Where we differ from the market) exist only when there is something to filter.
-
-## 3. Typography (all free, SIL OFL 1.1, self-hosted woff2, no Google CDN)
-
-| Role | Font | Why (R-06) |
-|---|---|---|
-| Headlines, teams, UI, text | **Archivo** (variable, wght 100-900, wdth 62-125) | Sports-heritage grotesque. The width axis gives one family with a condensed voice for headlines and team codes (wdth 62, weight 800) and normal width for text. Not one of the default list (Inter, Geist, Space Grotesk). |
-| Table figures (points, %, margin, time) | **IBM Plex Mono** 400/500/600 | Tabular figures so columns align. Small figures only, never headlines. |
-| Big readouts | **Doto** (variable, dot matrix) | The stadium board. One repeated voice: the win probability on a card and the figures in the header. |
-
-Rules:
-- Doto only at 32 px or more, digits only, always with a text equivalent (`aria-label`). Never in paragraphs.
-- Headlines in sentence case, `letter-spacing` 0 to -0.01em. No tracked small caps.
-- Scale (px): 12 (minimum, metadata only), 13, 15 (body), 18 (lede), 22, 28, 34 (card matchup), 40 (card probability), 44, 164 (week headline, `clamp(88px, 12.4vw, 164px)`).
-
-## 4. Colour (cap R-29: 3 neutrals + 1 accent)
-
-WCAG 2.x contrast is checked in CI by `scripts/check_site.py`, which reads the tokens from `site/static/style.css`.
+WCAG 2.x contrast is enforced in CI by `scripts/check_site.py`.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--paper` | #F4F4F2 | #0E0F11 | Background |
-| `--surface` | #FFFFFF | #17181B | Cards and row hover |
-| `--ink` | #101113 | #F2F2EF | Text, bar fill, strong rules |
-| `--ink-2` | #50525A | #A6A8AF | Secondary text |
-| `--ink-3` | #666870 | #8E9098 | Minimal metadata |
-| `--rule` | #D5D5D0 | #2A2B30 | Decorative rules |
-| `--cell-off` | #C9C9C3 | #2E2F34 | The track of the probability bar (decorative, the value is always text) |
-| `--flag` | #FFD60A | #FFD60A | Disagreement with the market. Fill only, with `--on-flag` text on top |
-| `--on-flag` | #101113 | #101113 | Text on yellow |
+| `--paper` | `#F3F4F6` | `#0E1014` | Page background (cool neutral grey) |
+| `--surface` | `#FFFFFF` | `#161920` | Full-bleed hero band, top bar, flagged game row, table highlight |
+| `--ink` | `#111318` | `#F3F4F6` | Primary text, headlines, probability bar fill, strong rules |
+| `--ink-2` | `#4B5260` | `#A7AFBE` | Secondary text, ledes, captions, table headers |
+| `--ink-3` | `#5C6473` | `#8C95A6` | Minimal metadata, dotted dividers |
+| `--rule` | `#D4D8DF` | `#282D38` | Hairline borders, SVG gridlines |
+| `--cell-off` | `#CFD5DE` | `#2C323F` | Probability bar track (decorative) |
+| `--bar-other` | `#9AA2B1` | `#4D5566` | Non-picked histogram bars |
+| `--flag` | `#FFD60A` | `#FFD60A` | Left vertical market-disagreement signal bar (`4px` row/counter, `3px` inline) and logo accent |
+| `--on-flag` | `#111318` | `#111318` | High-contrast ink pairing on yellow |
 
 Rules:
-- Yellow is never text on a light background (1.3:1). Always a fill with ink on top.
-- No semantic green or red for the sign of a difference: the sign (+/−) and the number say it, so nothing depends on colour.
-- Theme: light by default, `prefers-color-scheme` respected, manual button. Dark exists because games fall between 19:00 and 03:00 in Madrid.
-- Forbidden: gradients, light orbs, glow, glass, a second accent.
+- Yellow is never text on light backgrounds. On light mode it acts as a vertical signal rule beside high-contrast `--ink` text that carries the numeric value.
+- No semantic green or red for sign differences: the explicit sign (`+` / `−`) and team abbreviation carry the meaning.
+- Forbidden: gradients, glow, glassmorphism, beige, purple, or a second accent.
 
-## 5. Grid, spacing and shape
+## 4. Layout, hero and components
 
-- Container 1240 px, gutter 24 px (16 px on mobile). Header in 12 columns, 7/5 split.
-- Spacing: 4, 8, 12, 16, 24, 32, 48, 72, 112. The rhythm changes on purpose: 72 between big blocks, 48 before each day, 16 inside a row.
-- Radii: 2 px on controls and chips, 6 px on cards. No pills.
-- Rules: 1 px solid ink for day headers, 1 px dotted between rows. Dotted repeats the dot-matrix motif and is the only background "pattern".
-- Breakpoints: 1100 (card layout), 900 (header to one column), 640 (phone). Touch targets 44 px minimum.
+- **Container:** `1240px` max width, `24px` gutter (`16px` at `<= 640px`).
+- **Full-bleed hero (`.hero-band`):** sits outside `<main class="wrap">` on `--surface` with a bottom `1px` `--ink` rule; inner `.wrap.head` aligns cleanly with page content across `375`, `768`, `1280`, and `1440px`.
+- **Spacing scale (px):** `4, 8, 12, 16, 24, 32, 48, 64`.
+- **Game row:** time and weekday | `AWAY at HOME` in condensed `34px` with full team names | winner, probability in `36px` `IBM Plex Mono`, continuous bar with `50%` hairline, and market line | expected points per team with 80% range | positive winning margin (`HOU +8,7` / `HOU +8.7`) | total. Flagged rows (`>= 5` points from market) carry a `4px` left vertical `--flag` rule on `--surface` and inline `.sig` (`| +11 Market: 56%`) without repeating the difference.
+- **Game page market block:** displays one market win probability with named source and explicit timestamp kind (fetched vs captured vs read), plus a visually separated `Reference line (nflverse)` block for literal spread (`HOU −12,5`) and total.
+- **Mobile tables (`<= 640px`):** zero horizontal scroll site-wide. Narrow 2-to-4 column tables fit cleanly (`table.fit`); wide 5-to-7 column tables stack into `data-label` blocks (`table.stack`), keeping `table.sortable.stack thead` as a wrapping bar of `>= 44px` sort buttons.
+- **Breakpoints:** `1100px`, `900px`, `640px`. Minimum touch target `44px`.
 
-## 6. Components
+## 5. Motion (dial 2)
 
-**Game card** (desktop, six columns plus a sentence row): time and weekday | `AWAY en HOME` in condensed 34 px with full names under it | winner, probability in Doto, the continuous bar and the market line | expected points per team, one decimal, 80% range in brackets | margin as "HOU −8,7" | total. Under them, one sentence of why and, only if there are any, a line of notable absences. On phones it stacks: time and matchup, probability, points, margin and total, why.
+Honours `prefers-reduced-motion` (disabled). Sliding nav indicator (`280ms`), button press (`150ms`), static-first countdown. No loops, pulses, or parallax.
 
-**Why sentence**: a rule over the game's inputs, in this order: quarterback change, clear rest edge for the favourite, long trip against a home favourite, strong wind, home field in a close game, otherwise recent form. It is not a decomposition of the model and the Method page says so.
+## 6. Copy and data conventions on screen
 
-**Probability bar**: one filled bar, ink on the track colour, with a hairline at 50%. `aria-hidden`: the figure next to it carries the value.
+- No em dashes anywhere in text or generated assets.
+- Team names are the official English names in both languages.
+- Margin: always the predicted favourite with a positive winning margin (`HOU +8,7` / `HOU +8.7`) and an 80% range ordered away to home with team labels (`IND +10 a HOU +27` / `IND +10 to HOU +27`); the negative spread sign (`HOU −12,5`) is reserved exclusively for literal market betting-line quotes. Never a home margin without a name.
+- Market gap: integer difference computed from the two displayed percentages (`FLAG_PP = 5` in `site/build.py`).
+- Times: `Europe/Madrid` (24-hour clock) on `/es/`, `America/New_York` (12-hour AM/PM ET) on `/en/`, including header, cards, game page, record, and footer.
+- Empty states: plain human text, zero repository paths, zero bookmaker prices or EV.
 
-**Market line**: "Market: 66% (us +2)". When the difference is 5 points or more, a yellow flag chip with the signed difference precedes it.
+## 7. Delivery gate
 
-**Absences**: "Notable absences: Name (TEAM, out, 1,8 pts). Context: not included in the number." Per-player value in points of margin per game over a replacement; only Out or Doubtful players worth at least 1.0 point; never summed, never applied.
-
-**Game page**: matchup headline; four readouts (win probability, margin, total, market probability); the points table with 80% ranges; "Against the market"; context list (rest, travel, QB, venue); notable absences; margin and total distribution charts; a collapsed "Technical detail" with every component. The example score is one sentence under the points table.
-
-**History page**: the rules of the record, results by source (official pick, model alone, blended, market) on the same games, the game-by-game table with the pick type, and every saved week with its exact save time.
-
-**Method page**: the only place for jargon: what the number is, how it is computed, the market and why no per-bookmaker prices, the why sentence, injuries, historical tables, calibration, limits and a glossary.
-
-**Filters**: rectangular chips (All, Where we differ from the market) with counts, rendered only when at least one game is flagged. Active state is inverted ink. They work without reloading and the group is never empty.
-
-**Language switch**: a 44 px bordered link in the header showing the other language ("EN" or "ES"), next to the theme button. A plain link to the twin page; the choice is saved in `localStorage` (`ens-lang`) and applied by `theme.js` before first paint, like `ens-theme`.
-
-**Icons**: own 16 px set, 1.5 px stroke, square caps, one grid. Only those with meaning: flag, info. No sparkles, stars or bolts (R-04). No emoji.
-
-**Navigation**: logo (5 bars, one taller and yellow, the flag) + condensed wordmark; links with a 3 px indicator that slides on hover and returns to the current page.
-
-## 7. Motion (dial 2)
-
-Everything honours `prefers-reduced-motion` (turned off).
-- Navigation indicator: 280 ms, `cubic-bezier(.3,.7,.2,1)`.
-- Chips and rows: 150 ms of colour and background, 1 px shift on press.
-- Countdown to the next kickoff: text computed on load, no flicker.
-- Forbidden: loops, pulses, parallax, delayed content, counters that climb from 0.
-
-## 8. Content and copy (antislop-copywriting, R-02, R-17)
-
-- No em dash in any text. Use a comma, a full stop, a colon or brackets.
-- No filler lead-ins. A limitation is stated as a fact, on the Method page, not as a preamble.
-- One sentence of context per game, always backed by a datum.
-- Spanish: decimal comma, narrow no-break space before %, Madrid time with "(hora de Madrid)", °C and km/h. English: decimal point, no space before %. Weather only when `context.weather_known` is 1.
-- Team names are the official English ones in both languages ("New York Giants", "Los Angeles Rams"). Headings use the abbreviation, sentences use the abbreviation too.
-- The market comparison uses the integers as printed: 68% minus 66% is 2 points. Margin and total follow from the printed expected points.
-- No figure without a source (R-17). Figures come from `predictions/`, `results/`, `reports/`.
-- Footer: Madrid times, not UTC.
-
-## 9. What not to do
-
-- No gradients or light orbs.
-- No grid or dot backgrounds as decoration (R-07). The only dotted element is the row rule.
-- No default Geist/Inter/Space Grotesk, no JetBrains/Geist Mono (R-06).
-- No bento, no three identical columns, no "how it works in 3 steps".
-- No pills or capsules with a dot and glow; no badge above the headline.
-- No Lucide or clones; no arrows on every button (R-08).
-- No logo bar or invented testimonials; no unsourced figures (R-17).
-- No accent in more than one place: yellow marks disagreement and the logo flag, nothing else.
-- No "AI" language in the interface.
-- No bookmaker prices, expected value or betting advice.
-
-## 10. Delivery
-
-Before calling anything done: `python scripts/check_site.py` (contrast, em dashes, language markers, jargon on week pages, bookmaker names, half-translated team names, empty filter groups), 390 px with no overflow, a visible 2 px focus ring in ink with a 3 px offset, `lang` on every page, `aria-label` on the probability readouts, the antislop Delivery Gate passed by whoever implements. Font files live in `site/static/fonts/` with their licences.
-
-## 11. Data conventions on screen
-
-- Margin: always the predicted favourite with a positive winning margin ("HOU +8,7" / "HOU +8.7") and an 80% range ordered away to home with team labels ("IND +10 a HOU +27"); the negative spread sign ("HOU −12,5") is reserved exclusively for literal market betting-line quotes. Never a home margin without a name.
-- Flags: |model alone minus market consensus| of 5 points or more, computed from the printed integers. The threshold is `FLAG_PP` in `site/build.py`.
-- Times: always Europe/Madrid, also in the header and footer.
-- Empty states: human text, no repository paths.
+`scripts/check_site.py` (contrast, `<= 2` font families, zero `< 13px` in CSS/SVG, zero pills/kickers, no beige/purple, em dashes, language parity, ET on `/en/`, no false closing labels, no duplicate flagged gap, reconciled 2,133/2,141 on Method) + Playwright checks at `375`, `768`, `1280`, and `1440px` in ES and EN.

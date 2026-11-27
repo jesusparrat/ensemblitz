@@ -3,11 +3,11 @@
 {% set nav = 'game' %}
 {% block title %}{{ g.away }} {{ t('card.at') }} {{ g.home }}{% endblock %}
 {% block description %}{{ tx('game.description', away=g.away_name, home=g.home_name, fav=g.fav, p=pct(g.p_win)) }}{% endblock %}
-{% block content %}
-<section class="head matchup" aria-labelledby="h">
+{% block hero %}
+<section class="hero-band" aria-labelledby="h"><div class="wrap head matchup">
   <div>
-    <h1 id="h"><small>{{ t('game.kicker', week=week, season=season) }}</small>{{ g.away }} {{ t('card.at') }} {{ g.home }}</h1>
-    <p class="when">{{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.tz_note') }}.</p>
+    <h1 id="h">{{ g.away }} {{ t('card.at') }} {{ g.home }}</h1>
+    <p class="when">{{ t('game.week_ctx', week=week, season=season) }} {{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.tz_note') }}.</p>
     <p class="lede">{{ why_text(g) }}</p>
   </div>
   <div class="read four" aria-label="{{ tx('game.read_aria') }}">
@@ -16,7 +16,9 @@
     <div><b>{{ n(g.total, 1) }}</b><span>{{ t('game.total_label') }}</span></div>
     {% if g.mkt_win is not none %}<div class="{{ 'hot' if g.flag }}"><b>{{ shown(g.mkt_win) }}<i>%</i></b><span>{{ t('game.market_label') }}</span></div>{% endif %}
   </div>
-</section>
+</div></section>
+{% endblock %}
+{% block content %}
 
 {% if g.legacy %}<p class="note-legacy">{{ icon('info') }}<span>{{ t('game.legacy') }}</span></p>{% endif %}
 {% if g.final %}<p class="empty"><b>{{ t('card.final', away=g.away, a=g.final.away, home=g.home, h=g.final.home) }}</b> {% if g.final.ok %}{{ t('card.hit') }}{% else %}{{ t('card.miss') }}{% endif %}</p>{% endif %}
@@ -38,7 +40,7 @@
   <dl class="facts">
     <dt>{{ t('game.ours') }}</dt><dd>{{ t('card.wins', team=g.fav) }}, {{ pct(g.p_win) }}</dd>
     <dt>{{ t('game.market') }}</dt><dd>{% if g.mkt_win is not none %}{{ pct(g.mkt_win) }}{% else %}{{ t('na') }}{% endif %}</dd>
-    <dt>{{ t('game.diff') }}</dt><dd>{% if g.diff is none %}{{ t('na') }}{% else %}{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span>{% else %}{{ signed(g.diff, 0) }}{% endif %}{% endif %}</dd>
+    <dt>{{ t('game.diff') }}</dt><dd>{% if g.diff is none %}{{ t('na') }}{% else %}{% if g.flag %}<span class="sig">{{ signed(g.diff, 0) }}</span>{% else %}{{ signed(g.diff, 0) }}{% endif %}{% endif %}</dd>
     {% if g.mkt_source %}<dt>{{ t('game.market_src_label') }}</dt><dd>{% if g.mkt_source == 'odds_api_consensus' %}{{ t('game.market_src_odds_api', n=g.mkt_n) }}{% elif g.mkt_is_closing %}{{ t('game.market_src_nflverse_close') }}{% else %}{{ t('game.market_src_nflverse_pre') }}{% endif %}</dd>{% endif %}
   </dl>
   <p class="small">{% if g.mkt_n %}{{ t('game.market_src_books', n=g.mkt_n) }}{% else %}{{ t('game.market_src_nflverse') }}{% endif %}{% if g.mkt_time and g.mkt_time_kind == 'fetched' %} {{ t('game.market_time_fetched', when=stamp(g.mkt_time)) }}{% elif g.mkt_time and g.mkt_time_kind == 'captured' %} {{ t('game.market_time_captured', when=stamp(g.mkt_time)) }}{% elif g.mkt_time and g.mkt_time_kind == 'read' %} {{ t('game.market_time_read', when=stamp(g.mkt_time)) }}{% endif %} {{ t('game.market_note') }}</p>

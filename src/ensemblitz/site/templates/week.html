@@ -2,11 +2,11 @@
 {% from "_macros.html" import icon, pbar, absences with context %}
 {% set nav = 'home' %}
 {% block title %}{{ tx('week.title', week=week) }}{% endblock %}
-{% block content %}
-<section class="head" aria-labelledby="h">
+{% block hero %}
+<section class="hero-band" aria-labelledby="h"><div class="wrap head">
   <div>
-    <h1 id="h"><small>{{ t('week.kicker', season=season) }}</small>{{ t('week.h1', week=week) }}</h1>
-    {% if games %}<p class="lede">{{ t('week.lede') }}</p>{% endif %}
+    <h1 id="h">{{ t('week.h1', week=week) }}</h1>
+    {% if games %}<p class="lede">{{ t('week.lede', season=season) }}</p>{% endif %}
   </div>
   <div class="read" aria-label="{{ tx('week.read_aria') }}">
     <div><b>{{ games|length }}</b><span>{{ t('week.read_games') }}</span></div>
@@ -14,7 +14,9 @@
     {% if nxt %}<div><b data-kick="{{ nxt.kick_utc }}">{{ nxt.kick.time }}</b><span data-kick-label="{{ tx('week.read_next_live', away=nxt.away, home=nxt.home) }}">{{ nxt.kick.day }}, {{ t('week.read_next', away=nxt.away, home=nxt.home) }}</span></div>
     {% elif graded %}<div><b>{{ graded|selectattr('final.ok')|list|length }}/{{ graded|length }}</b><span>{{ t('week.read_hits') }}</span></div>{% endif %}
   </div>
-</section>
+</div></section>
+{% endblock %}
+{% block content %}
 
 {% if weeks|length > 1 %}
 <nav class="weeknav" aria-label="{{ tx('week.nav_aria') }}"><span>{{ t('week.nav') }}</span>
@@ -33,7 +35,7 @@
 {% endif %}
 
 <div class="tools">
-  <p class="legend">{{ t('week.legend') }}{% if flagged %} <span class="chipf" aria-hidden="true">{{ icon('flag') }}</span> {{ t('week.legend_flag', n=flag_pts) }}{% endif %}</p>
+  <p class="legend">{{ t('week.legend') }}{% if flagged %} <span class="sig-swatch" aria-hidden="true"></span> {{ t('week.legend_flag', n=flag_pts) }}{% endif %}</p>
   {% if flagged %}<div class="chips" role="group" aria-label="{{ tx('filter.label') }}">
     <button class="chip" type="button" data-f="all" aria-pressed="true">{{ t('filter.all') }}<span class="n">{{ games|length }}</span></button>
     <button class="chip" type="button" data-f="flag" aria-pressed="false">{{ t('filter.flags') }}<span class="n">{{ flagged|length }}</span></button>
@@ -46,7 +48,7 @@
   <div class="cols" aria-hidden="true"><span>{{ t('cols.time') }}</span><span>{{ t('cols.game') }}</span><span>{{ t('cols.win') }}</span><span>{{ t('cols.points') }}</span><span class="r">{{ t('cols.margin') }}</span><span class="r">{{ t('cols.total') }}</span></div>
   <ol class="games">
   {% for g in d.games %}
-  <li class="game" data-flag="{{ 1 if g.flag else 0 }}" data-day="{{ d.id }}">
+  <li class="game{{ ' is-flagged' if g.flag }}" data-flag="{{ 1 if g.flag else 0 }}" data-day="{{ d.id }}">
     <div class="t">{{ g.kick.time }}<small>{{ g.kick.wd }}</small></div>
     <div class="m">
       <h3><a href="{{ u('game', g.id) }}">{{ g.away }} <em>{{ t('card.at') }}</em> {{ g.home }}</a></h3>
@@ -56,7 +58,7 @@
     <div class="p">
       <div class="win"><span class="who">{{ t('card.wins', team=g.fav) }}</span><b class="board" role="img" aria-label="{{ tx('card.win_aria', team=g.fav, p=pct(g.p_win)) }}">{{ shown(g.p_win) }}</b><span class="pc" aria-hidden="true">%</span></div>
       {{ pbar(g.p_win) }}
-      {% if g.mkt_win is not none %}<div class="mkt">{% if g.flag %}<span class="chipf">{{ icon('flag') }}{{ signed(g.diff, 0) }}</span> {{ t('card.market_flagged', p=pct(g.mkt_win)) }}{% else %}{{ t('card.market', p=pct(g.mkt_win), d=signed(g.diff, 0)) }}{% endif %}</div>{% endif %}
+      {% if g.mkt_win is not none %}<div class="mkt">{% if g.flag %}<span class="sig">{{ signed(g.diff, 0) }}</span> {{ t('card.market_flagged', p=pct(g.mkt_win)) }}{% else %}{{ t('card.market', p=pct(g.mkt_win), d=signed(g.diff, 0)) }}{% endif %}</div>{% endif %}
     </div>
     <div class="x">
       {% for side, tm, v in (('away', g.away, g.pts_away), ('home', g.home, g.pts_home)) %}
