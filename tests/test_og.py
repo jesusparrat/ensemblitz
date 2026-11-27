@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import tomllib
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -262,3 +263,14 @@ def test_pages_workflow_wires_optional_goatcounter_var() -> None:
         encoding="utf-8"
     )
     assert "ENSEMBLITZ_GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}" in wf
+
+
+def test_matplotlib_is_runtime_dependency_for_pages_build() -> None:
+    pyproject = tomllib.loads(
+        (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    runtime_deps = pyproject["project"]["dependencies"]
+    assert any(dep.lower().startswith("matplotlib") for dep in runtime_deps), (
+        "matplotlib must be in [project].dependencies so pages.yml (uv sync --frozen) "
+        "can generate Open Graph PNG cards during ensemblitz site"
+    )

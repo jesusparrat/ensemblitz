@@ -282,6 +282,7 @@ source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
     { name = "lightgbm" },
+    { name = "matplotlib" },
     { name = "nflreadpy" },
     { name = "numpy" },
     { name = "pandas" },
@@ -294,7 +295,6 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
-    { name = "matplotlib" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -303,7 +303,7 @@ dev = [
 requires-dist = [
     { name = "jinja2", specifier = ">=3.1" },
     { name = "lightgbm", specifier = ">=4.3" },
-    { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.8" },
+    { name = "matplotlib", specifier = ">=3.8" },
     { name = "nflreadpy", specifier = ">=0.1.5" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pandas", specifier = ">=2.2" },
