@@ -9,6 +9,10 @@
     <h1 id="h">{{ g.away }} {{ t('card.at') }} {{ g.home }}</h1>
     <p class="when">{{ t('game.week_ctx', week=week, season=season) }} {{ g.away_name }} {{ t('card.at') }} {{ g.home_name }}. {{ g.kick.day_full }}, {{ g.kick.time }} {{ t('game.tz_note') }}.</p>
     <p class="lede">{{ why_text(g) }}</p>
+    <div class="hero-actions">
+      <button class="copy-link" type="button" data-copy-url data-copied="{{ tx('game.copied') }}" data-copy-fail="{{ tx('game.copy_fail') }}">{{ icon('link') }}<span>{{ t('game.copy_link') }}</span></button>
+      <span class="copy-status small" role="status" aria-live="polite"></span>
+    </div>
   </div>
   <div class="read four" aria-label="{{ tx('game.read_aria') }}">
     <div><b role="img" aria-label="{{ tx('card.win_aria', team=g.fav, p=pct(g.p_win)) }}">{{ shown(g.p_win) }}<i>%</i></b><span>{{ t('card.wins', team=g.fav) }}</span></div>

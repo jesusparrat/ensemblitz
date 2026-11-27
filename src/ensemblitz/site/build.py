@@ -22,10 +22,11 @@ from ensemblitz import news as N
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
 from ensemblitz.site import charts
 from ensemblitz.site.i18n import LANGS, Lang
-from ensemblitz.site.names import full
+from ensemblitz.site.names import TEAMS, full
 
 HERE = Path(__file__).parent
 REPO_URL = "https://github.com/jesusparrat/ensemblitz"
+TEAM_OPTIONS = sorted(((abbr, full(abbr)) for abbr in TEAMS), key=lambda x: x[1])
 FLAG_PP = 10  # fixed >= 10 printed percentage points gap that marks a reading disagreement
 HFA = 1.8  # home-field advantage in points (Kalman hyper-parameter, see reports/backtest.json)
 ROUTES = {
@@ -35,6 +36,7 @@ ROUTES = {
         "game": "partido/{}.html",
         "history": "historial.html",
         "method": "metodo.html",
+        "verify": "verificar.html",
     },
     "en": {
         "home": "en/index.html",
@@ -42,6 +44,7 @@ ROUTES = {
         "game": "en/game/{}.html",
         "history": "en/history.html",
         "method": "en/method.html",
+        "verify": "en/verify.html",
     },
 }
 MODEL_KEYS = ["market", "elo", "kf", "lgbm", "lgbm_mkt", "sim", "ens"]
@@ -96,6 +99,7 @@ def load_inputs(root: Path) -> dict:
         "graded": graded,
         "backtest": _read(root / "reports" / "backtest.json"),
         "baseline": _read(root / "reports" / "baseline_2018_2025.json"),
+        "manifest": _read(root / "predictions" / "MANIFEST.json"),
     }
 
 
@@ -551,6 +555,7 @@ class Site:
                 "graded": [g for g in games if g["final"]],
                 "is_current": key == current,
                 "legacy": any(g["legacy"] for g in games),
+                "team_options": TEAM_OPTIONS,
             }
             self.render(L, "week.html", "week", key[1], **ctx)
             if key == current:
@@ -615,6 +620,34 @@ class Site:
             )
             if calib_pts
             else "",
+        )
+        manifest_raw = inputs.get("manifest") or {}
+        artifacts_map = (
+            manifest_raw.get("artifacts")
+            if isinstance(manifest_raw, dict) and isinstance(manifest_raw.get("artifacts"), dict)
+            else {}
+        )
+        manifest_entries = [
+            {"path": p, "sha256": str(h), "url": f"{REPO_URL}/blob/main/{p}"}
+            for p, h in sorted(artifacts_map.items())
+        ]
+        sample_snapshot = next(
+            (
+                e["path"]
+                for e in reversed(manifest_entries)
+                if e["path"].count("/") >= 3 and e["path"].endswith(".json")
+            ),
+            "predictions/2026/week12/20261124T182645Z.json",
+        )
+        manifest_json = json.dumps(artifacts_map, sort_keys=True).replace("</", "<\\/")
+        self.render(
+            L,
+            "verify.html",
+            "verify",
+            manifest_entries=manifest_entries,
+            manifest_json=manifest_json,
+            sample_snapshot=sample_snapshot,
+            repo_slug=REPO_URL.removeprefix("https://github.com/"),
         )
 
 
