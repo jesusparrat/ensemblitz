@@ -4,8 +4,8 @@
  "market_source": "The Odds API",
  "market_type": "h2h",
  "consensus_method": "unweighted mean of per-operator Shin no-vig probabilities",
- "odds_fetched_at": "2026-11-28T10:57:54Z",
- "predictions_generated_at": "2026-11-28T10:57:56Z",
+ "odds_fetched_at": "2026-11-28T12:17:57Z",
+ "predictions_generated_at": "2026-11-28T12:17:58Z",
  "games": [
   {
    "game_id": "2026_12_ATL_MIN",
@@ -13,9 +13,9 @@
    "away": "ATL",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.7143,
-   "consensus_home_prob_shin": 0.7428,
-   "gap_model_only": -0.0285,
-   "n_books": 41,
+   "consensus_home_prob_shin": 0.7429,
+   "gap_model_only": -0.0286,
+   "n_books": 42,
    "flag_large_disagreement": false
   },
   {
@@ -24,9 +24,9 @@
    "away": "BAL",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.6936,
-   "consensus_home_prob_shin": 0.7349,
-   "gap_model_only": -0.0413,
-   "n_books": 41,
+   "consensus_home_prob_shin": 0.7345,
+   "gap_model_only": -0.0409,
+   "n_books": 42,
    "flag_large_disagreement": false
   },
   {
@@ -35,9 +35,9 @@
    "away": "NO",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.8296,
-   "consensus_home_prob_shin": 0.8253,
-   "gap_model_only": 0.0043,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.8249,
+   "gap_model_only": 0.0047,
+   "n_books": 41,
    "flag_large_disagreement": false
   },
   {
@@ -46,9 +46,9 @@
    "away": "NYG",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.4133,
-   "consensus_home_prob_shin": 0.3022,
-   "gap_model_only": 0.1111,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.3025,
+   "gap_model_only": 0.1108,
+   "n_books": 41,
    "flag_large_disagreement": true,
    "likely_reasons": [
     "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
@@ -62,9 +62,9 @@
    "away": "NYJ",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.5196,
-   "consensus_home_prob_shin": 0.3081,
-   "gap_model_only": 0.2115,
-   "n_books": 41,
+   "consensus_home_prob_shin": 0.3083,
+   "gap_model_only": 0.2113,
+   "n_books": 42,
    "flag_large_disagreement": true,
    "likely_reasons": [
     "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
@@ -76,9 +76,9 @@
    "away": "TEN",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.8624,
-   "consensus_home_prob_shin": 0.8917,
-   "gap_model_only": -0.0293,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.8918,
+   "gap_model_only": -0.0294,
+   "n_books": 41,
    "flag_large_disagreement": false
   },
   {
@@ -87,9 +87,9 @@
    "away": "NE",
    "kickoff_utc": "2026-11-29T21:05:00Z",
    "model_only_home_prob": 0.2866,
-   "consensus_home_prob_shin": 0.4163,
-   "gap_model_only": -0.1297,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.4161,
+   "gap_model_only": -0.1295,
+   "n_books": 42,
    "flag_large_disagreement": true,
    "likely_reasons": [
     "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
@@ -102,9 +102,9 @@
    "away": "SEA",
    "kickoff_utc": "2026-11-29T21:25:00Z",
    "model_only_home_prob": 0.5737,
-   "consensus_home_prob_shin": 0.4828,
-   "gap_model_only": 0.0909,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.4827,
+   "gap_model_only": 0.091,
+   "n_books": 42,
    "flag_large_disagreement": true,
    "likely_reasons": [
     "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
@@ -118,9 +118,9 @@
    "away": "WAS",
    "kickoff_utc": "2026-11-29T21:25:00Z",
    "model_only_home_prob": 0.3592,
-   "consensus_home_prob_shin": 0.2512,
-   "gap_model_only": 0.108,
-   "n_books": 41,
+   "consensus_home_prob_shin": 0.2514,
+   "gap_model_only": 0.1078,
+   "n_books": 42,
    "flag_large_disagreement": true,
    "likely_reasons": [
     "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
@@ -132,9 +132,9 @@
    "away": "LV",
    "kickoff_utc": "2026-11-30T01:20:00Z",
    "model_only_home_prob": 0.6401,
-   "consensus_home_prob_shin": 0.6779,
-   "gap_model_only": -0.0378,
-   "n_books": 40,
+   "consensus_home_prob_shin": 0.6777,
+   "gap_model_only": -0.0376,
+   "n_books": 41,
    "flag_large_disagreement": false
   },
   {
@@ -143,9 +143,9 @@
    "away": "CAR",
    "kickoff_utc": "2026-12-01T01:15:00Z",
    "model_only_home_prob": 0.5945,
-   "consensus_home_prob_shin": 0.6018,
-   "gap_model_only": -0.0073,
-   "n_books": 38,
+   "consensus_home_prob_shin": 0.6016,
+   "gap_model_only": -0.0071,
+   "n_books": 39,
    "flag_large_disagreement": false
   }
  ]
