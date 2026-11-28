@@ -3,10 +3,11 @@
 Every production run writes a new file. Existing snapshots are never overwritten.
 Re-doing a week requires ``--force``. While any game in a week has ``kickoff_utc > now``,
 a new append-only snapshot may be written, with every game at or past kickoff
-(``kickoff_utc <= now``) frozen to its exact canonical JSON record from the latest
-snapshot published strictly before that game's kickoff. Once all games in the week have
-passed kickoff, no option writes a new snapshot; historical corrections follow the
-procedure in ``docs/LEDGER.md``.
+(``kickoff_utc <= now``) frozen to the v1 form of its record from the latest snapshot
+published strictly before that game's kickoff. A v0 record is mapped with
+``contract_io.game_from_v0``; a v1 record is copied unchanged. Once all games in the
+week have passed kickoff, no option writes a new snapshot; historical corrections
+follow the procedure in ``docs/LEDGER.md``.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from pathlib import Path
 
 from ensemblitz import config as C
 from ensemblitz import contract as K
+from ensemblitz import contract_io as IO
 
 MANIFEST_NAME = "MANIFEST.json"
 MANIFEST_REL = f"predictions/{MANIFEST_NAME}"
@@ -101,6 +103,21 @@ def canonical_game_json(game: dict) -> str:
     Never call parsed-dict equality "byte-for-byte".
     """
     return json.dumps(game, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def canonical_game_v1(game: dict) -> str:
+    """``canonical_game_json`` after mapping a legacy v0 game to v1.
+
+    v1 records are serialized as stored. Freeze checks and ``verify_integrity`` compare
+    this string, so a v0 pre-kickoff record and the v1 game copied from it match, while
+    a changed probability still differs.
+    """
+    return canonical_game_json(IO.game_as_v1(game))
+
+
+def _frozen_v1_copy(game: dict) -> dict:
+    """Independent copy of a pre-kickoff game in v1 shape."""
+    return copy.deepcopy(IO.game_as_v1(game))
 
 
 def predictions_root(root: Path | None = None) -> Path:
@@ -299,6 +316,8 @@ def freeze_started_games(
 ) -> list[dict]:
     """Freeze every game with ``kickoff_utc <= now`` to its latest pre-kickoff record.
 
+    The stored record is copied in v1 shape: ``game_from_v0`` when the snapshot is still
+    v0, unchanged when it is already v1. Probabilities are the pre-kickoff values.
     Also preserves already-started games from earlier pre-kickoff snapshots that are no
     longer in ``games`` (for example a Thursday game already marked played by Friday).
     Raises :class:`WeekLockedError` if all games have passed kickoff or if a started game
@@ -313,7 +332,7 @@ def freeze_started_games(
         pre_kickoff.items(), key=lambda kv: (kv[1][0].get("kickoff_utc", ""), kv[0])
     ):
         if _parse_utc(frozen_game["kickoff_utc"]) <= now_utc:
-            frozen_out.append(copy.deepcopy(frozen_game))
+            frozen_out.append(_frozen_v1_copy(frozen_game))
             seen.add(gid)
 
     for g in games:
@@ -326,7 +345,7 @@ def freeze_started_games(
                     f"{season} week {week}: game {gid} kicked off at {g['kickoff_utc']} "
                     "with no prior pre-kickoff snapshot."
                 )
-            frozen_out.append(copy.deepcopy(pre_kickoff[gid][0]))
+            frozen_out.append(_frozen_v1_copy(pre_kickoff[gid][0]))
             seen.add(gid)
         else:
             frozen_out.append(g)
@@ -508,9 +527,9 @@ def write_snapshot(
 
     Refuses if the week already has a snapshot and ``force`` is false, refuses
     unconditionally once all games in the week have passed kickoff, and enforces
-    per-game canonical immutability for every game with ``kickoff_utc <= now``.
-    When ``freeze_started=True``, games with ``kickoff_utc <= now`` are automatically
-    replaced with their frozen pre-kickoff canonical records before writing.
+    per-game immutability in v1 space (``canonical_game_v1``) for every game with
+    ``kickoff_utc <= now``. When ``freeze_started=True``, those games are replaced
+    with their frozen pre-kickoff records (v0 mapped to v1) before writing.
     """
     root = (root or C.ROOT).resolve()
     season, week = int(doc["season"]), int(doc["week"])
@@ -551,7 +570,7 @@ def write_snapshot(
                 "has no prior pre-kickoff snapshot."
             )
         frozen_game, _pub, frozen_rel = pre_kickoff[gid]
-        if canonical_game_json(g) != canonical_game_json(frozen_game):
+        if canonical_game_v1(g) != canonical_game_v1(frozen_game):
             raise WeekLockedError(
                 f"{season} week {week}: started game {gid} differs from its frozen canonical "
                 f"record in {frozen_rel}."
@@ -632,6 +651,7 @@ __all__ = [
     "add_to_manifest",
     "artifacts_for_week",
     "canonical_game_json",
+    "canonical_game_v1",
     "describe",
     "first_kickoff_utc",
     "first_publication_utc",

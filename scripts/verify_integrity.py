@@ -2,9 +2,10 @@
 
 Exit 0 when every artifact in predictions/MANIFEST.json matches its SHA-256, every
 snapshot on disk is listed, and across all snapshots of each ``(season, week)`` ordered
-by publication time, every game past kickoff preserves its exact canonical JSON record
-(``ledger.canonical_game_json``) from the latest snapshot published strictly before that
-game's kickoff. New weeks or mid-week updates are added by extending the manifest;
+by publication time, every game past kickoff preserves its v1 canonical record
+(``ledger.canonical_game_v1``, which maps a legacy v0 game with ``game_from_v0`` first)
+from the latest snapshot published strictly before that game's kickoff. New weeks or
+mid-week updates are added by extending the manifest;
 existing hashes must not change.
 
 The working-tree manifest is also compared against the artifacts map in ``--base-ref``
@@ -119,7 +120,7 @@ def verify(root: Path, base_ref: str = "HEAD") -> list[str]:
                     continue
                 seen_ids.add(gid)
                 kick_dt = L.parse_utc(kick)
-                canon = L.canonical_game_json(g)
+                canon = L.canonical_game_v1(g)
                 if pub_dt < kick_dt:
                     has_open_game = True
                     frozen[gid] = (canon, kick, rel)
