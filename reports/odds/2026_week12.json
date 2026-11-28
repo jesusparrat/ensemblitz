@@ -1,213 +1,152 @@
 {
-  "season": 2026,
-  "week": 12,
-  "market_source": "The Odds API",
-  "market_type": "h2h",
-  "consensus_method": "unweighted mean of per-operator Shin no-vig probabilities",
-  "odds_fetched_at": "2026-11-24T18:26:48Z",
-  "predictions_generated_at": "2026-11-24T18:26:45Z",
-  "games": [
-    {
-      "game_id": "2026_12_GB_LA",
-      "home": "LA",
-      "away": "GB",
-      "kickoff_utc": "2026-11-26T01:00:00Z",
-      "model_only_home_prob": 0.6663,
-      "consensus_home_prob_shin": 0.5573,
-      "gap_model_only": 0.109,
-      "n_books": 41,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "bajas distintas en el último parte (local 2, visitante 5)"
-      ]
-    },
-    {
-      "game_id": "2026_12_CHI_DET",
-      "home": "DET",
-      "away": "CHI",
-      "kickoff_utc": "2026-11-26T18:00:00Z",
-      "model_only_home_prob": 0.5863,
-      "consensus_home_prob_shin": 0.4362,
-      "gap_model_only": 0.1501,
-      "n_books": 41,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "sin causa clara en nuestros datos: lo más probable es información que el modelo no ve (lesiones de última hora, movimientos de apuestas profesionales)"
-      ]
-    },
-    {
-      "game_id": "2026_12_PHI_DAL",
-      "home": "DAL",
-      "away": "PHI",
-      "kickoff_utc": "2026-11-26T21:30:00Z",
-      "model_only_home_prob": 0.6573,
-      "consensus_home_prob_shin": 0.7983,
-      "gap_model_only": -0.141,
-      "n_books": 41,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "sin causa clara en nuestros datos: lo más probable es información que el modelo no ve (lesiones de última hora, movimientos de apuestas profesionales)"
-      ]
-    },
-    {
-      "game_id": "2026_12_KC_BUF",
-      "home": "BUF",
-      "away": "KC",
-      "kickoff_utc": "2026-11-27T01:20:00Z",
-      "model_only_home_prob": 0.6796,
-      "consensus_home_prob_shin": 0.5795,
-      "gap_model_only": 0.1001,
-      "n_books": 39,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "sin causa clara en nuestros datos: lo más probable es información que el modelo no ve (lesiones de última hora, movimientos de apuestas profesionales)"
-      ]
-    },
-    {
-      "game_id": "2026_12_DEN_PIT",
-      "home": "PIT",
-      "away": "DEN",
-      "kickoff_utc": "2026-11-27T20:00:00Z",
-      "model_only_home_prob": 0.3934,
-      "consensus_home_prob_shin": 0.417,
-      "gap_model_only": -0.0236,
-      "n_books": 41,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_ATL_MIN",
-      "home": "MIN",
-      "away": "ATL",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.7254,
-      "consensus_home_prob_shin": 0.7403,
-      "gap_model_only": -0.0149,
-      "n_books": 39,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_BAL_HOU",
-      "home": "HOU",
-      "away": "BAL",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.6999,
-      "consensus_home_prob_shin": 0.7375,
-      "gap_model_only": -0.0376,
-      "n_books": 39,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_NO_CIN",
-      "home": "CIN",
-      "away": "NO",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.8288,
-      "consensus_home_prob_shin": 0.8276,
-      "gap_model_only": 0.0012,
-      "n_books": 37,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_NYG_IND",
-      "home": "IND",
-      "away": "NYG",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.4239,
-      "consensus_home_prob_shin": 0.2626,
-      "gap_model_only": 0.1613,
-      "n_books": 37,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "cambio de QB titular (local); el mercado suele ajustarlo más rápido que nuestros ratings",
-        "descanso desigual (10 vs 7 días)",
-        "bajas distintas en el último parte (local 5, visitante 0)"
-      ]
-    },
-    {
-      "game_id": "2026_12_NYJ_MIA",
-      "home": "MIA",
-      "away": "NYJ",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.5178,
-      "consensus_home_prob_shin": 0.3468,
-      "gap_model_only": 0.171,
-      "n_books": 39,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "sin causa clara en nuestros datos: lo más probable es información que el modelo no ve (lesiones de última hora, movimientos de apuestas profesionales)"
-      ]
-    },
-    {
-      "game_id": "2026_12_TEN_JAX",
-      "home": "JAX",
-      "away": "TEN",
-      "kickoff_utc": "2026-11-29T18:00:00Z",
-      "model_only_home_prob": 0.8675,
-      "consensus_home_prob_shin": 0.9028,
-      "gap_model_only": -0.0353,
-      "n_books": 37,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_NE_LAC",
-      "home": "LAC",
-      "away": "NE",
-      "kickoff_utc": "2026-11-29T21:05:00Z",
-      "model_only_home_prob": 0.2889,
-      "consensus_home_prob_shin": 0.5098,
-      "gap_model_only": -0.2209,
-      "n_books": 35,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "descanso desigual (7 vs 14 días)"
-      ]
-    },
-    {
-      "game_id": "2026_12_SEA_SF",
-      "home": "SF",
-      "away": "SEA",
-      "kickoff_utc": "2026-11-29T21:25:00Z",
-      "model_only_home_prob": 0.6055,
-      "consensus_home_prob_shin": 0.6151,
-      "gap_model_only": -0.0096,
-      "n_books": 38,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_WAS_ARI",
-      "home": "ARI",
-      "away": "WAS",
-      "kickoff_utc": "2026-11-29T21:25:00Z",
-      "model_only_home_prob": 0.3704,
-      "consensus_home_prob_shin": 0.2271,
-      "gap_model_only": 0.1433,
-      "n_books": 36,
-      "flag_large_disagreement": true,
-      "likely_reasons": [
-        "cambio de QB titular (local); el mercado suele ajustarlo más rápido que nuestros ratings"
-      ]
-    },
-    {
-      "game_id": "2026_12_LV_CLE",
-      "home": "CLE",
-      "away": "LV",
-      "kickoff_utc": "2026-11-30T01:20:00Z",
-      "model_only_home_prob": 0.6362,
-      "consensus_home_prob_shin": 0.6753,
-      "gap_model_only": -0.0391,
-      "n_books": 36,
-      "flag_large_disagreement": false
-    },
-    {
-      "game_id": "2026_12_CAR_TB",
-      "home": "TB",
-      "away": "CAR",
-      "kickoff_utc": "2026-12-01T01:15:00Z",
-      "model_only_home_prob": 0.6079,
-      "consensus_home_prob_shin": 0.5882,
-      "gap_model_only": 0.0197,
-      "n_books": 36,
-      "flag_large_disagreement": false
-    }
-  ]
+ "season": 2026,
+ "week": 12,
+ "market_source": "The Odds API",
+ "market_type": "h2h",
+ "consensus_method": "unweighted mean of per-operator Shin no-vig probabilities",
+ "odds_fetched_at": "2026-11-28T10:57:54Z",
+ "predictions_generated_at": "2026-11-28T10:57:56Z",
+ "games": [
+  {
+   "game_id": "2026_12_ATL_MIN",
+   "home": "MIN",
+   "away": "ATL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.7143,
+   "consensus_home_prob_shin": 0.7428,
+   "gap_model_only": -0.0285,
+   "n_books": 41,
+   "flag_large_disagreement": false
+  },
+  {
+   "game_id": "2026_12_BAL_HOU",
+   "home": "HOU",
+   "away": "BAL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.6936,
+   "consensus_home_prob_shin": 0.7349,
+   "gap_model_only": -0.0413,
+   "n_books": 41,
+   "flag_large_disagreement": false
+  },
+  {
+   "game_id": "2026_12_NO_CIN",
+   "home": "CIN",
+   "away": "NO",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.8296,
+   "consensus_home_prob_shin": 0.8253,
+   "gap_model_only": 0.0043,
+   "n_books": 40,
+   "flag_large_disagreement": false
+  },
+  {
+   "game_id": "2026_12_NYG_IND",
+   "home": "IND",
+   "away": "NYG",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.4133,
+   "consensus_home_prob_shin": 0.3022,
+   "gap_model_only": 0.1111,
+   "n_books": 40,
+   "flag_large_disagreement": true,
+   "likely_reasons": [
+    "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
+    "descanso desigual (10 vs 7 d\u00edas)",
+    "bajas distintas en el \u00faltimo parte (local 5, visitante 0)"
+   ]
+  },
+  {
+   "game_id": "2026_12_NYJ_MIA",
+   "home": "MIA",
+   "away": "NYJ",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.5196,
+   "consensus_home_prob_shin": 0.3081,
+   "gap_model_only": 0.2115,
+   "n_books": 41,
+   "flag_large_disagreement": true,
+   "likely_reasons": [
+    "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
+   ]
+  },
+  {
+   "game_id": "2026_12_TEN_JAX",
+   "home": "JAX",
+   "away": "TEN",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "model_only_home_prob": 0.8624,
+   "consensus_home_prob_shin": 0.8917,
+   "gap_model_only": -0.0293,
+   "n_books": 40,
+   "flag_large_disagreement": false
+  },
+  {
+   "game_id": "2026_12_NE_LAC",
+   "home": "LAC",
+   "away": "NE",
+   "kickoff_utc": "2026-11-29T21:05:00Z",
+   "model_only_home_prob": 0.2866,
+   "consensus_home_prob_shin": 0.4163,
+   "gap_model_only": -0.1297,
+   "n_books": 40,
+   "flag_large_disagreement": true,
+   "likely_reasons": [
+    "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
+    "descanso desigual (7 vs 14 d\u00edas)"
+   ]
+  },
+  {
+   "game_id": "2026_12_SEA_SF",
+   "home": "SF",
+   "away": "SEA",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "model_only_home_prob": 0.5737,
+   "consensus_home_prob_shin": 0.4828,
+   "gap_model_only": 0.0909,
+   "n_books": 40,
+   "flag_large_disagreement": true,
+   "likely_reasons": [
+    "cambio de QB titular (local); el mercado suele ajustarlo m\u00e1s r\u00e1pido que nuestros ratings",
+    "descanso desigual (7 vs 14 d\u00edas)",
+    "bajas distintas en el \u00faltimo parte (local 1, visitante 4)"
+   ]
+  },
+  {
+   "game_id": "2026_12_WAS_ARI",
+   "home": "ARI",
+   "away": "WAS",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "model_only_home_prob": 0.3592,
+   "consensus_home_prob_shin": 0.2512,
+   "gap_model_only": 0.108,
+   "n_books": 41,
+   "flag_large_disagreement": true,
+   "likely_reasons": [
+    "sin causa clara en nuestros datos: lo m\u00e1s probable es informaci\u00f3n que el modelo no ve (lesiones de \u00faltima hora, movimientos de apuestas profesionales)"
+   ]
+  },
+  {
+   "game_id": "2026_12_LV_CLE",
+   "home": "CLE",
+   "away": "LV",
+   "kickoff_utc": "2026-11-30T01:20:00Z",
+   "model_only_home_prob": 0.6401,
+   "consensus_home_prob_shin": 0.6779,
+   "gap_model_only": -0.0378,
+   "n_books": 40,
+   "flag_large_disagreement": false
+  },
+  {
+   "game_id": "2026_12_CAR_TB",
+   "home": "TB",
+   "away": "CAR",
+   "kickoff_utc": "2026-12-01T01:15:00Z",
+   "model_only_home_prob": 0.5945,
+   "consensus_home_prob_shin": 0.6018,
+   "gap_model_only": -0.0073,
+   "n_books": 38,
+   "flag_large_disagreement": false
+  }
+ ]
 }
