@@ -1,6 +1,6 @@
 # Shared state handoff
 
-Short, factual status of `main`. This is the shared state entry point for agents. Update it in every functional PR before merge. Automated `weekly.yml` commits never modify this file. Keep it to 40 lines or fewer. Never write merge SHAs or self-references to the PR being merged; refer to PRs by number and title.
+Short, factual status of `main`. This is the shared state entry point for agents. Update it in every functional PR before merge. Automated `weekly.yml` commits never modify this file. Keep it to 40 lines or fewer. Never write merge SHAs, author attribution, or self-references to the PR being merged; refer to PRs by number and title.
 
 ## Last functional merge
 
@@ -28,4 +28,4 @@ GitHub **#25**, `fix: split the open margin tail into 15-21 and 22+`. New snapsh
 
 `ENSEMBLITZ_GITHUB_TOKEN` is a fine-grained PAT scoped to this repo. It expires 2027-02-26. Renew it before then. It replaced the token that was due to expire on 2026-12-17.
 
-Last updated: 2026-11-28 by Grok Bot
+Last updated: 2026-11-28
