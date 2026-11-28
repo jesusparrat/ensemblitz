@@ -40,11 +40,11 @@ A v1 document is one prediction run for one `(season, week)`. Top level:
 - **80% range:** `[q10, q90]` of `n_sims` simulations with a fixed `seed`. The lowest 10% and highest 10% of outcomes fall outside.
 - **Example score:** `example_score` is **illustrative**: one plausible score near the expected points, never a forecast of the exact result. Its `prob` is stored so the site can say how unlikely any single score is.
 
-### Display rules (implemented in PR 3; the data never changes for display)
+### Display rules (shipped in PR 3, GitHub #12; the data never changes for display)
 
 - One notation for a single margin: the favourite and the points it gives, for example `HOU −8.7`.
 - A margin range is written **from the same team's perspective** as the number next to it: "HOU by 8.7, 80% range from −10 to +27 for HOU". A home-minus-away range never sits next to a favourite-minus label (audit finding C4).
-- Time: data is always UTC. The Spanish site shows **Europe/Madrid** and the English site shows **America/New_York (ET)** (`contract.DISPLAY_TZ`). Today `/en/` still shows Madrid (audit finding C6); PR 3 fixes it.
+- Time: data is always UTC. The Spanish site shows **Europe/Madrid**. The English site shows **America/New_York (ET)** (`contract.DISPLAY_TZ`). That split is what PR 3 shipped.
 
 ### Market naming
 
@@ -121,7 +121,7 @@ errors = contract.validate_week(doc)  # [] when valid
 
 The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 
-1. **Ledger.** Every run writes a new, never-overwritten snapshot at `predictions/<season>/week<WW>/<generated_at_utc>.json`. Re-doing a week requires `--force`. No option, including `--force`, writes a new snapshot after the week's first kickoff. Historical corrections follow the rectification procedure in `LEDGER.md`.
+1. **Ledger.** Every run writes a new, never-overwritten snapshot under `predictions/<season>/week<WW>/` with a colon-free UTC filename (see `LEDGER.md`). Re-doing a week requires `--force`. While any game still has `kickoff_utc` in the future, a new snapshot may be written. Each game already at or past kickoff keeps the v1 form of its latest pre-kickoff record. A v0 record is mapped with `contract_io.game_from_v0`; the historical file stays v0 on disk. No option, including `--force`, writes a snapshot once every game in the week is at or past kickoff. Historical corrections follow the rectification procedure in `LEDGER.md`.
 2. **Historical snapshots.** The five versions of `predictions/2026/week12.json` from commits `22f65ff`, `081affe`, `475a36a`, `ae9f088` and `7690ac8` are stored byte for byte under `predictions/2026/week12/`. Week 11 is stored the same way from its own commits. They stay v0 on disk and are read through the v0 reader. The original `week11.json` and `week12.json` are not rewritten.
 3. **Manifest.** `predictions/MANIFEST.json` stores **only the SHA-256 of each artifact** (path → hash). There is **no `first_commit` field and no self-hash**. Publication time is proven by git history: `scripts/verify_integrity.py` finds the first commit that contained those bytes (by blob) and checks that its committer time is before kickoff.
 4. **Integrity check.** `verify_integrity.py` recomputes every hash, fails on a modified, deleted or substituted artifact, and validates v1 files with `contract.validate_week`. It runs in `ci.yml` and in `weekly.yml` before the commit. Adding a new week only extends the manifest.
@@ -132,11 +132,37 @@ The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 
 ## Optional `outcome_bands` (margin bands)
 
-New v1 snapshots may include `outcome_bands` on each game. Existing v1 and v0 snapshots without the field stay valid. The writer fills it from the headline simulation (`headline.distribution.n_sims`, seed `2026`, the model-only score draws). It is not a second simulation.
+Optional on each v1 game since GitHub #24 (`ee87af3`). The schema declares the object, so a present value is validated, and a snapshot that omits the key stays valid. Legacy v0 files have no `outcome_bands`. The writer (`predict.py`) fills it from the same headline score draws as `headline.distribution` (`n_sims` and that distribution's `seed`, 2026 in the current simulator call). It is the same simulation, counted into bands. It is not a second model and it does not change `headline.home_win_prob`.
 
-Eleven bands of integer home margin (home points minus away points). A tie, margin 0, is its own band, including a game that is still tied after overtime. The bands, in order, are `away_22p` (away by 22 or more), `away_15_21`, `away_8_14`, `away_4_7`, `away_1_3`, `tie`, `home_1_3`, `home_4_7`, `home_8_14`, `home_15_21`, `home_22p` (home by 22 or more). Each band stores a probability rounded to 4 decimals. `top3` is those ids sorted by that probability, then by the order above. Grading records `outcome_band` and `outcome_band_rank` (`1`, `2`, `3`, or `outside top 3`) only when the frozen pick carried the field.
+New snapshots, since GitHub #25 (`c5fea6a`), use eleven bands of integer home margin (home points minus away points). A tie, margin 0, is its own band, including a game that is still tied after overtime. Canonical order:
 
-Snapshots already written with the earlier seven bands stay valid and are graded with the ids stored on that record: `away_15` (away by 15 or more), `away_8_14`, `away_1_7`, `tie`, `home_1_7`, `home_8_14`, `home_15` (home by 15 or more). A later reader does not recut those probabilities onto the eleven-band set.
+| id | Home margin |
+|---|---|
+| `away_22p` | −22 or lower |
+| `away_15_21` | −21 to −15 |
+| `away_8_14` | −14 to −8 |
+| `away_4_7` | −7 to −4 |
+| `away_1_3` | −3 to −1 |
+| `tie` | 0, including a game still tied after overtime |
+| `home_1_3` | +1 to +3 |
+| `home_4_7` | +4 to +7 |
+| `home_8_14` | +8 to +14 |
+| `home_15_21` | +15 to +21 |
+| `home_22p` | +22 or higher |
+
+Each band stores `prob` rounded to 4 decimals (count of draws in the band, divided by `n_sims`). Rounding can move the probabilities off an exact sum of 1. `contract.py` accepts a sum within 0.01 of 1. `top3` is the three ids with the highest rounded probability, ties broken by the canonical order of the set on the record. Grading records `outcome_band` and `outcome_band_rank` (`1`, `2`, `3`, or `outside top 3`) only when the frozen pick carried the field. Those two grade fields are not part of the prediction document.
+
+Snapshots already written with the seven-band set from GitHub #24 stay valid. Validation (`CANONICAL_SETS` in `outcome_bands.py`) and grading use the ids stored on that record, and a later reader does not recut those probabilities onto the eleven-band set:
+
+| id | Home margin |
+|---|---|
+| `away_15` | −15 or lower |
+| `away_8_14` | −14 to −8 |
+| `away_1_7` | −7 to −1 |
+| `tie` | 0 |
+| `home_1_7` | +1 to +7 |
+| `home_8_14` | +8 to +14 |
+| `home_15` | +15 or higher |
 
 ## Optional `explanation` block (PR 5)
 

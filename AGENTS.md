@@ -62,12 +62,13 @@ A model change that improves the baseline is accepted by regenerating the artefa
 - `src/ensemblitz/impact.py`, `margin.py`, `phase1.py`, `phase1_report.py`: per-player injury impact (value over replacement, probability of playing, discrete margin table). `ensemblitz phase1 [--full]` regenerates `reports/phase1_*` and `reports/PHASE1.md`. Not wired into production. `impact.notable_absences` feeds the context lines on the site.
 - `src/ensemblitz/site/`: `build.py` (data and pages), `i18n.py` (language formats), `strings.py` (UI strings), `templates/`, `static/`.
 - `src/ensemblitz/contract.py`, `contract_io.py`, `ledger.py`, `schemas/predictions.v1.schema.json`, `docs/CONTRACT.md`, `docs/LEDGER.md`: prediction contract v1, the v0/v1 reader, and the append-only ledger.
+- `docs/ROADMAP.md`: merged history, measured production exclusions, and the approved forward plan.
 
 ## Governance and fixed rules
 
 ### Work rules
 
-- One topic per PR, on its own branch from the latest `main`. Nothing is merged without Jesús saying so. No force-push to `main`, no direct commits.
+- One topic per PR, on its own branch from the latest `main`. Nothing is merged without Jesús saying so. No force-push to `main`, no direct commits. Who runs each phase, and the one-executor rule, is the Collaboration model in `docs/ROADMAP.md`.
 - Each PR description (in English) lists: what changes, why, the files, the checks with their numbers and what is left for later.
 - The environment is locked: dependencies change only by editing `pyproject.toml` and committing the regenerated `uv.lock` in the same PR. CI runs `uv lock --check` and `uv sync --frozen`; `UV_FROZEN=1` keeps `uv run` from re-resolving.
 - No paid or quota-consuming call (The Odds API, agents) without need; prefer cached data.
@@ -87,15 +88,35 @@ A model change that improves the baseline is accepted by regenerating the artefa
 - **Append-only picks.** A published snapshot is never edited. Each run writes a new snapshot with SHA-256 in `predictions/MANIFEST.json`, and git history proves the time of publication (no commit field inside the manifest). Procedure: `docs/LEDGER.md`.
 - **Provenance.** Published artifacts carry `git_sha` from a clean tree (`contract.provenance(production=True)`), `data_snapshot` hashes and a `model_version` that is bumped by any model or simulator change. Local artifacts are flagged `reproducible: false`.
 
+### Current weekly publication
+
+`.github/workflows/weekly.yml` runs only on `main`. Three crons, plus `workflow_dispatch`:
+
+- **Tuesday 07:00 UTC:** first snapshot of the upcoming slate.
+- **Friday 22:00 UTC:** refresh after the usual Friday injury report, for games that have not kicked off. It does not guarantee a final report for Thursday, Monday, Saturday, international, or other non-Sunday games.
+- **Saturday 08:00 UTC:** catch-up when the Friday run is delayed or skipped (GitHub #23). Started games stay frozen. An empty diff does not commit.
+
+Per-game freeze: a new snapshot may be appended while any game in the week still has `kickoff_utc` in the future. Every game already at or past kickoff is copied from the latest snapshot published strictly before that kickoff. A v0 record is mapped with `contract_io.game_from_v0` into the v1 document; the historical file stays v0 on disk (GitHub #22, which closes issue #21). Once every game in the week is at or past kickoff, no option, including `--force`, writes another snapshot.
+
+New snapshots are contract v1. `contract_io.load_week` reads v0 and v1. Legacy v0 files are not rewritten.
+
+After the weekly commit and push, `actions/attest` writes Sigstore-backed SLSA provenance for `predictions/MANIFEST.json` and for each new snapshot file. Attestations prove those bytes and which workflow run produced them. They do not prove calibration or model validity. Procedure: `docs/LEDGER.md`.
+
+Optional `outcome_bands` on a new v1 game (GitHub #25, `c5fea6a`) stores eleven final-margin bands and the three most likely, taken from the headline simulation: 1 to 3, 4 to 7, 8 to 14, 15 to 21, and 22 or more on each side, plus a tie. Records written with the seven-band set from GitHub #24 stay valid and are graded with the ids stored on the record. It is not a second model. Grading records which rank happened when the frozen pick carried the field. Field rules: `docs/CONTRACT.md`.
+
+Merged history, measured exclusions and the forward plan: `docs/ROADMAP.md`.
+
 ### Official sequence
+
+The list below is the original plan. What merged, and what comes next, is `docs/ROADMAP.md`.
 
 1. **PR 1a:** `uv.lock`, a single Python version, contract v1 (schema, `contract.py`, tests), this governance section.
 2. **PR 1b:** append-only ledger (including the five historical snapshots of `week12.json` rebuilt from git without changes), SHA-256 manifest, `verify_integrity.py`, v0/v1 reader, writer on v1, site without re-simulation.
-3. **PR 2 (this work):** statistical audit in the open: 2133 vs 2141 games, model-only 64.8% vs market 66.4%, stratified 2-week block bootstrap (+ 1-week/4-week sensitivity), the ensemble margin equal to the spread, market naming, news adjustment scope, and odds data governance below.
+3. **PR 2:** statistical audit in the open: 2133 vs 2141 games, model-only 64.8% vs market 66.4%, stratified 2-week block bootstrap (+ 1-week/4-week sensitivity), the ensemble margin equal to the spread, market naming, news adjustment scope, and odds data governance below.
 4. **PR 3:** site and data fixes: ET on `/en/`, one sign convention per row, one market figure per page, tables at 375 px, no false "closing".
 5. **PR 4:** visual system: DESIGN.md from references, three mock-ups to choose from, typographic team badges generated in code, UI icons.
-6. **PR 5:** a real "why": unit match-ups adjusted for opponent and play (NGS, PFR, FTN), "matchups to watch", reading levels.
-7. **PR 6:** product: filters and sorting, follow a team, compare, share, alerts, more frequent batch updates.
+6. **PR 5:** the published "why": separated component explanations, and descriptive unit match-ups from nflverse opponent-adjusted EPA per play (offense EPA and EPA allowed). The site labels them "Matchups to watch". An earlier draft of this line named NGS, PFR and FTN; those sources are not in the implementation.
+7. **PR 6:** product work later split into 6a (per-game ledger and attestations), 6b (verification page, favorite-team filter, copy link) and 6c (Open Graph, SEO, opt-in analytics). The broader product proposal after weeks 13 to 18 is phase label PR7 in `docs/ROADMAP.md`, which is not a GitHub pull request number.
 
 ### Fixed rules
 
