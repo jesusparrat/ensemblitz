@@ -86,6 +86,26 @@ def week_from_v0(doc: dict, odds: dict | None = None) -> tuple[dict, str]:
     return out, kind, per
 
 
+def is_v0_game(game: object) -> bool:
+    """True for one legacy ``game_record()`` object, false for a v1 game.
+
+    v0 games carry ``home_win_prob`` as a dict and ``predicted_margin``. A v1 game
+    has neither. The margin field keeps partial fixtures (a ``home_win_prob`` dict
+    without the rest of the v0 record) on the raw comparison path.
+    """
+    if not isinstance(game, dict):
+        return False
+    return isinstance(game.get("home_win_prob"), dict) and "predicted_margin" in game
+
+
+def game_as_v1(game: dict) -> dict:
+    """v1 game unchanged. A v0 game mapped with ``game_from_v0`` (new dict)."""
+    if is_v0_game(game):
+        rec, _kind = game_from_v0(game)
+        return rec
+    return game
+
+
 def game_from_v0(g: dict, odds: dict | None = None) -> tuple[dict, str]:
     """Map one v0 game to a v1 game record. Returns ``(record, headline_kind)``."""
     hwp = g["home_win_prob"]
@@ -284,7 +304,9 @@ __all__ = [
     "LoadedWeek",
     "V0_N_SIMS",
     "V0_SEED",
+    "game_as_v1",
     "game_from_v0",
+    "is_v0_game",
     "latest_pick_before_kickoff",
     "load_week",
     "market_quote",
