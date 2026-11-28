@@ -1,11 +1,10 @@
 # Shared state handoff
 
-Short, factual status of `main`. This is the shared state entry point for agents. Update it in every functional PR before merge. Automated `weekly.yml` commits never modify this file. Keep it to 40 lines or fewer.
+Short, factual status of `main`. This is the shared state entry point for agents. Update it in every functional PR before merge. Automated `weekly.yml` commits never modify this file. Keep it to 40 lines or fewer. Never write merge SHAs or self-references to the PR being merged; refer to PRs by number and title.
 
-## Last merges
+## Last functional merge
 
-- Last functional merge: GitHub **#25** (`c5fea6a`, 2026-11-28T12:48:31Z): `fix: split the open margin tail into 15-21 and 22+`. New snapshots use eleven final-margin bands.
-- Last docs merge: GitHub **#26** (`27149fa`, 2026-11-28T13:34:31Z): `docs: sync agent guide, contract, and roadmap with main`.
+GitHub **#25**, `fix: split the open margin tail into 15-21 and 22+`. New snapshots use eleven final-margin bands.
 
 ## Last weekly publication
 
@@ -20,7 +19,7 @@ Short, factual status of `main`. This is the shared state entry point for agents
 
 ## Next authorized phases
 
-- **P2a. Two-level discrepancy warning** (UI, Cursor) and **P2b.1. `kf_params` provenance audit** (Antigravity) may run in parallel on disjoint files.
+- **P2a. Two-level discrepancy warning** (UI, Cursor) and **P2b.1. `kf_params` provenance audit** (Antigravity) may run in parallel on disjoint files after the Tuesday 2026-12-01 week-12 grading passes. They do not wait for the Saturday 2026-12-05 cron check, which closes P0 in parallel and blocks neither.
 - **P2b.2. Point-in-time capture contract** starts clean from week 14.
 - Then **P3. Player valuation, QB only first**, with the log-loss gate (upper bound of the 95% CI of the paired log-loss difference strictly below 0).
 - Then **P4. Product proposal after weeks 13 to 18** (phase label PR7).

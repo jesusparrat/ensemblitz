@@ -74,6 +74,8 @@ Still PENDING until executed:
 
 **Margin bands.** Merged as GitHub **#25** (`c5fea6a`). New snapshots use eleven bands. Records written with the seven bands from **#24** stay valid and are graded on those edges.
 
+**P2a** and **P2b.1** start after the Tuesday 2026-12-01 week-12 grading close (P0-a). The Saturday 2026-12-05 cron check (P0-b) runs in parallel and does not block them. **P2b.2** still starts clean from week 14.
+
 **P2a. Two-level discrepancy warning.** Editorial only, for a printed gap of 10 percentage points or more. It does not change any probability. Historical backing, verified in `src/ensemblitz/explain.py` (`DISCREPANCY_10PP_HISTORY`) and the English method string in `src/ensemblitz/site/strings.py`: 506 of 2133 decided 2018-2025 games, model-only accuracy 59.9%, market accuracy 65.8%, accuracy gap −5.9 percentage points, 95% CI [−11.5, −0.4]. The code comment records a stratified 2-week block bootstrap (10000 reps, seed 20260, 72 blocks). There is no separate report file for this row.
 
 **P2b.1. `kf_params` provenance audit.** Check that published Kalman parameters are point-in-time. No result is claimed here.
