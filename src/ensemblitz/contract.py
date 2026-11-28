@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from ensemblitz import config as C
+from ensemblitz import outcome_bands as OB
 
 SCHEMA_VERSION = "1"
 # Next to the code, not under ENSEMBLITZ_ROOT: the schema is part of the source tree.
@@ -171,16 +172,8 @@ def semantic_errors(doc: dict) -> list[str]:
         ob = g.get("outcome_bands")
         if ob:
             ids = [b["id"] for b in ob["bands"]]
-            if ids != [
-                "away_15",
-                "away_8_14",
-                "away_1_7",
-                "tie",
-                "home_1_7",
-                "home_8_14",
-                "home_15",
-            ]:
-                errors.append(f"{p}.outcome_bands.bands: ids must follow the canonical order")
+            if tuple(ids) not in OB.CANONICAL_SETS:
+                errors.append(f"{p}.outcome_bands.bands: ids must follow a canonical order")
             if len(set(ob["top3"])) != 3 or any(b not in ids for b in ob["top3"]):
                 errors.append(f"{p}.outcome_bands.top3: three distinct band ids")
             prob = {b["id"]: b["prob"] for b in ob["bands"]}

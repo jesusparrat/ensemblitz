@@ -311,8 +311,12 @@ def _bands_view(outcome: dict | None, home: str, away: str, final: dict | None) 
     """Top 3 bands for the card. ``hit`` is set once the game has a final margin."""
     if not outcome or not outcome.get("top3"):
         return None
-    by_id = {b["id"]: b["prob"] for b in outcome.get("bands") or []}
-    actual = None if final is None else OB.band_for_margin(int(final["margin"]))
+    stored = outcome.get("bands") or []
+    by_id = {b["id"]: b["prob"] for b in stored}
+    ids = list(by_id)
+    actual = None
+    if final is not None and OB.spec_for_ids(ids) is not None:
+        actual = OB.band_for_margin(int(final["margin"]), ids)
     rows = []
     for rank, bid in enumerate(outcome["top3"], start=1):
         if bid not in by_id:

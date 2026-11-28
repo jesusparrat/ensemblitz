@@ -134,7 +134,9 @@ The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 
 New v1 snapshots may include `outcome_bands` on each game. Existing v1 and v0 snapshots without the field stay valid. The writer fills it from the headline simulation (`headline.distribution.n_sims`, seed `2026`, the model-only score draws). It is not a second simulation.
 
-Seven bands of integer home margin (home points minus away points). A tie, margin 0, is its own band, including a game that is still tied after overtime. The bands, in order, are `away_15` (away by 15 or more), `away_8_14`, `away_1_7`, `tie`, `home_1_7`, `home_8_14`, `home_15` (home by 15 or more). Each band stores a probability rounded to 4 decimals. `top3` is those ids sorted by that probability, then by the order above. Grading records `outcome_band` and `outcome_band_rank` (`1`, `2`, `3`, or `outside top 3`) only when the frozen pick carried the field.
+Eleven bands of integer home margin (home points minus away points). A tie, margin 0, is its own band, including a game that is still tied after overtime. The bands, in order, are `away_22p` (away by 22 or more), `away_15_21`, `away_8_14`, `away_4_7`, `away_1_3`, `tie`, `home_1_3`, `home_4_7`, `home_8_14`, `home_15_21`, `home_22p` (home by 22 or more). Each band stores a probability rounded to 4 decimals. `top3` is those ids sorted by that probability, then by the order above. Grading records `outcome_band` and `outcome_band_rank` (`1`, `2`, `3`, or `outside top 3`) only when the frozen pick carried the field.
+
+Snapshots already written with the earlier seven bands stay valid and are graded with the ids stored on that record: `away_15` (away by 15 or more), `away_8_14`, `away_1_7`, `tie`, `home_1_7`, `home_8_14`, `home_15` (home by 15 or more). A later reader does not recut those probabilities onto the eleven-band set.
 
 ## Optional `explanation` block (PR 5)
 
