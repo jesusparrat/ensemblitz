@@ -1,0 +1,5438 @@
+{
+ "schema_version": "1",
+ "model_version": "0.2.0",
+ "git_sha": "c5fea6aa8b0c0d7c3e8434bbcf21376041794ae7",
+ "reproducible": true,
+ "generated_at_utc": "2026-11-28T12:49:38Z",
+ "data_cutoff_utc": "2026-11-27T20:00:00Z",
+ "data_snapshot": {
+  "data/raw/injuries.parquet": "1737ff308adccc13ec071d43199aab73898738c9e707ec21af8e84dbdf3adfe1",
+  "data/raw/pbp_2015.parquet": "42c4422fba911fdcbbec84f87ad4d705b17b4de176fa23fe0a877367caf0cae7",
+  "data/raw/pbp_2016.parquet": "e2bcc822d450d2b889fce09f65fc5b7f051420640056595a0eca71b5065831c8",
+  "data/raw/pbp_2017.parquet": "5f1e1645ca5921ec4959b1a4e0bae2a46e77959358e72114a741dde32da53d80",
+  "data/raw/pbp_2018.parquet": "12e038d0bab611bfee84651b5c1b2da02ba02d8531d40f4172edcb72cb7c3539",
+  "data/raw/pbp_2019.parquet": "7a399c6e3c5c30f2b31369aa9a680cd37f8c91c1413fa08aa446b02746e9cdef",
+  "data/raw/pbp_2020.parquet": "11e12247644c1f5eaf0c38971b758d02f3089a3dd93722ad52b5e70da57749b1",
+  "data/raw/pbp_2021.parquet": "b5e8c60a7031dd1ee171a5a12e812924e4730adf1c6277c0eab8071aebacd6a9",
+  "data/raw/pbp_2022.parquet": "e3118f338be8b3d19851a29c73aa10ff87b5112fda782fe1792a56468aa5ee4c",
+  "data/raw/pbp_2023.parquet": "4f8e364864a4d1b5d49e8cb0bb55a18f87abf9775fb628a4b6972585bc2c3635",
+  "data/raw/pbp_2024.parquet": "61aaa22e02f859d7559483a4edffebdcefae625ad867007615c7807477360e3e",
+  "data/raw/pbp_2025.parquet": "38d369ec67e8512c847dec43a4592c94e70499bfd4f4b5c3a14b02bd5ebfd3d9",
+  "data/raw/pbp_2026.parquet": "2bac3f8dac07f08e47f926d05854c0d8bdb8e4be9aa7b577edc8d12818e95ac8",
+  "data/raw/player_ids.parquet": "c312621334fb379e2ff9380e69f29d94c2d8b684da33fb9ec55a97d124b9358f",
+  "data/raw/player_stats.parquet": "1fee3c59d50220f7b91effb8a03e76f3c76660c867ba2c4723cff5af80b29a53",
+  "data/raw/schedules.parquet": "95574ae37fcaf71d54833b8d3c24a3d73d4bb70c294f4525dda90ea1bf913b63",
+  "data/raw/schedules_history.parquet": "b81bd16f57e0f6916d6579f14cb10232606dafe529362da5686fd08f7343dfad",
+  "data/raw/snap_counts.parquet": "12f6884fa16047831ed9ffc2403e465edd3b652afc85f06d841a3460f5bd3e47"
+ },
+ "season": 2026,
+ "week": 12,
+ "ensemble_weights": {
+  "with_market": {
+   "components": [
+    "market",
+    "elo",
+    "kf",
+    "lgbm",
+    "lgbm_mkt"
+   ],
+   "prob_weights": [
+    0.795,
+    0.051,
+    0.0,
+    0.0,
+    0.241
+   ],
+   "bias": -0.048,
+   "margin_weights": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "no_market": {
+   "components": [
+    "elo",
+    "kf",
+    "lgbm"
+   ],
+   "prob_weights": [
+    0.4,
+    0.124,
+    0.529
+   ],
+   "bias": -0.058,
+   "margin_weights": [
+    0.255,
+    0.329,
+    0.447
+   ]
+  }
+ },
+ "games": [
+  {
+   "game_id": "2026_12_GB_LA",
+   "home_team": "LA",
+   "away_team": "GB",
+   "kickoff_utc": "2026-11-26T01:00:00Z",
+   "generated_at_utc": "2026-11-24T18:26:45Z",
+   "headline": {
+    "home_win_prob": 0.6663,
+    "home_points": 25.43,
+    "away_points": 19.5,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.663,
+     "home_points": [
+      13.0,
+      39.0
+     ],
+     "away_points": [
+      7.0,
+      32.0
+     ],
+     "margin_home": [
+      -12.0,
+      24.0
+     ],
+     "total": [
+      27.0,
+      64.0
+     ]
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.0061
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.5686,
+    "margin_home": 2.5,
+    "total": 44.91
+   },
+   "components": {
+    "elo": 0.6703,
+    "kf": 0.6811,
+    "lgbm": 0.6695,
+    "lgbm_mkt": 0.6382
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-24T18:26:45Z",
+     "is_closing": false,
+     "home_win_prob": 0.5514,
+     "margin_home": 2.5,
+     "total_line": 44.5,
+     "home_moneyline": -135.0,
+     "away_moneyline": 114.0
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 10,
+    "away_rest_days": 10,
+    "dome": true,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 5
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.5686,
+    "margin_home_before": 2.5,
+    "items": []
+   }
+  },
+  {
+   "game_id": "2026_12_CHI_DET",
+   "home_team": "DET",
+   "away_team": "CHI",
+   "kickoff_utc": "2026-11-26T18:00:00Z",
+   "generated_at_utc": "2026-11-24T18:26:45Z",
+   "headline": {
+    "home_win_prob": 0.5863,
+    "home_points": 27.06,
+    "away_points": 23.73,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.5954,
+     "home_points": [
+      13.0,
+      41.0
+     ],
+     "away_points": [
+      10.0,
+      38.0
+     ],
+     "margin_home": [
+      -15.0,
+      22.0
+     ],
+     "total": [
+      31.0,
+      71.0
+     ]
+    },
+    "example_score": {
+     "home": 27,
+     "away": 23,
+     "prob": 0.0029
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.4297,
+    "margin_home": -2.5,
+    "total": 56.01
+   },
+   "components": {
+    "elo": 0.5688,
+    "kf": 0.5956,
+    "lgbm": 0.6189,
+    "lgbm_mkt": 0.4512
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-24T18:26:45Z",
+     "is_closing": false,
+     "home_win_prob": 0.4365,
+     "margin_home": -2.5,
+     "total_line": 55.5,
+     "home_moneyline": 120.0,
+     "away_moneyline": -142.0
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 4,
+    "away_rest_days": 4,
+    "dome": true,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 1,
+    "away_out_lag": 1
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.4297,
+    "margin_home_before": -2.5,
+    "items": []
+   }
+  },
+  {
+   "game_id": "2026_12_PHI_DAL",
+   "home_team": "DAL",
+   "away_team": "PHI",
+   "kickoff_utc": "2026-11-26T21:30:00Z",
+   "generated_at_utc": "2026-11-24T18:26:45Z",
+   "headline": {
+    "home_win_prob": 0.6573,
+    "home_points": 28.325,
+    "away_points": 22.755,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.6499,
+     "home_points": [
+      14.0,
+      42.0
+     ],
+     "away_points": [
+      10.0,
+      37.0
+     ],
+     "margin_home": [
+      -13.0,
+      24.0
+     ],
+     "total": [
+      32.0,
+      71.0
+     ]
+    },
+    "example_score": {
+     "home": 28,
+     "away": 24,
+     "prob": 0.0032
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.7855,
+    "margin_home": 8.5,
+    "total": 47.94
+   },
+   "components": {
+    "elo": 0.6399,
+    "kf": 0.6508,
+    "lgbm": 0.6859,
+    "lgbm_mkt": 0.7384
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-24T18:26:45Z",
+     "is_closing": false,
+     "home_win_prob": 0.7924,
+     "margin_home": 8.5,
+     "total_line": 47.5,
+     "home_moneyline": -469.0,
+     "away_moneyline": 363.0
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 4,
+    "away_rest_days": 4,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 5,
+    "away_out_lag": 3
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.7855,
+    "margin_home_before": 8.5,
+    "items": []
+   }
+  },
+  {
+   "game_id": "2026_12_KC_BUF",
+   "home_team": "BUF",
+   "away_team": "KC",
+   "kickoff_utc": "2026-11-27T01:20:00Z",
+   "generated_at_utc": "2026-11-24T18:26:45Z",
+   "headline": {
+    "home_win_prob": 0.6796,
+    "home_points": 26.51,
+    "away_points": 20.830000000000002,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.6572,
+     "home_points": [
+      13.0,
+      41.0
+     ],
+     "away_points": [
+      9.0,
+      34.0
+     ],
+     "margin_home": [
+      -13.0,
+      24.0
+     ],
+     "total": [
+      29.0,
+      67.0
+     ]
+    },
+    "example_score": {
+     "home": 27,
+     "away": 20,
+     "prob": 0.0059
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.5908,
+    "margin_home": 3.0,
+    "total": 47.94
+   },
+   "components": {
+    "elo": 0.7124,
+    "kf": 0.6211,
+    "lgbm": 0.6764,
+    "lgbm_mkt": 0.6373
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-24T18:26:45Z",
+     "is_closing": false,
+     "home_win_prob": 0.5756,
+     "margin_home": 3.0,
+     "total_line": 47.5,
+     "home_moneyline": -150.0,
+     "away_moneyline": 126.0
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 4,
+    "away_rest_days": 4,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 3,
+    "away_out_lag": 3
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.5908,
+    "margin_home_before": 3.0,
+    "items": []
+   }
+  },
+  {
+   "game_id": "2026_12_DEN_PIT",
+   "home_team": "PIT",
+   "away_team": "DEN",
+   "kickoff_utc": "2026-11-27T20:00:00Z",
+   "generated_at_utc": "2026-11-24T18:26:45Z",
+   "headline": {
+    "home_win_prob": 0.3934,
+    "home_points": 19.74,
+    "away_points": 22.34,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.4239,
+     "home_points": [
+      7.0,
+      33.0
+     ],
+     "away_points": [
+      10.0,
+      35.0
+     ],
+     "margin_home": [
+      -20.0,
+      14.0
+     ],
+     "total": [
+      24.0,
+      61.0
+     ]
+    },
+    "example_score": {
+     "home": 17,
+     "away": 21,
+     "prob": 0.0047
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.4033,
+    "margin_home": -3.0,
+    "total": 38.85
+   },
+   "components": {
+    "elo": 0.395,
+    "kf": 0.4481,
+    "lgbm": 0.4155,
+    "lgbm_mkt": 0.4591
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-24T18:26:45Z",
+     "is_closing": false,
+     "home_win_prob": 0.4143,
+     "margin_home": -3.0,
+     "total_line": 38.5,
+     "home_moneyline": 132.0,
+     "away_moneyline": -156.0
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 5,
+    "away_rest_days": 5,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 0,
+    "away_out_lag": 1
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.4033,
+    "margin_home_before": -3.0,
+    "items": []
+   }
+  },
+  {
+   "game_id": "2026_12_ATL_MIN",
+   "home_team": "MIN",
+   "away_team": "ATL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.7143,
+    "home_points": 21.84,
+    "away_points": 14.63,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.7181,
+     "home_points": [
+      10.0,
+      35.0
+     ],
+     "away_points": [
+      3.0,
+      27.0
+     ],
+     "margin_home": [
+      -10.0,
+      24.0
+     ],
+     "total": [
+      20.0,
+      54.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        15,
+        7,
+        2,
+        5,
+        9,
+        8,
+        9,
+        22,
+        19,
+        11,
+        34,
+        43,
+        22,
+        32,
+        85,
+        70,
+        35,
+        106,
+        149,
+        62,
+        84,
+        263,
+        190,
+        95,
+        251,
+        394,
+        158,
+        215,
+        789,
+        290,
+        180,
+        587,
+        708,
+        255,
+        405,
+        59,
+        405,
+        296,
+        1047,
+        779,
+        246,
+        634,
+        1398,
+        426,
+        328,
+        912,
+        723,
+        269,
+        597,
+        871,
+        340,
+        294,
+        695,
+        485,
+        206,
+        377,
+        526,
+        197,
+        181,
+        384,
+        242,
+        104,
+        206,
+        276,
+        76,
+        90,
+        160,
+        85,
+        35,
+        74,
+        368
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        349,
+        7,
+        33,
+        286,
+        72,
+        59,
+        270,
+        393,
+        49,
+        260,
+        454,
+        249,
+        172,
+        687,
+        569,
+        137,
+        404,
+        1028,
+        241,
+        343,
+        941,
+        708,
+        213,
+        670,
+        791,
+        405,
+        436,
+        889,
+        618,
+        285,
+        545,
+        831,
+        275,
+        390,
+        678,
+        456,
+        203,
+        531,
+        463,
+        273,
+        298,
+        405,
+        241,
+        169,
+        260,
+        340,
+        125,
+        175,
+        225,
+        118,
+        82,
+        150,
+        107,
+        71,
+        58,
+        111,
+        49,
+        39,
+        51,
+        66,
+        21,
+        20,
+        38,
+        21,
+        12,
+        14,
+        10,
+        6,
+        4,
+        11,
+        40
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 20,
+     "away": 13,
+     "prob": 0.0069
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.7255,
+    "margin_home": 7.0,
+    "total": 41.88
+   },
+   "components": {
+    "elo": 0.7821,
+    "kf": 0.718,
+    "lgbm": 0.6586,
+    "lgbm_mkt": 0.676
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.7269,
+     "margin_home": 7.0,
+     "total_line": 41.5,
+     "home_moneyline": -310.0,
+     "away_moneyline": 252.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.7429,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 14,
+    "dome": true,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.7255,
+    "margin_home_before": 7.0,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0119
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0295
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.0783
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.0923
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0684
+     },
+     {
+      "id": "tie",
+      "prob": 0.0029
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0874
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1529
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.2063
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1462
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.1239
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_4_7",
+     "home_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": 2.478,
+     "top_matchup_id": "away_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 4.933,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.5107,
+      "kf": 0.1157,
+      "lgbm": 0.3477
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 2.261,
+      "kf": 2.478,
+      "lgbm": 2.467
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 5.517,
+     "groups": {
+      "pass_game": 0.482,
+      "rush_game": -0.567,
+      "efficiency": -0.622,
+      "qb": 1.388,
+      "team_strength": 4.933,
+      "situational": -1.956
+     }
+    },
+    "kalman": {
+     "margin": 7.534,
+     "hfa": 1.842,
+     "home_off": -3.336,
+     "away_def_allowed": 1.635,
+     "away_off": -2.033,
+     "home_def_allowed": -5.36,
+     "home_off_vs_away_def": -1.701,
+     "away_off_vs_home_def": -7.393
+    },
+    "elo": {
+     "margin": 8.879,
+     "team_margin": 6.959,
+     "hfa_margin": 1.92,
+     "home_rating": 1589.6,
+     "away_rating": 1415.6
+    },
+    "matchups": [
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "ATL",
+      "def_team": "MIN",
+      "off_epa": -0.073,
+      "off_rank": 30,
+      "def_epa_allowed": -0.086,
+      "def_rank": 1,
+      "combined_epa": -0.159,
+      "favors": "MIN"
+     },
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "MIN",
+      "def_team": "ATL",
+      "off_epa": -0.091,
+      "off_rank": 31,
+      "def_epa_allowed": 0.032,
+      "def_rank": 18,
+      "combined_epa": -0.059,
+      "favors": "ATL"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "MIN",
+      "def_team": "ATL",
+      "off_epa": -0.04,
+      "off_rank": 21,
+      "def_epa_allowed": -0.014,
+      "def_rank": 18,
+      "combined_epa": -0.054,
+      "favors": "ATL"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "ATL",
+      "def_team": "MIN",
+      "off_epa": 0.011,
+      "off_rank": 9,
+      "def_epa_allowed": -0.06,
+      "def_rank": 3,
+      "combined_epa": -0.049,
+      "favors": "MIN"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.04,
+     "away_epa_per_dropback": -0.026,
+     "diff_epa_per_dropback": 0.066,
+     "home_dropbacks": 782.6,
+     "away_dropbacks": 433.4,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_BAL_HOU",
+   "home_team": "HOU",
+   "away_team": "BAL",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.6936,
+    "home_points": 26.94,
+    "away_points": 19.76,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.6975,
+     "home_points": [
+      13.0,
+      41.0
+     ],
+     "away_points": [
+      7.0,
+      33.0
+     ],
+     "margin_home": [
+      -11.0,
+      25.0
+     ],
+     "total": [
+      29.0,
+      66.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        38,
+        7,
+        4,
+        9,
+        18,
+        8,
+        14,
+        29,
+        29,
+        29,
+        56,
+        62,
+        24,
+        53,
+        114,
+        88,
+        50,
+        146,
+        187,
+        77,
+        149,
+        274,
+        209,
+        108,
+        309,
+        383,
+        164,
+        257,
+        693,
+        296,
+        212,
+        532,
+        702,
+        258,
+        450,
+        25,
+        435,
+        290,
+        897,
+        737,
+        312,
+        506,
+        1119,
+        428,
+        323,
+        785,
+        628,
+        300,
+        523,
+        778,
+        375,
+        263,
+        639,
+        483,
+        242,
+        389,
+        514,
+        224,
+        198,
+        395,
+        288,
+        122,
+        223,
+        265,
+        143,
+        114,
+        204,
+        125,
+        74,
+        87,
+        509
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        58,
+        2,
+        6,
+        61,
+        14,
+        12,
+        67,
+        111,
+        5,
+        83,
+        145,
+        77,
+        65,
+        246,
+        226,
+        68,
+        197,
+        368,
+        105,
+        206,
+        453,
+        398,
+        127,
+        487,
+        541,
+        302,
+        352,
+        722,
+        500,
+        246,
+        502,
+        820,
+        250,
+        462,
+        823,
+        569,
+        294,
+        681,
+        561,
+        354,
+        455,
+        707,
+        455,
+        309,
+        468,
+        670,
+        258,
+        454,
+        537,
+        339,
+        197,
+        421,
+        334,
+        194,
+        200,
+        328,
+        178,
+        138,
+        196,
+        259,
+        91,
+        154,
+        155,
+        107,
+        70,
+        127,
+        91,
+        55,
+        49,
+        80,
+        358
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 27,
+     "away": 20,
+     "prob": 0.006
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.7262,
+    "margin_home": 6.5,
+    "total": 47.94
+   },
+   "components": {
+    "elo": 0.6938,
+    "kf": 0.7421,
+    "lgbm": 0.6873,
+    "lgbm_mkt": 0.6553
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.739,
+     "margin_home": 6.5,
+     "total_line": 47.5,
+     "home_moneyline": -334.0,
+     "away_moneyline": 268.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.7342,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 10,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   },
+   "absences": {
+    "home": [
+     {
+      "player": "Danielle Hunter",
+      "position": "DE",
+      "status": "out",
+      "points": 1.8
+     }
+    ],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.7262,
+    "margin_home_before": 6.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.019
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0406
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.0852
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.0867
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0705
+     },
+     {
+      "id": "tie",
+      "prob": 0.0013
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0811
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1337
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1883
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1452
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.1485
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_22p",
+     "home_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "lgbm",
+     "lead_component_margin_home": 2.947,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 3.418,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.327,
+      "kf": 0.1309,
+      "lgbm": 0.4166
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 1.447,
+      "kf": 2.784,
+      "lgbm": 2.947
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 6.589,
+     "groups": {
+      "pass_game": -0.141,
+      "rush_game": -0.587,
+      "efficiency": -0.774,
+      "qb": 2.217,
+      "team_strength": 3.418,
+      "situational": 0.598
+     }
+    },
+    "kalman": {
+     "margin": 8.463,
+     "hfa": 1.842,
+     "home_off": 1.752,
+     "away_def_allowed": 2.143,
+     "away_off": -0.904,
+     "home_def_allowed": -1.822,
+     "home_off_vs_away_def": 3.895,
+     "away_off_vs_home_def": -2.726
+    },
+    "elo": {
+     "margin": 5.684,
+     "team_margin": 3.764,
+     "hfa_margin": 1.92,
+     "home_rating": 1535.5,
+     "away_rating": 1441.4
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "HOU",
+      "def_team": "BAL",
+      "off_epa": 0.079,
+      "off_rank": 9,
+      "def_epa_allowed": 0.043,
+      "def_rank": 21,
+      "combined_epa": 0.122,
+      "favors": "HOU"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "HOU",
+      "def_team": "BAL",
+      "off_epa": -0.067,
+      "off_rank": 28,
+      "def_epa_allowed": -0.022,
+      "def_rank": 12,
+      "combined_epa": -0.088,
+      "favors": "BAL"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "BAL",
+      "def_team": "HOU",
+      "off_epa": -0.013,
+      "off_rank": 20,
+      "def_epa_allowed": -0.015,
+      "def_rank": 11,
+      "combined_epa": -0.028,
+      "favors": "HOU"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "BAL",
+      "def_team": "HOU",
+      "off_epa": 0.005,
+      "off_rank": 10,
+      "def_epa_allowed": -0.031,
+      "def_rank": 9,
+      "combined_epa": -0.026,
+      "favors": "HOU"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.048,
+     "away_epa_per_dropback": -0.03,
+     "diff_epa_per_dropback": 0.078,
+     "home_dropbacks": 771.1,
+     "away_dropbacks": 770.7,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [
+      {
+       "player": "Danielle Hunter",
+       "position": "DE",
+       "status": "out",
+       "points": 1.8
+      }
+     ],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_NO_CIN",
+   "home_team": "CIN",
+   "away_team": "NO",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.8296,
+    "home_points": 30.94,
+    "away_points": 19.01,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.803,
+     "home_points": [
+      17.0,
+      45.0
+     ],
+     "away_points": [
+      7.0,
+      31.0
+     ],
+     "margin_home": [
+      -7.0,
+      30.0
+     ],
+     "total": [
+      31.0,
+      69.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        8,
+        1,
+        3,
+        7,
+        7,
+        10,
+        11,
+        19,
+        8,
+        5,
+        28,
+        23,
+        19,
+        32,
+        58,
+        45,
+        36,
+        85,
+        97,
+        49,
+        76,
+        164,
+        91,
+        74,
+        216,
+        216,
+        96,
+        182,
+        470,
+        226,
+        189,
+        408,
+        444,
+        174,
+        355,
+        15,
+        298,
+        273,
+        738,
+        540,
+        296,
+        506,
+        1040,
+        411,
+        390,
+        780,
+        661,
+        317,
+        561,
+        826,
+        421,
+        409,
+        713,
+        586,
+        245,
+        527,
+        679,
+        351,
+        290,
+        538,
+        381,
+        203,
+        343,
+        406,
+        182,
+        197,
+        313,
+        209,
+        102,
+        201,
+        1120
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        28,
+        0,
+        2,
+        38,
+        8,
+        10,
+        44,
+        71,
+        5,
+        57,
+        97,
+        60,
+        46,
+        140,
+        171,
+        45,
+        139,
+        316,
+        102,
+        134,
+        370,
+        255,
+        86,
+        373,
+        451,
+        223,
+        292,
+        647,
+        431,
+        225,
+        496,
+        718,
+        262,
+        425,
+        741,
+        490,
+        272,
+        647,
+        636,
+        384,
+        453,
+        776,
+        486,
+        315,
+        531,
+        658,
+        291,
+        446,
+        571,
+        370,
+        319,
+        508,
+        424,
+        210,
+        306,
+        425,
+        243,
+        201,
+        265,
+        302,
+        122,
+        183,
+        211,
+        159,
+        105,
+        149,
+        119,
+        89,
+        94,
+        112,
+        620
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 30,
+     "away": 17,
+     "prob": 0.0039
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.8253,
+    "margin_home": 9.5,
+    "total": 48.95
+   },
+   "components": {
+    "elo": 0.8087,
+    "kf": 0.7666,
+    "lgbm": 0.8498,
+    "lgbm_mkt": 0.815
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.8135,
+     "margin_home": 9.5,
+     "total_line": 48.5,
+     "home_moneyline": -547.0,
+     "away_moneyline": 416.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.8321,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 41
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 6,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 4,
+    "away_out_lag": 5
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.8253,
+    "margin_home_before": 9.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0091
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0223
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.052
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.0646
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0486
+     },
+     {
+      "id": "tie",
+      "prob": 0.0008
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0654
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1191
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1973
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.179
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.2418
+     }
+    ],
+    "top3": [
+     "home_22p",
+     "home_8_14",
+     "home_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "lgbm",
+     "lead_component_margin_home": 6.254,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 7.176,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.5761,
+      "kf": 0.1473,
+      "lgbm": 0.9172
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 2.551,
+      "kf": 3.125,
+      "lgbm": 6.254
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 13.983,
+     "groups": {
+      "pass_game": -0.095,
+      "rush_game": 0.286,
+      "efficiency": 0.705,
+      "qb": 2.936,
+      "team_strength": 7.176,
+      "situational": 1.118
+     }
+    },
+    "kalman": {
+     "margin": 9.501,
+     "hfa": 1.842,
+     "home_off": 4.683,
+     "away_def_allowed": 1.357,
+     "away_off": -2.382,
+     "home_def_allowed": 0.764,
+     "home_off_vs_away_def": 6.04,
+     "away_off_vs_home_def": -1.619
+    },
+    "elo": {
+     "margin": 10.016,
+     "team_margin": 8.096,
+     "hfa_margin": 1.92,
+     "home_rating": 1594.3,
+     "away_rating": 1391.9
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "CIN",
+      "def_team": "NO",
+      "off_epa": 0.145,
+      "off_rank": 2,
+      "def_epa_allowed": 0.039,
+      "def_rank": 20,
+      "combined_epa": 0.185,
+      "favors": "CIN"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "NO",
+      "def_team": "CIN",
+      "off_epa": -0.082,
+      "off_rank": 30,
+      "def_epa_allowed": 0.015,
+      "def_rank": 29,
+      "combined_epa": -0.067,
+      "favors": "CIN"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "NO",
+      "def_team": "CIN",
+      "off_epa": -0.005,
+      "off_rank": 19,
+      "def_epa_allowed": 0.048,
+      "def_rank": 24,
+      "combined_epa": 0.043,
+      "favors": "NO"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "CIN",
+      "def_team": "NO",
+      "off_epa": -0.012,
+      "off_rank": 14,
+      "def_epa_allowed": -0.018,
+      "def_rank": 16,
+      "combined_epa": -0.03,
+      "favors": "NO"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.128,
+     "away_epa_per_dropback": -0.011,
+     "diff_epa_per_dropback": 0.139,
+     "home_dropbacks": 862.2,
+     "away_dropbacks": 544.3,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_NYG_IND",
+   "home_team": "IND",
+   "away_team": "NYG",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.4133,
+    "home_points": 21.67,
+    "away_points": 23.93,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.4371,
+     "home_points": [
+      10.0,
+      35.0
+     ],
+     "away_points": [
+      10.0,
+      38.0
+     ],
+     "margin_home": [
+      -21.0,
+      15.0
+     ],
+     "total": [
+      27.0,
+      65.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        234,
+        40,
+        23,
+        74,
+        99,
+        55,
+        65,
+        163,
+        132,
+        74,
+        180,
+        209,
+        140,
+        155,
+        364,
+        247,
+        158,
+        359,
+        448,
+        213,
+        283,
+        595,
+        434,
+        214,
+        586,
+        657,
+        302,
+        409,
+        1162,
+        498,
+        294,
+        692,
+        901,
+        329,
+        451,
+        38,
+        514,
+        310,
+        822,
+        645,
+        278,
+        436,
+        959,
+        370,
+        233,
+        556,
+        459,
+        173,
+        289,
+        441,
+        239,
+        157,
+        318,
+        239,
+        86,
+        164,
+        206,
+        96,
+        60,
+        145,
+        86,
+        42,
+        61,
+        77,
+        34,
+        41,
+        51,
+        30,
+        11,
+        16,
+        79
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        70,
+        1,
+        11,
+        73,
+        22,
+        9,
+        90,
+        127,
+        13,
+        95,
+        152,
+        99,
+        67,
+        273,
+        265,
+        66,
+        208,
+        526,
+        128,
+        195,
+        527,
+        426,
+        145,
+        511,
+        545,
+        286,
+        381,
+        819,
+        546,
+        264,
+        495,
+        864,
+        261,
+        467,
+        782,
+        543,
+        264,
+        747,
+        580,
+        368,
+        436,
+        672,
+        426,
+        302,
+        452,
+        603,
+        232,
+        379,
+        454,
+        334,
+        196,
+        394,
+        261,
+        193,
+        190,
+        323,
+        214,
+        131,
+        185,
+        186,
+        77,
+        111,
+        136,
+        107,
+        59,
+        122,
+        68,
+        47,
+        47,
+        61,
+        291
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 21,
+     "away": 24,
+     "prob": 0.004
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.291,
+    "margin_home": -5.5,
+    "total": 41.88
+   },
+   "components": {
+    "elo": 0.4097,
+    "kf": 0.422,
+    "lgbm": 0.4493,
+    "lgbm_mkt": 0.3495
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.2998,
+     "margin_home": -5.5,
+     "total_line": 41.5,
+     "home_moneyline": 221.0,
+     "away_moneyline": -267.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.3025,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 41
+    }
+   ],
+   "context": {
+    "home_qb_change": true,
+    "away_qb_change": false,
+    "home_rest_days": 10,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 5,
+    "away_out_lag": 0
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.291,
+    "margin_home_before": -5.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0822
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.1036
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1598
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1323
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.084
+     },
+     {
+      "id": "tie",
+      "prob": 0.0019
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0823
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1159
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.126
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.0704
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.0415
+     }
+    ],
+    "top3": [
+     "away_8_14",
+     "away_4_7",
+     "home_8_14"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": -0.844,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": -3.158,
+     "qb_change_teams": [
+      "IND"
+     ]
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": -0.1459,
+      "kf": -0.039,
+      "lgbm": -0.1078
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": -0.646,
+      "kf": -0.844,
+      "lgbm": -0.77
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": -1.722,
+     "groups": {
+      "pass_game": 0.266,
+      "rush_game": 0.372,
+      "efficiency": 0.033,
+      "qb": -1.26,
+      "team_strength": -3.158,
+      "situational": 0.166
+     }
+    },
+    "kalman": {
+     "margin": -2.566,
+     "hfa": 1.842,
+     "home_off": -1.769,
+     "away_def_allowed": -0.403,
+     "away_off": -0.589,
+     "home_def_allowed": 2.824,
+     "home_off_vs_away_def": -2.173,
+     "away_off_vs_home_def": 2.235
+    },
+    "elo": {
+     "margin": -2.537,
+     "team_margin": -4.457,
+     "hfa_margin": 1.92,
+     "home_rating": 1377.0,
+     "away_rating": 1488.4
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "IND",
+      "def_team": "NYG",
+      "off_epa": -0.129,
+      "off_rank": 32,
+      "def_epa_allowed": -0.009,
+      "def_rank": 12,
+      "combined_epa": -0.139,
+      "favors": "NYG"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "NYG",
+      "def_team": "IND",
+      "off_epa": 0.029,
+      "off_rank": 15,
+      "def_epa_allowed": 0.045,
+      "def_rank": 22,
+      "combined_epa": 0.073,
+      "favors": "NYG"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "NYG",
+      "def_team": "IND",
+      "off_epa": -0.049,
+      "off_rank": 25,
+      "def_epa_allowed": -0.006,
+      "def_rank": 23,
+      "combined_epa": -0.055,
+      "favors": "IND"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "IND",
+      "def_team": "NYG",
+      "off_epa": 0.012,
+      "off_rank": 8,
+      "def_epa_allowed": -0.003,
+      "def_rank": 26,
+      "combined_epa": 0.009,
+      "favors": "IND"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": -0.064,
+     "away_epa_per_dropback": -0.037,
+     "diff_epa_per_dropback": -0.027,
+     "home_dropbacks": 176.0,
+     "away_dropbacks": 305.0,
+     "home_qb_change": true,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_NYJ_MIA",
+   "home_team": "MIA",
+   "away_team": "NYJ",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.5196,
+    "home_points": 21.69,
+    "away_points": 20.43,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.5354,
+     "home_points": [
+      10.0,
+      35.0
+     ],
+     "away_points": [
+      9.0,
+      34.0
+     ],
+     "margin_home": [
+      -16.0,
+      18.0
+     ],
+     "total": [
+      24.0,
+      61.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        71,
+        17,
+        9,
+        33,
+        49,
+        20,
+        36,
+        80,
+        72,
+        42,
+        97,
+        171,
+        91,
+        112,
+        213,
+        167,
+        91,
+        246,
+        350,
+        179,
+        219,
+        489,
+        316,
+        181,
+        459,
+        574,
+        235,
+        381,
+        1074,
+        468,
+        277,
+        744,
+        879,
+        322,
+        511,
+        33,
+        497,
+        331,
+        957,
+        802,
+        271,
+        508,
+        1130,
+        384,
+        231,
+        711,
+        569,
+        208,
+        359,
+        594,
+        254,
+        203,
+        413,
+        320,
+        138,
+        235,
+        288,
+        121,
+        108,
+        207,
+        141,
+        57,
+        105,
+        142,
+        41,
+        37,
+        69,
+        45,
+        16,
+        39,
+        161
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        141,
+        1,
+        15,
+        107,
+        16,
+        20,
+        152,
+        194,
+        28,
+        154,
+        249,
+        138,
+        112,
+        404,
+        371,
+        83,
+        269,
+        687,
+        179,
+        270,
+        661,
+        565,
+        181,
+        561,
+        619,
+        322,
+        444,
+        828,
+        592,
+        296,
+        538,
+        883,
+        271,
+        463,
+        853,
+        539,
+        281,
+        675,
+        531,
+        357,
+        417,
+        633,
+        383,
+        262,
+        394,
+        481,
+        185,
+        295,
+        358,
+        218,
+        141,
+        308,
+        227,
+        160,
+        145,
+        204,
+        126,
+        71,
+        116,
+        130,
+        58,
+        71,
+        97,
+        61,
+        44,
+        65,
+        32,
+        33,
+        24,
+        46,
+        165
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 21,
+     "away": 20,
+     "prob": 0.0034
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.3066,
+    "margin_home": -5.5,
+    "total": 39.86
+   },
+   "components": {
+    "elo": 0.578,
+    "kf": 0.5869,
+    "lgbm": 0.4842,
+    "lgbm_mkt": 0.3589
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.3078,
+     "margin_home": -5.5,
+     "total_line": 39.5,
+     "home_moneyline": 212.0,
+     "away_moneyline": -258.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.3083,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   },
+   "absences": {
+    "home": [],
+    "away": [
+     {
+      "player": "Omar Cooper Jr.",
+      "position": "WR",
+      "status": "out",
+      "points": 1.1
+     }
+    ]
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.3066,
+    "margin_home_before": -5.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.045
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0732
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1318
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1281
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0856
+     },
+     {
+      "id": "tie",
+      "prob": 0.0016
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0892
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1356
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1528
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.0925
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.0644
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_4_7",
+     "away_8_14"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": 0.938,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 1.69,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.1258,
+      "kf": 0.0435,
+      "lgbm": -0.0334
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 0.557,
+      "kf": 0.938,
+      "lgbm": -0.239
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": -0.534,
+     "groups": {
+      "pass_game": 0.289,
+      "rush_game": -0.288,
+      "efficiency": -0.539,
+      "qb": -3.631,
+      "team_strength": 1.69,
+      "situational": 0.087
+     }
+    },
+    "kalman": {
+     "margin": 2.852,
+     "hfa": 1.842,
+     "home_off": -4.514,
+     "away_def_allowed": 3.306,
+     "away_off": -2.856,
+     "home_def_allowed": 0.638,
+     "home_off_vs_away_def": -1.209,
+     "away_off_vs_home_def": -2.218
+    },
+    "elo": {
+     "margin": 2.186,
+     "team_margin": 0.266,
+     "hfa_margin": 1.92,
+     "home_rating": 1349.0,
+     "away_rating": 1342.3
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "MIA",
+      "def_team": "NYJ",
+      "off_epa": -0.049,
+      "off_rank": 27,
+      "def_epa_allowed": 0.125,
+      "def_rank": 30,
+      "combined_epa": 0.075,
+      "favors": "MIA"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "NYJ",
+      "def_team": "MIA",
+      "off_epa": -0.016,
+      "off_rank": 21,
+      "def_epa_allowed": 0.05,
+      "def_rank": 25,
+      "combined_epa": 0.033,
+      "favors": "NYJ"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "NYJ",
+      "def_team": "MIA",
+      "off_epa": -0.026,
+      "off_rank": 20,
+      "def_epa_allowed": -0.003,
+      "def_rank": 25,
+      "combined_epa": -0.029,
+      "favors": "MIA"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "MIA",
+      "def_team": "NYJ",
+      "off_epa": -0.042,
+      "off_rank": 22,
+      "def_epa_allowed": 0.027,
+      "def_rank": 31,
+      "combined_epa": -0.015,
+      "favors": "NYJ"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": -0.094,
+     "away_epa_per_dropback": 0.003,
+     "diff_epa_per_dropback": -0.097,
+     "home_dropbacks": 69.9,
+     "away_dropbacks": 770.7,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": [
+      {
+       "player": "Omar Cooper Jr.",
+       "position": "WR",
+       "status": "out",
+       "points": 1.1
+      }
+     ]
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_TEN_JAX",
+   "home_team": "JAX",
+   "away_team": "TEN",
+   "kickoff_utc": "2026-11-29T18:00:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.8624,
+    "home_points": 31.92,
+    "away_points": 17.35,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.8493,
+     "home_points": [
+      17.0,
+      47.0
+     ],
+     "away_points": [
+      7.0,
+      30.0
+     ],
+     "margin_home": [
+      -4.0,
+      32.0
+     ],
+     "total": [
+      31.0,
+      69.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        3,
+        1,
+        0,
+        3,
+        5,
+        1,
+        3,
+        10,
+        12,
+        7,
+        10,
+        15,
+        9,
+        17,
+        42,
+        33,
+        23,
+        57,
+        57,
+        33,
+        53,
+        106,
+        89,
+        62,
+        141,
+        151,
+        86,
+        132,
+        371,
+        166,
+        148,
+        294,
+        415,
+        162,
+        291,
+        13,
+        266,
+        259,
+        620,
+        524,
+        237,
+        498,
+        912,
+        399,
+        344,
+        743,
+        597,
+        334,
+        592,
+        744,
+        445,
+        410,
+        799,
+        625,
+        296,
+        551,
+        717,
+        341,
+        321,
+        665,
+        427,
+        233,
+        440,
+        526,
+        258,
+        236,
+        433,
+        272,
+        150,
+        244,
+        1521
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        32,
+        0,
+        4,
+        34,
+        7,
+        8,
+        39,
+        58,
+        8,
+        56,
+        111,
+        60,
+        48,
+        186,
+        163,
+        31,
+        138,
+        331,
+        88,
+        171,
+        386,
+        290,
+        112,
+        384,
+        457,
+        222,
+        281,
+        617,
+        413,
+        232,
+        535,
+        753,
+        277,
+        461,
+        753,
+        539,
+        291,
+        672,
+        664,
+        323,
+        440,
+        791,
+        498,
+        352,
+        537,
+        635,
+        279,
+        388,
+        586,
+        392,
+        258,
+        483,
+        418,
+        220,
+        299,
+        404,
+        271,
+        198,
+        293,
+        262,
+        116,
+        173,
+        227,
+        163,
+        72,
+        155,
+        112,
+        58,
+        93,
+        90,
+        502
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 31,
+     "away": 17,
+     "prob": 0.0063
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.8723,
+    "margin_home": 14.0,
+    "total": 48.95
+   },
+   "components": {
+    "elo": 0.9031,
+    "kf": 0.906,
+    "lgbm": 0.7959,
+    "lgbm_mkt": 0.8153
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.8683,
+     "margin_home": 14.0,
+     "total_line": 48.5,
+     "home_moneyline": -930.0,
+     "away_moneyline": 630.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.8918,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 41
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 1
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.8723,
+    "margin_home_before": 14.0,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0048
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0149
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.0384
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.049
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0434
+     },
+     {
+      "id": "tie",
+      "prob": 0.0006
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0573
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1085
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1877
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1921
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.3034
+     }
+    ],
+    "top3": [
+     "home_22p",
+     "home_15_21",
+     "home_8_14"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": 5.624,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 7.734,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.8921,
+      "kf": 0.2806,
+      "lgbm": 0.7202
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 3.949,
+      "kf": 5.624,
+      "lgbm": 4.995
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 11.167,
+     "groups": {
+      "pass_game": 0.017,
+      "rush_game": -0.468,
+      "efficiency": -0.812,
+      "qb": 2.911,
+      "team_strength": 7.734,
+      "situational": -0.071
+     }
+    },
+    "kalman": {
+     "margin": 17.099,
+     "hfa": 1.842,
+     "home_off": 4.251,
+     "away_def_allowed": 5.247,
+     "away_off": -2.227,
+     "home_def_allowed": -3.532,
+     "home_off_vs_away_def": 9.498,
+     "away_off_vs_home_def": -5.759
+    },
+    "elo": {
+     "margin": 15.51,
+     "team_margin": 13.59,
+     "hfa_margin": 1.92,
+     "home_rating": 1622.2,
+     "away_rating": 1282.4
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "JAX",
+      "def_team": "TEN",
+      "off_epa": 0.096,
+      "off_rank": 6,
+      "def_epa_allowed": 0.149,
+      "def_rank": 32,
+      "combined_epa": 0.246,
+      "favors": "JAX"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "TEN",
+      "def_team": "JAX",
+      "off_epa": -0.019,
+      "off_rank": 17,
+      "def_epa_allowed": -0.068,
+      "def_rank": 1,
+      "combined_epa": -0.087,
+      "favors": "JAX"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "TEN",
+      "def_team": "JAX",
+      "off_epa": -0.046,
+      "off_rank": 25,
+      "def_epa_allowed": -0.036,
+      "def_rank": 5,
+      "combined_epa": -0.082,
+      "favors": "JAX"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "JAX",
+      "def_team": "TEN",
+      "off_epa": -0.007,
+      "off_rank": 12,
+      "def_epa_allowed": -0.013,
+      "def_rank": 19,
+      "combined_epa": -0.02,
+      "favors": "TEN"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.074,
+     "away_epa_per_dropback": -0.083,
+     "diff_epa_per_dropback": 0.157,
+     "home_dropbacks": 785.7,
+     "away_dropbacks": 568.8,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_NE_LAC",
+   "home_team": "LAC",
+   "away_team": "NE",
+   "kickoff_utc": "2026-11-29T21:05:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.2866,
+    "home_points": 18.79,
+    "away_points": 24.85,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.3228,
+     "home_points": [
+      7.0,
+      31.0
+     ],
+     "away_points": [
+      13.0,
+      38.0
+     ],
+     "margin_home": [
+      -24.0,
+      11.0
+     ],
+     "total": [
+      26.0,
+      62.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        375,
+        85,
+        41,
+        119,
+        154,
+        107,
+        105,
+        220,
+        199,
+        93,
+        254,
+        381,
+        179,
+        209,
+        470,
+        355,
+        210,
+        431,
+        660,
+        309,
+        325,
+        738,
+        510,
+        269,
+        645,
+        782,
+        329,
+        428,
+        1143,
+        579,
+        299,
+        797,
+        926,
+        334,
+        472,
+        24,
+        462,
+        253,
+        747,
+        567,
+        246,
+        337,
+        709,
+        291,
+        177,
+        423,
+        363,
+        141,
+        216,
+        300,
+        136,
+        87,
+        182,
+        124,
+        59,
+        85,
+        129,
+        66,
+        34,
+        68,
+        51,
+        19,
+        30,
+        45,
+        10,
+        3,
+        26,
+        18,
+        5,
+        9,
+        26
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        96,
+        0,
+        11,
+        90,
+        30,
+        19,
+        117,
+        155,
+        20,
+        113,
+        210,
+        118,
+        97,
+        349,
+        310,
+        71,
+        245,
+        571,
+        154,
+        239,
+        595,
+        471,
+        137,
+        553,
+        568,
+        306,
+        365,
+        859,
+        571,
+        285,
+        544,
+        818,
+        289,
+        513,
+        813,
+        550,
+        273,
+        666,
+        619,
+        337,
+        445,
+        693,
+        402,
+        261,
+        425,
+        602,
+        223,
+        316,
+        437,
+        316,
+        173,
+        336,
+        262,
+        163,
+        181,
+        251,
+        135,
+        104,
+        141,
+        135,
+        69,
+        89,
+        125,
+        70,
+        47,
+        86,
+        56,
+        31,
+        44,
+        50,
+        185
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 17,
+     "away": 24,
+     "prob": 0.0085
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.381,
+    "margin_home": -3.0,
+    "total": 34.82
+   },
+   "components": {
+    "elo": 0.3426,
+    "kf": 0.3997,
+    "lgbm": 0.2637,
+    "lgbm_mkt": 0.3412
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.4234,
+     "margin_home": -3.0,
+     "total_line": 34.5,
+     "home_moneyline": 127.0,
+     "away_moneyline": -150.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.4161,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": true,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 14,
+    "dome": true,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 4,
+    "away_out_lag": 3
+   },
+   "absences": {
+    "home": [
+     {
+      "player": "Justin Herbert",
+      "position": "QB",
+      "status": "out",
+      "points": 2.7
+     }
+    ],
+    "away": [
+     {
+      "player": "Drake Maye",
+      "position": "QB",
+      "status": "out",
+      "points": 5.7
+     }
+    ]
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.381,
+    "margin_home_before": -3.0,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.126
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.138
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.185
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1409
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0866
+     },
+     {
+      "id": "tie",
+      "prob": 0.0012
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0731
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.093
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.0955
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.0401
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.0205
+     }
+    ],
+    "top3": [
+     "away_8_14",
+     "away_4_7",
+     "away_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "lgbm",
+     "lead_component_margin_home": -3.816,
+     "top_matchup_id": "away_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": -6.162,
+     "qb_change_teams": [
+      "LAC"
+     ]
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": -0.2604,
+      "kf": -0.0504,
+      "lgbm": -0.5434
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": -1.153,
+      "kf": -1.091,
+      "lgbm": -3.816
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": -8.533,
+     "groups": {
+      "pass_game": 0.325,
+      "rush_game": -0.077,
+      "efficiency": -0.033,
+      "qb": -2.614,
+      "team_strength": -6.162,
+      "situational": -1.828
+     }
+    },
+    "kalman": {
+     "margin": -3.318,
+     "hfa": 1.842,
+     "home_off": -3.492,
+     "away_def_allowed": -0.039,
+     "away_off": 0.393,
+     "home_def_allowed": 1.237,
+     "home_off_vs_away_def": -3.531,
+     "away_off_vs_home_def": 1.63
+    },
+    "elo": {
+     "margin": -4.528,
+     "team_margin": -6.448,
+     "hfa_margin": 1.92,
+     "home_rating": 1370.6,
+     "away_rating": 1531.8
+    },
+    "matchups": [
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "NE",
+      "def_team": "LAC",
+      "off_epa": 0.06,
+      "off_rank": 11,
+      "def_epa_allowed": 0.026,
+      "def_rank": 16,
+      "combined_epa": 0.087,
+      "favors": "NE"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "LAC",
+      "def_team": "NE",
+      "off_epa": -0.047,
+      "off_rank": 24,
+      "def_epa_allowed": -0.021,
+      "def_rank": 13,
+      "combined_epa": -0.068,
+      "favors": "NE"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "NE",
+      "def_team": "LAC",
+      "off_epa": -0.044,
+      "off_rank": 23,
+      "def_epa_allowed": -0.001,
+      "def_rank": 27,
+      "combined_epa": -0.045,
+      "favors": "LAC"
+     },
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "LAC",
+      "def_team": "NE",
+      "off_epa": -0.072,
+      "off_rank": 29,
+      "def_epa_allowed": 0.038,
+      "def_rank": 19,
+      "combined_epa": -0.034,
+      "favors": "NE"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.004,
+     "away_epa_per_dropback": 0.068,
+     "diff_epa_per_dropback": -0.064,
+     "home_dropbacks": 7.0,
+     "away_dropbacks": 636.5,
+     "home_qb_change": true,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [
+      {
+       "player": "Justin Herbert",
+       "position": "QB",
+       "status": "out",
+       "points": 2.7
+      }
+     ],
+     "away": [
+      {
+       "player": "Drake Maye",
+       "position": "QB",
+       "status": "out",
+       "points": 5.7
+      }
+     ]
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_SEA_SF",
+   "home_team": "SF",
+   "away_team": "SEA",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.5737,
+    "home_points": 24.44,
+    "away_points": 21.74,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.5883,
+     "home_points": [
+      12.0,
+      38.0
+     ],
+     "away_points": [
+      10.0,
+      35.0
+     ],
+     "margin_home": [
+      -15.0,
+      21.0
+     ],
+     "total": [
+      27.0,
+      66.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        80,
+        25,
+        10,
+        28,
+        43,
+        22,
+        30,
+        70,
+        59,
+        37,
+        86,
+        128,
+        76,
+        66,
+        184,
+        136,
+        109,
+        220,
+        284,
+        126,
+        205,
+        399,
+        280,
+        206,
+        429,
+        520,
+        206,
+        362,
+        923,
+        412,
+        274,
+        651,
+        773,
+        299,
+        467,
+        18,
+        473,
+        335,
+        875,
+        732,
+        372,
+        532,
+        1129,
+        410,
+        319,
+        704,
+        595,
+        218,
+        441,
+        640,
+        299,
+        241,
+        451,
+        400,
+        159,
+        269,
+        397,
+        157,
+        121,
+        251,
+        188,
+        83,
+        135,
+        178,
+        62,
+        54,
+        114,
+        79,
+        31,
+        52,
+        261
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        69,
+        1,
+        11,
+        66,
+        11,
+        12,
+        72,
+        117,
+        14,
+        83,
+        151,
+        86,
+        65,
+        290,
+        233,
+        58,
+        197,
+        466,
+        107,
+        201,
+        512,
+        389,
+        141,
+        456,
+        501,
+        273,
+        334,
+        753,
+        484,
+        287,
+        532,
+        890,
+        276,
+        488,
+        795,
+        534,
+        314,
+        726,
+        590,
+        338,
+        462,
+        728,
+        454,
+        311,
+        466,
+        572,
+        224,
+        349,
+        504,
+        317,
+        198,
+        394,
+        293,
+        219,
+        214,
+        309,
+        184,
+        159,
+        162,
+        242,
+        94,
+        123,
+        158,
+        116,
+        65,
+        136,
+        76,
+        55,
+        62,
+        78,
+        353
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 24,
+     "away": 21,
+     "prob": 0.0042
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.4689,
+    "margin_home": -1.5,
+    "total": 42.89
+   },
+   "components": {
+    "elo": 0.6105,
+    "kf": 0.5902,
+    "lgbm": 0.561,
+    "lgbm_mkt": 0.4844
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.4736,
+     "margin_home": -1.5,
+     "total_line": 42.5,
+     "home_moneyline": 103.0,
+     "away_moneyline": -121.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.4827,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": true,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 14,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 1,
+    "away_out_lag": 4
+   },
+   "absences": {
+    "home": [
+     {
+      "player": "Brock Purdy",
+      "position": "QB",
+      "status": "out",
+      "points": 6.9
+     }
+    ],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.4689,
+    "margin_home_before": -1.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.038
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0632
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1201
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.113
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.077
+     },
+     {
+      "id": "tie",
+      "prob": 0.0009
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0842
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1383
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1663
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1108
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.0883
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_4_7",
+     "away_8_14"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": 0.977,
+     "top_matchup_id": "home_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 1.136,
+     "qb_change_teams": [
+      "SF"
+     ]
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.1797,
+      "kf": 0.0452,
+      "lgbm": 0.1298
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 0.795,
+      "kf": 0.977,
+      "lgbm": 0.927
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 2.074,
+     "groups": {
+      "pass_game": 0.001,
+      "rush_game": 0.405,
+      "efficiency": 0.952,
+      "qb": -1.275,
+      "team_strength": 1.136,
+      "situational": -1.003
+     }
+    },
+    "kalman": {
+     "margin": 2.97,
+     "hfa": 1.842,
+     "home_off": 5.647,
+     "away_def_allowed": -4.764,
+     "away_off": 0.395,
+     "home_def_allowed": -0.639,
+     "home_off_vs_away_def": 0.884,
+     "away_off_vs_home_def": -0.244
+    },
+    "elo": {
+     "margin": 3.123,
+     "team_margin": 1.203,
+     "hfa_margin": 1.92,
+     "home_rating": 1672.2,
+     "away_rating": 1642.1
+    },
+    "matchups": [
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "SF",
+      "def_team": "SEA",
+      "off_epa": 0.174,
+      "off_rank": 1,
+      "def_epa_allowed": -0.079,
+      "def_rank": 2,
+      "combined_epa": 0.095,
+      "favors": "SF"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "SEA",
+      "def_team": "SF",
+      "off_epa": -0.062,
+      "off_rank": 27,
+      "def_epa_allowed": -0.026,
+      "def_rank": 10,
+      "combined_epa": -0.088,
+      "favors": "SF"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "SEA",
+      "def_team": "SF",
+      "off_epa": 0.05,
+      "off_rank": 13,
+      "def_epa_allowed": 0.023,
+      "def_rank": 15,
+      "combined_epa": 0.073,
+      "favors": "SEA"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "SF",
+      "def_team": "SEA",
+      "off_epa": 0.033,
+      "off_rank": 6,
+      "def_epa_allowed": -0.048,
+      "def_rank": 5,
+      "combined_epa": -0.015,
+      "favors": "SEA"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": 0.008,
+     "away_epa_per_dropback": 0.016,
+     "diff_epa_per_dropback": -0.008,
+     "home_dropbacks": 515.8,
+     "away_dropbacks": 715.5,
+     "home_qb_change": true,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [
+      {
+       "player": "Brock Purdy",
+       "position": "QB",
+       "status": "out",
+       "points": 6.9
+      }
+     ],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_WAS_ARI",
+   "home_team": "ARI",
+   "away_team": "WAS",
+   "kickoff_utc": "2026-11-29T21:25:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.3592,
+    "home_points": 20.91,
+    "away_points": 25.09,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.3795,
+     "home_points": [
+      9.0,
+      34.0
+     ],
+     "away_points": [
+      13.0,
+      39.0
+     ],
+     "margin_home": [
+      -22.0,
+      14.0
+     ],
+     "total": [
+      28.0,
+      65.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        349,
+        64,
+        48,
+        81,
+        109,
+        72,
+        88,
+        191,
+        158,
+        105,
+        226,
+        294,
+        148,
+        177,
+        422,
+        322,
+        176,
+        453,
+        545,
+        250,
+        310,
+        707,
+        460,
+        270,
+        636,
+        717,
+        304,
+        429,
+        1152,
+        509,
+        307,
+        699,
+        885,
+        311,
+        423,
+        26,
+        454,
+        298,
+        746,
+        588,
+        257,
+        388,
+        903,
+        312,
+        231,
+        416,
+        398,
+        173,
+        239,
+        393,
+        204,
+        108,
+        248,
+        189,
+        72,
+        141,
+        174,
+        66,
+        50,
+        114,
+        79,
+        34,
+        33,
+        62,
+        25,
+        25,
+        42,
+        29,
+        10,
+        16,
+        60
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        64,
+        1,
+        12,
+        58,
+        15,
+        12,
+        73,
+        99,
+        8,
+        88,
+        164,
+        98,
+        77,
+        254,
+        222,
+        59,
+        215,
+        447,
+        137,
+        208,
+        528,
+        428,
+        132,
+        480,
+        523,
+        309,
+        325,
+        758,
+        506,
+        263,
+        522,
+        838,
+        291,
+        463,
+        787,
+        533,
+        289,
+        725,
+        562,
+        343,
+        466,
+        724,
+        432,
+        324,
+        466,
+        658,
+        263,
+        365,
+        479,
+        329,
+        200,
+        413,
+        308,
+        204,
+        208,
+        320,
+        186,
+        135,
+        184,
+        204,
+        85,
+        117,
+        154,
+        104,
+        66,
+        102,
+        83,
+        60,
+        59,
+        57,
+        329
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 20,
+     "away": 24,
+     "prob": 0.0056
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.2328,
+    "margin_home": -6.5,
+    "total": 41.88
+   },
+   "components": {
+    "elo": 0.4266,
+    "kf": 0.3916,
+    "lgbm": 0.341,
+    "lgbm_mkt": 0.2424
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.2544,
+     "margin_home": -6.5,
+     "total_line": 41.5,
+     "home_moneyline": 278.0,
+     "away_moneyline": -345.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.2514,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 42
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 7,
+    "away_rest_days": 6,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.2328,
+    "margin_home_before": -6.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.1055
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.1239
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1762
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1333
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0809
+     },
+     {
+      "id": "tie",
+      "prob": 0.0013
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0749
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1068
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1081
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.0568
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.0323
+     }
+    ],
+    "top3": [
+     "away_8_14",
+     "away_4_7",
+     "away_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "lgbm",
+     "lead_component_margin_home": -2.473,
+     "top_matchup_id": "away_pass",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": -4.849,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": -0.1183,
+      "kf": -0.0545,
+      "lgbm": -0.3485
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": -0.524,
+      "kf": -1.179,
+      "lgbm": -2.473
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": -5.53,
+     "groups": {
+      "pass_game": -0.685,
+      "rush_game": -0.191,
+      "efficiency": -0.31,
+      "qb": -1.523,
+      "team_strength": -4.849,
+      "situational": 0.171
+     }
+    },
+    "kalman": {
+     "margin": -3.586,
+     "hfa": 1.842,
+     "home_off": -3.157,
+     "away_def_allowed": 0.672,
+     "away_off": -0.761,
+     "home_def_allowed": 3.703,
+     "home_off_vs_away_def": -2.486,
+     "away_off_vs_home_def": 2.942
+    },
+    "elo": {
+     "margin": -2.056,
+     "team_margin": -3.976,
+     "hfa_margin": 1.92,
+     "home_rating": 1358.3,
+     "away_rating": 1457.7
+    },
+    "matchups": [
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "WAS",
+      "def_team": "ARI",
+      "off_epa": 0.024,
+      "off_rank": 16,
+      "def_epa_allowed": 0.147,
+      "def_rank": 31,
+      "combined_epa": 0.171,
+      "favors": "WAS"
+     },
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "WAS",
+      "def_team": "ARI",
+      "off_epa": -0.019,
+      "off_rank": 18,
+      "def_epa_allowed": -0.032,
+      "def_rank": 8,
+      "combined_epa": -0.051,
+      "favors": "ARI"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "ARI",
+      "def_team": "WAS",
+      "off_epa": -0.025,
+      "off_rank": 19,
+      "def_epa_allowed": -0.008,
+      "def_rank": 22,
+      "combined_epa": -0.033,
+      "favors": "WAS"
+     },
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "ARI",
+      "def_team": "WAS",
+      "off_epa": -0.031,
+      "off_rank": 22,
+      "def_epa_allowed": 0.046,
+      "def_rank": 23,
+      "combined_epa": 0.015,
+      "favors": "ARI"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": -0.001,
+     "away_epa_per_dropback": 0.023,
+     "diff_epa_per_dropback": -0.024,
+     "home_dropbacks": 115.7,
+     "away_dropbacks": 559.9,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_LV_CLE",
+   "home_team": "CLE",
+   "away_team": "LV",
+   "kickoff_utc": "2026-11-30T01:20:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.6401,
+    "home_points": 25.23,
+    "away_points": 20.76,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.6294,
+     "home_points": [
+      13.0,
+      38.0
+     ],
+     "away_points": [
+      9.0,
+      34.0
+     ],
+     "margin_home": [
+      -14.0,
+      22.0
+     ],
+     "total": [
+      27.0,
+      65.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        57,
+        8,
+        11,
+        28,
+        29,
+        15,
+        12,
+        58,
+        47,
+        28,
+        71,
+        90,
+        42,
+        72,
+        177,
+        136,
+        73,
+        177,
+        258,
+        124,
+        159,
+        351,
+        250,
+        171,
+        382,
+        438,
+        188,
+        313,
+        833,
+        395,
+        238,
+        656,
+        760,
+        273,
+        478,
+        28,
+        432,
+        330,
+        879,
+        740,
+        305,
+        545,
+        1149,
+        455,
+        332,
+        715,
+        618,
+        286,
+        432,
+        719,
+        310,
+        251,
+        609,
+        416,
+        181,
+        307,
+        431,
+        201,
+        132,
+        297,
+        210,
+        99,
+        184,
+        214,
+        91,
+        70,
+        136,
+        100,
+        47,
+        55,
+        296
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        56,
+        4,
+        13,
+        71,
+        17,
+        9,
+        74,
+        130,
+        16,
+        81,
+        159,
+        100,
+        59,
+        265,
+        277,
+        58,
+        201,
+        478,
+        119,
+        208,
+        544,
+        418,
+        149,
+        509,
+        552,
+        271,
+        372,
+        779,
+        532,
+        278,
+        538,
+        743,
+        268,
+        487,
+        778,
+        533,
+        248,
+        726,
+        630,
+        347,
+        456,
+        694,
+        428,
+        316,
+        457,
+        597,
+        261,
+        357,
+        503,
+        321,
+        189,
+        410,
+        314,
+        213,
+        217,
+        314,
+        173,
+        128,
+        181,
+        213,
+        88,
+        132,
+        131,
+        102,
+        52,
+        111,
+        65,
+        49,
+        51,
+        66,
+        314
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 24,
+     "away": 20,
+     "prob": 0.005
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.6677,
+    "margin_home": 4.5,
+    "total": 38.85
+   },
+   "components": {
+    "elo": 0.6617,
+    "kf": 0.594,
+    "lgbm": 0.6458,
+    "lgbm_mkt": 0.6195
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.6788,
+     "margin_home": 4.5,
+     "total_line": 38.5,
+     "home_moneyline": -241.0,
+     "away_moneyline": 199.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.6777,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 41
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 14,
+    "away_rest_days": 7,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 1
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.6677,
+    "margin_home_before": 4.5,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0284
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0552
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1047
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1061
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0756
+     },
+     {
+      "id": "tie",
+      "prob": 0.0014
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.082
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1369
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1779
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1253
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.1066
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_4_7",
+     "home_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "lgbm",
+     "lead_component_margin_home": 2.259,
+     "top_matchup_id": "away_rush",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 1.557,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.2682,
+      "kf": 0.0471,
+      "lgbm": 0.3179
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 1.187,
+      "kf": 1.022,
+      "lgbm": 2.259
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 5.05,
+     "groups": {
+      "pass_game": 0.46,
+      "rush_game": -0.017,
+      "efficiency": -0.276,
+      "qb": 1.155,
+      "team_strength": 1.557,
+      "situational": 0.313
+     }
+    },
+    "kalman": {
+     "margin": 3.107,
+     "hfa": 1.842,
+     "home_off": -3.893,
+     "away_def_allowed": 4.749,
+     "away_off": 0.053,
+     "home_def_allowed": -0.463,
+     "home_off_vs_away_def": 0.856,
+     "away_off_vs_home_def": -0.409
+    },
+    "elo": {
+     "margin": 4.662,
+     "team_margin": 2.742,
+     "hfa_margin": 1.92,
+     "home_rating": 1455.0,
+     "away_rating": 1386.4
+    },
+    "matchups": [
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "LV",
+      "def_team": "CLE",
+      "off_epa": -0.09,
+      "off_rank": 32,
+      "def_epa_allowed": -0.006,
+      "def_rank": 24,
+      "combined_epa": -0.096,
+      "favors": "CLE"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "CLE",
+      "def_team": "LV",
+      "off_epa": -0.07,
+      "off_rank": 29,
+      "def_epa_allowed": 0.009,
+      "def_rank": 28,
+      "combined_epa": -0.06,
+      "favors": "LV"
+     },
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "CLE",
+      "def_team": "LV",
+      "off_epa": -0.047,
+      "off_rank": 26,
+      "def_epa_allowed": 0.083,
+      "def_rank": 28,
+      "combined_epa": 0.035,
+      "favors": "CLE"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "LV",
+      "def_team": "CLE",
+      "off_epa": 0.015,
+      "off_rank": 18,
+      "def_epa_allowed": -0.021,
+      "def_rank": 8,
+      "combined_epa": -0.006,
+      "favors": "CLE"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": -0.036,
+     "away_epa_per_dropback": -0.027,
+     "diff_epa_per_dropback": -0.009,
+     "home_dropbacks": 590.5,
+     "away_dropbacks": 83.5,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  },
+  {
+   "game_id": "2026_12_CAR_TB",
+   "home_team": "TB",
+   "away_team": "CAR",
+   "kickoff_utc": "2026-12-01T01:15:00Z",
+   "generated_at_utc": "2026-11-28T12:49:38Z",
+   "headline": {
+    "home_win_prob": 0.5945,
+    "home_points": 25.36,
+    "away_points": 21.59,
+    "distribution": {
+     "n_sims": 20000,
+     "seed": 2026,
+     "p_home": 0.6124,
+     "home_points": [
+      13.0,
+      39.0
+     ],
+     "away_points": [
+      10.0,
+      35.0
+     ],
+     "margin_home": [
+      -14.0,
+      22.0
+     ],
+     "total": [
+      29.0,
+      67.0
+     ],
+     "histogram": {
+      "margin_home": {
+       "lo": -35,
+       "width": 1,
+       "counts": [
+        77,
+        15,
+        15,
+        28,
+        42,
+        21,
+        30,
+        54,
+        50,
+        34,
+        82,
+        116,
+        51,
+        93,
+        195,
+        130,
+        84,
+        210,
+        242,
+        134,
+        188,
+        357,
+        257,
+        156,
+        397,
+        470,
+        252,
+        319,
+        845,
+        407,
+        276,
+        622,
+        768,
+        301,
+        422,
+        23,
+        447,
+        321,
+        904,
+        722,
+        328,
+        531,
+        1112,
+        431,
+        320,
+        716,
+        558,
+        273,
+        476,
+        668,
+        323,
+        285,
+        543,
+        382,
+        189,
+        298,
+        366,
+        182,
+        174,
+        318,
+        186,
+        104,
+        170,
+        169,
+        80,
+        67,
+        118,
+        80,
+        40,
+        49,
+        307
+       ]
+      },
+      "total": {
+       "lo": 10,
+       "width": 1,
+       "counts": [
+        46,
+        2,
+        5,
+        62,
+        11,
+        13,
+        83,
+        94,
+        12,
+        71,
+        150,
+        76,
+        61,
+        249,
+        210,
+        61,
+        188,
+        416,
+        90,
+        224,
+        500,
+        350,
+        125,
+        485,
+        487,
+        258,
+        343,
+        753,
+        490,
+        260,
+        522,
+        781,
+        249,
+        464,
+        785,
+        512,
+        294,
+        725,
+        603,
+        352,
+        480,
+        744,
+        420,
+        313,
+        519,
+        581,
+        214,
+        351,
+        506,
+        372,
+        194,
+        435,
+        320,
+        241,
+        248,
+        343,
+        209,
+        162,
+        200,
+        233,
+        109,
+        137,
+        153,
+        116,
+        81,
+        118,
+        84,
+        67,
+        59,
+        90,
+        439
+       ]
+      }
+     }
+    },
+    "example_score": {
+     "home": 24,
+     "away": 21,
+     "prob": 0.0036
+    }
+   },
+   "ensemble": {
+    "home_win_prob": 0.5758,
+    "margin_home": 3.0,
+    "total": 43.9
+   },
+   "components": {
+    "elo": 0.6097,
+    "kf": 0.6512,
+    "lgbm": 0.5863,
+    "lgbm_mkt": 0.5449
+   },
+   "market": [
+    {
+     "source": "nflverse_line",
+     "captured_at_utc": "2026-11-28T12:49:38Z",
+     "is_closing": false,
+     "home_win_prob": 0.5896,
+     "margin_home": 3.0,
+     "total_line": 43.5,
+     "home_moneyline": -159.0,
+     "away_moneyline": 134.0
+    },
+    {
+     "source": "odds_api_consensus",
+     "captured_at_utc": "2026-11-28T12:49:37Z",
+     "is_closing": false,
+     "home_win_prob": 0.6016,
+     "margin_home": null,
+     "total_line": null,
+     "n_books": 39
+    }
+   ],
+   "context": {
+    "home_qb_change": false,
+    "away_qb_change": false,
+    "home_rest_days": 8,
+    "away_rest_days": 8,
+    "dome": false,
+    "weather_known": false,
+    "temp_f": null,
+    "wind_mph": null,
+    "home_out_lag": 2,
+    "away_out_lag": 2
+   },
+   "absences": {
+    "home": [],
+    "away": []
+   },
+   "news_adjustment": {
+    "applied": false,
+    "applies_to": "ensemble",
+    "margin_points": 0,
+    "home_points_lost": 0,
+    "away_points_lost": 0,
+    "home_win_prob_before": 0.5758,
+    "margin_home_before": 3.0,
+    "items": []
+   },
+   "outcome_bands": {
+    "n_sims": 20000,
+    "seed": 2026,
+    "bands": [
+     {
+      "id": "away_22p",
+      "prob": 0.0354
+     },
+     {
+      "id": "away_15_21",
+      "prob": 0.0592
+     },
+     {
+      "id": "away_8_14",
+      "prob": 0.1104
+     },
+     {
+      "id": "away_4_7",
+      "prob": 0.1075
+     },
+     {
+      "id": "away_1_3",
+      "prob": 0.0746
+     },
+     {
+      "id": "tie",
+      "prob": 0.0011
+     },
+     {
+      "id": "home_1_3",
+      "prob": 0.0836
+     },
+     {
+      "id": "home_4_7",
+      "prob": 0.1346
+     },
+     {
+      "id": "home_8_14",
+      "prob": 0.1721
+     },
+     {
+      "id": "home_15_21",
+      "prob": 0.1193
+     },
+     {
+      "id": "home_22p",
+      "prob": 0.1022
+     }
+    ],
+    "top3": [
+     "home_8_14",
+     "home_4_7",
+     "home_15_21"
+    ]
+   },
+   "explanation": {
+    "season_week": 12,
+    "summary": {
+     "lead_component": "kf",
+     "lead_component_margin_home": 1.662,
+     "top_matchup_id": "away_rush",
+     "lgbm_top_group": "team_strength",
+     "lgbm_top_group_margin_home": 1.352,
+     "qb_change_teams": []
+    },
+    "stack": {
+     "components": [
+      "elo",
+      "kf",
+      "lgbm"
+     ],
+     "prob_weights": [
+      0.3997,
+      0.1238,
+      0.5291
+     ],
+     "prob_bias": -0.0576,
+     "logit_contributions": {
+      "elo": 0.1782,
+      "kf": 0.0773,
+      "lgbm": 0.1845
+     },
+     "margin_weights": [
+      0.2546,
+      0.3289,
+      0.4473
+     ],
+     "margin_contributions": {
+      "elo": 0.789,
+      "kf": 1.662,
+      "lgbm": 1.317
+     }
+    },
+    "lgbm_shap": {
+     "base_margin": 1.858,
+     "pred_margin": 2.944,
+     "groups": {
+      "pass_game": 0.182,
+      "rush_game": -0.36,
+      "efficiency": -0.2,
+      "qb": 0.292,
+      "team_strength": 1.352,
+      "situational": -0.179
+     }
+    },
+    "kalman": {
+     "margin": 5.053,
+     "hfa": 1.842,
+     "home_off": -0.392,
+     "away_def_allowed": 2.7,
+     "away_off": 0.531,
+     "home_def_allowed": -1.434,
+     "home_off_vs_away_def": 2.308,
+     "away_off_vs_home_def": -0.903
+    },
+    "elo": {
+     "margin": 3.098,
+     "team_margin": 1.178,
+     "hfa_margin": 1.92,
+     "home_rating": 1477.0,
+     "away_rating": 1447.6
+    },
+    "matchups": [
+     {
+      "id": "away_rush",
+      "unit": "rush",
+      "off_team": "CAR",
+      "def_team": "TB",
+      "off_epa": -0.002,
+      "off_rank": 11,
+      "def_epa_allowed": -0.04,
+      "def_rank": 7,
+      "combined_epa": -0.042,
+      "favors": "TB"
+     },
+     {
+      "id": "away_pass",
+      "unit": "pass",
+      "off_team": "CAR",
+      "def_team": "TB",
+      "off_epa": 0.015,
+      "off_rank": 17,
+      "def_epa_allowed": -0.049,
+      "def_rank": 3,
+      "combined_epa": -0.033,
+      "favors": "TB"
+     },
+     {
+      "id": "home_rush",
+      "unit": "rush",
+      "off_team": "TB",
+      "def_team": "CAR",
+      "off_epa": -0.012,
+      "off_rank": 15,
+      "def_epa_allowed": -0.011,
+      "def_rank": 20,
+      "combined_epa": -0.023,
+      "favors": "CAR"
+     },
+     {
+      "id": "home_pass",
+      "unit": "pass",
+      "off_team": "TB",
+      "def_team": "CAR",
+      "off_epa": -0.046,
+      "off_rank": 24,
+      "def_epa_allowed": 0.057,
+      "def_rank": 27,
+      "combined_epa": 0.011,
+      "favors": "TB"
+     }
+    ],
+    "qb_matchup": {
+     "home_epa_per_dropback": -0.0,
+     "away_epa_per_dropback": -0.02,
+     "diff_epa_per_dropback": 0.02,
+     "home_dropbacks": 751.3,
+     "away_dropbacks": 770.1,
+     "home_qb_change": false,
+     "away_qb_change": false
+    },
+    "injury_context": {
+     "source": "nflverse_injuries",
+     "cutoff_utc": "2026-11-27T20:00:00Z",
+     "included_in_model": false,
+     "home": [],
+     "away": []
+    }
+   }
+  }
+ ]
+}
