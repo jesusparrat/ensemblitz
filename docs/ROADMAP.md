@@ -2,13 +2,15 @@
 
 Record of what is on `main`, what stays out of production, and the approved work after that. Phase labels such as PR 1a or PR7 are planning names. GitHub pull request numbers are a different sequence. This file does not change the model, the site, or any published probability.
 
-Checked against `git log origin/main` on 2026-11-28, with `HEAD` at `c5fea6a`. Figures below are copied from the cited file in this repository. A figure with no file here is marked **reported**.
+Checked against `git log origin/main` on 2026-11-28, with `HEAD` at `b80f41e`. Figures below are copied from the cited file in this repository. A figure with no file here is marked **reported**.
 
 ## Tip of main vs the last functional change
 
-`HEAD` (`c5fea6a`, 2026-11-28) is the last functional change, squash-merged as GitHub **#25**: `fix: split the open margin tail into 15-21 and 22+ (#25)`.
+`HEAD` (`b80f41e`, 2026-11-28) is an automated weekly commit: `chore: weekly predictions and results [skip ci]`.
 
-The automated weekly commit directly under it is `c62262b` (2026-11-28): `chore: weekly predictions and results [skip ci]`. Another weekly commit with the same subject, `3cd857e` (2026-11-28), sits between GitHub **#22** (`8b6f2f3`) and GitHub **#23** (`95f0ad9`). Weekly commits refresh `predictions/` and results. They are not feature merges.
+The last functional change under it is `c5fea6a` (2026-11-28), squash-merged as GitHub **#25**: `fix: split the open margin tail into 15-21 and 22+ (#25)`.
+
+Earlier weekly commits with the same subject are `c62262b` (2026-11-28), directly under #25, and `3cd857e` (2026-11-28), between GitHub **#22** (`8b6f2f3`) and GitHub **#23** (`95f0ad9`). Weekly commits refresh `predictions/` and results. They are not feature merges.
 
 ## Merged work
 
@@ -61,6 +63,13 @@ These items are the plan. They are not commits on `main` unless the merged table
 
 **P0. Week-12 close audit (read-only).** Read the published week-12 snapshots and grades. Do not rewrite a frozen pick.
 
+Pre-close checks passed on 2026-11-28: main state, per-game freeze hashes, MANIFEST continuity from `d19d692`, Sigstore attestations, histograms, and band coverage.
+
+Still PENDING until executed:
+
+- (a) Week-12 grading of the Sunday and Monday games, including the outcome-band rank. Scheduled Tuesday 2026-12-01.
+- (b) Saturday catch-up cron (GitHub #23) proven not to create empty commits. First fire Saturday 2026-12-05 (week 13).
+
 **P1. This documentation pull request.** Sync `AGENTS.md` and `docs/CONTRACT.md` with `main`, and add this file. No code, tests, templates, workflows, `predictions/` or `reports/` changes.
 
 **Margin bands.** Merged as GitHub **#25** (`c5fea6a`). New snapshots use eleven bands. Records written with the seven bands from **#24** stay valid and are graded on those edges.
@@ -74,3 +83,18 @@ These items are the plan. They are not commits on `main` unless the merged table
 **P3. Player valuation, QB only first.** A preregistered hypotheses document comes before any fit. Gate: the upper bound of the 95% CI of the paired log-loss difference is strictly below 0. The same rule as injuries and `mo_cap1`.
 
 **P4. Product proposal after weeks 13 to 18.** The phase label for that proposal is **PR7**. PR7 is not a GitHub pull request number. GitHub **#7** is the earlier web v2 merge (`aff600c`, 2026-11-18) and is unrelated.
+
+## Collaboration model
+
+Jesús is the sole decision maker and the only person who merges to `main`.
+
+- Neon orchestrates the roadmap and writes one closed prompt per phase.
+- Astra audits commits, workflows and statistics independently.
+- Grok Bot and Cursor do fast execution near the repo (P0 checks, P2a UI).
+- Antigravity runs self-contained branches with heavy tests (P2b.1, P2b.2, P3 experiments).
+
+Rules:
+
+- One executor per branch. Parallel work only when the branches touch disjoint files.
+- The repo is the source of truth: `AGENTS.md`, `docs/ROADMAP.md`, and `main`.
+- One cross-review round per phase. A blocker needs concrete evidence: a `file:line` citation, a test, or data.
