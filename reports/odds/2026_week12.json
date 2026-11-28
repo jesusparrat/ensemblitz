@@ -4,8 +4,8 @@
  "market_source": "The Odds API",
  "market_type": "h2h",
  "consensus_method": "unweighted mean of per-operator Shin no-vig probabilities",
- "odds_fetched_at": "2026-11-28T12:17:57Z",
- "predictions_generated_at": "2026-11-28T12:17:58Z",
+ "odds_fetched_at": "2026-11-28T12:49:37Z",
+ "predictions_generated_at": "2026-11-28T12:49:38Z",
  "games": [
   {
    "game_id": "2026_12_ATL_MIN",
@@ -24,8 +24,8 @@
    "away": "BAL",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.6936,
-   "consensus_home_prob_shin": 0.7345,
-   "gap_model_only": -0.0409,
+   "consensus_home_prob_shin": 0.7342,
+   "gap_model_only": -0.0406,
    "n_books": 42,
    "flag_large_disagreement": false
   },
@@ -35,8 +35,8 @@
    "away": "NO",
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "model_only_home_prob": 0.8296,
-   "consensus_home_prob_shin": 0.8249,
-   "gap_model_only": 0.0047,
+   "consensus_home_prob_shin": 0.8321,
+   "gap_model_only": -0.0025,
    "n_books": 41,
    "flag_large_disagreement": false
   },
