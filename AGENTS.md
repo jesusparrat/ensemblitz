@@ -106,6 +106,8 @@ Optional `outcome_bands` on a new v1 game (GitHub #25, `c5fea6a`) stores eleven 
 
 Merged history, measured exclusions and the forward plan: `docs/ROADMAP.md`.
 
+The shared state entry point is `docs/HANDOFF.md`. Every functional PR must update that file before merge. Automated `weekly.yml` commits never modify it.
+
 ### Official sequence
 
 The list below is the original plan. What merged, and what comes next, is `docs/ROADMAP.md`.
