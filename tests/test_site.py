@@ -410,6 +410,7 @@ def test_every_template_and_code_key_exists_in_both_languages():
         "fact.venue_",
         "grp_",
         "unit_",
+        "band.",
     }
     missing = {k for k in used if k not in STRINGS["es"] and k not in dynamic}
     assert not missing, missing
@@ -419,6 +420,10 @@ def test_every_template_and_code_key_exists_in_both_languages():
         ("hist.src_", ["official", "model_only", "ensemble", "market"]),
         ("status_", ["out", "doubtful", "questionable", "returning", "other"]),
         ("fact.venue_", ["dome", "open", "open_nowx"]),
+        (
+            "band.",
+            ["away_15", "away_8_14", "away_1_7", "tie", "home_1_7", "home_8_14", "home_15"],
+        ),
     ):
         for k in keys:
             assert pre + k in STRINGS["es"], pre + k

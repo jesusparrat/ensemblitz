@@ -23,6 +23,7 @@ from ensemblitz import config as C
 from ensemblitz import contract_io
 from ensemblitz import ledger as L
 from ensemblitz import news as N
+from ensemblitz import outcome_bands as OB
 from ensemblitz.data.stadiums import HOME_STADIUMS, haversine_km
 from ensemblitz.site import charts, og
 from ensemblitz.site.i18n import LANGS, Lang
@@ -237,6 +238,7 @@ def _game(
             "home": int(round((tot + mar) / 2)),
             "away": int(round((tot - mar) / 2)),
             "ok": bool(result.get("headline_correct", result.get("ensemble_correct"))),
+            "margin": int(round(mar)),
         }
     # Per docs/CONTRACT.md §3, market is not a model component and is shown once in its own block.
     comps = {k: g["components"].get(k) for k in ("elo", "kf", "lgbm", "lgbm_mkt")}
@@ -299,9 +301,33 @@ def _game(
         "example": h["example_score"],
         "saved_at": g["generated_at_utc"],
         "final": final,
+        "bands": _bands_view(g.get("outcome_bands"), home, away, final),
         "news": [x for x in (news_items or []) if x["team"] in (home, away)],
         "histogram": (dist.get("histogram") if dist else None),
     }
+
+
+def _bands_view(outcome: dict | None, home: str, away: str, final: dict | None) -> dict | None:
+    """Top 3 bands for the card. ``hit`` is set once the game has a final margin."""
+    if not outcome or not outcome.get("top3"):
+        return None
+    by_id = {b["id"]: b["prob"] for b in outcome.get("bands") or []}
+    actual = None if final is None else OB.band_for_margin(int(final["margin"]))
+    rows = []
+    for rank, bid in enumerate(outcome["top3"], start=1):
+        if bid not in by_id:
+            return None
+        team = away if bid.startswith("away") else home
+        rows.append(
+            {
+                "rank": rank,
+                "id": bid,
+                "team": team,
+                "prob": by_id[bid],
+                "hit": actual == bid,
+            }
+        )
+    return {"rows": rows, "outside": actual is not None and actual not in outcome["top3"]}
 
 
 def game_charts(g: dict, L: Lang) -> dict[str, str]:

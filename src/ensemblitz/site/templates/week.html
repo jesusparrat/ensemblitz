@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, pbar, absences with context %}
+{% from "_macros.html" import icon, pbar, absences, bands with context %}
 {% set nav = 'home' %}
 {% block title %}{{ tx('week.title', week=week) }}{% endblock %}
 {% block hero %}
@@ -79,6 +79,7 @@
     <div class="v mg"><span class="lab-m">{{ t('cols.margin') }}</span>{% if g.margin_ok %}<b>{{ fav_txt(g.home, g.away, g.margin) }}</b>{% else %}<b>{{ t('even') }}</b>{% endif %}</div>
     <div class="v tt"><span class="lab-m">{{ t('cols.total') }}</span><b>{{ n(g.total, 1) }}</b></div>
     <p class="why">{{ why_text(g) }}</p>
+    {{ bands(g) }}
     {{ absences(g) }}
   </li>
   {% endfor %}

@@ -120,14 +120,19 @@ h3 { margin: 0; font-weight: 700; font-size: 17px; line-height: 1.25; }
 .cols { padding: var(--s3) var(--s4) var(--s2) calc(var(--s4) + 4px); font-size: 13px; color: var(--ink-2); font-weight: 500; }
 .cols .r { text-align: right; }
 .games { list-style: none; margin: 0; padding: 0; }
-.game { padding: var(--s5) var(--s4) var(--s4) var(--s4); border-bottom: 1px dotted var(--ink-3); border-left: 4px solid transparent; position: relative; row-gap: var(--s3); grid-template-areas: "t m p x mg tt" ". why why why why why" ". ctx ctx ctx ctx ctx"; transition: background .15s; }
+.game { padding: var(--s5) var(--s4) var(--s4) var(--s4); border-bottom: 1px dotted var(--ink-3); border-left: 4px solid transparent; position: relative; row-gap: var(--s3); grid-template-areas: "t m p x mg tt" ". why why why why why" ". bd bd bd bd bd bd" ". ctx ctx ctx ctx ctx"; transition: background .15s; }
 .game.is-fav { background: var(--surface); border-left-color: var(--ink); }
 .game.is-flagged { border-left-color: var(--flag); background: var(--surface); }
 .game.is-fav.is-flagged { border-left-color: var(--flag); box-shadow: inset 0 1px 0 var(--ink), inset 0 -1px 0 var(--ink); }
 .game:hover { background: var(--surface); }
 .game[hidden], .daygroup[hidden] { display: none; }
 .game > .t { grid-area: t; } .game > .m { grid-area: m; } .game > .p { grid-area: p; } .game > .x { grid-area: x; }
-.game > .mg { grid-area: mg; } .game > .tt { grid-area: tt; } .game > .why { grid-area: why; } .game > .ctx { grid-area: ctx; }
+.game > .mg { grid-area: mg; } .game > .tt { grid-area: tt; } .game > .why { grid-area: why; } .game > .bands { grid-area: bd; } .game > .ctx { grid-area: ctx; }
+.bands { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; }
+.bands .rk { font-family: var(--font-mono); font-weight: 600; }
+.bands .hit { font-weight: 700; }
+.bands .happened { color: var(--ink); }
+.bands-out { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
 .t { font-family: var(--font-mono); font-size: 15px; font-weight: 600; line-height: 1.25; white-space: nowrap; }
 .t small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-2); margin-top: 2px; font-family: var(--font-sans); }
 .m { min-width: 0; }
@@ -252,7 +257,7 @@ details.tech summary { cursor: pointer; min-height: 44px; display: flex; align-i
 /* tablet and mobile */
 @media (max-width: 1100px) {
   .cols { display: none; }
-  .game { grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "t m m m" ". p p x" ". mg tt tt" ". why why why" ". ctx ctx ctx"; row-gap: var(--s3); padding: var(--s5) var(--s4); }
+  .game { grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "t m m m" ". p p x" ". mg tt tt" ". why why why" ". bd bd bd bd" ". ctx ctx ctx"; row-gap: var(--s3); padding: var(--s5) var(--s4); }
   .v { text-align: left; }
   .lab-m { display: block; font-size: 13px; color: var(--ink-2); margin-bottom: 3px; font-family: var(--font-sans); font-weight: 400; }
   .mg { display: flex; flex-direction: column; } .tt { display: flex; flex-direction: column; }
@@ -281,7 +286,7 @@ details.tech summary { cursor: pointer; min-height: 44px; display: flex; align-i
   h2 { font-size: 34px; }
   .tools { margin-top: var(--s6); }
   .day { flex-wrap: wrap; gap: var(--s1) var(--s3); }
-  .game { grid-template-columns: 76px minmax(0, 1fr); grid-template-areas: "t m" ". p" ". x" ". mg" ". tt" ". why" ". ctx"; padding: var(--s4) var(--s3); }
+  .game { grid-template-columns: 76px minmax(0, 1fr); grid-template-areas: "t m" ". p" ". x" ". mg" ". tt" ". why" ". bd" ". ctx"; padding: var(--s4) var(--s3); }
   .m h3 { font-size: 34px; }
   .mg, .tt { flex-direction: row; align-items: baseline; gap: var(--s3); }
   .mg .lab-m, .tt .lab-m { margin: 0; min-width: 64px; }
