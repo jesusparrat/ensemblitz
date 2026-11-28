@@ -168,6 +168,28 @@ def semantic_errors(doc: dict) -> list[str]:
         sources = [q["source"] for q in g["market"]]
         if len(sources) != len(set(sources)):
             errors.append(f"{p}.market: one quote per source")
+        ob = g.get("outcome_bands")
+        if ob:
+            ids = [b["id"] for b in ob["bands"]]
+            if ids != [
+                "away_15",
+                "away_8_14",
+                "away_1_7",
+                "tie",
+                "home_1_7",
+                "home_8_14",
+                "home_15",
+            ]:
+                errors.append(f"{p}.outcome_bands.bands: ids must follow the canonical order")
+            if len(set(ob["top3"])) != 3 or any(b not in ids for b in ob["top3"]):
+                errors.append(f"{p}.outcome_bands.top3: three distinct band ids")
+            prob = {b["id"]: b["prob"] for b in ob["bands"]}
+            ranked = sorted(ids, key=lambda i: (-prob[i], ids.index(i)))
+            if ob["top3"] != ranked[:3]:
+                errors.append(f"{p}.outcome_bands.top3: not the three highest probabilities")
+            total_p = sum(prob.values())
+            if abs(total_p - 1.0) > 0.01:
+                errors.append(f"{p}.outcome_bands: probabilities sum to {total_p}, not 1")
     if doc["data_cutoff_utc"] > doc["generated_at_utc"]:
         errors.append("$: data_cutoff_utc is later than generated_at_utc")
     return errors

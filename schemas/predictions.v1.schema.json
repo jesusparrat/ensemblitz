@@ -650,8 +650,74 @@
         "news_adjustment": {
           "$ref": "#/$defs/news_adjustment"
         },
+        "outcome_bands": {
+          "$ref": "#/$defs/outcome_bands"
+        },
         "explanation": {
           "$ref": "#/$defs/explanation"
+        }
+      }
+    },
+    "band_id": {
+      "enum": [
+        "away_15",
+        "away_8_14",
+        "away_1_7",
+        "tie",
+        "home_1_7",
+        "home_8_14",
+        "home_15"
+      ]
+    },
+    "outcome_band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "prob"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/band_id"
+        },
+        "prob": {
+          "$ref": "#/$defs/prob"
+        }
+      }
+    },
+    "outcome_bands": {
+      "type": "object",
+      "description": "Optional. Seven final-margin bands from the headline simulation, plus the three highest probabilities. A tie is its own band. Absent on snapshots written before this field.",
+      "additionalProperties": false,
+      "required": [
+        "n_sims",
+        "seed",
+        "bands",
+        "top3"
+      ],
+      "properties": {
+        "n_sims": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "bands": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "$ref": "#/$defs/outcome_band"
+          }
+        },
+        "top3": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/band_id"
+          }
         }
       }
     },

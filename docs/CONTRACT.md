@@ -130,6 +130,12 @@ The procedure is in [`LEDGER.md`](LEDGER.md). In short:
 7. **Odds.** The weekly job fetches The Odds API *before* `predict`, so the consensus line is frozen in `market[]` with the snapshot. The comparison report is written afterwards from the cache, without a second API call.
 
 
+## Optional `outcome_bands` (margin bands)
+
+New v1 snapshots may include `outcome_bands` on each game. Existing v1 and v0 snapshots without the field stay valid. The writer fills it from the headline simulation (`headline.distribution.n_sims`, seed `2026`, the model-only score draws). It is not a second simulation.
+
+Seven bands of integer home margin (home points minus away points). A tie, margin 0, is its own band, including a game that is still tied after overtime. The bands, in order, are `away_15` (away by 15 or more), `away_8_14`, `away_1_7`, `tie`, `home_1_7`, `home_8_14`, `home_15` (home by 15 or more). Each band stores a probability rounded to 4 decimals. `top3` is those ids sorted by that probability, then by the order above. Grading records `outcome_band` and `outcome_band_rank` (`1`, `2`, `3`, or `outside top 3`) only when the frozen pick carried the field.
+
 ## Optional `explanation` block (PR 5)
 
 New v1 snapshots include an optional `explanation` object on each game. Existing v1 snapshots without `explanation` and legacy v0 snapshots remain valid (backward compatibility with existing snapshots; older consumers expecting strict unknown-key rejection should upgrade). The site formats `explanation` without recomputing attributions, rankings or injury values.

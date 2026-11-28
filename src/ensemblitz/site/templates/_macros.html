@@ -10,6 +10,17 @@
 <div class="pbar" aria-hidden="true"><i style="width:{{ (p * 100)|round(1) }}%"></i></div>
 {%- endmacro %}
 
+{% macro bands(g) -%}
+{%- if g.bands -%}
+<ol class="bands">
+{%- for b in g.bands.rows -%}
+<li class="{{ 'hit' if b.hit else '' }}"><span class="rk">{{ b.rank }}</span> {% if b.id == 'tie' %}{{ t('band.tie') }}{% else %}{{ t('band.' + b.id, team=b.team) }}{% endif %} <span class="num">{{ pct(b.prob) }}</span>{% if b.hit %} <span class="happened">{{ t('card.band_happened') }}</span>{% endif %}</li>
+{%- endfor -%}
+</ol>
+{%- if g.bands.outside -%}<p class="bands-out">{{ t('card.band_outside') }}</p>{%- endif -%}
+{%- endif -%}
+{%- endmacro %}
+
 {% macro absences(g) -%}
 {%- if g.absences -%}
 <p class="ctx">{{ icon('info') }}<span>{{ t('card.absences', list=absence_list(g)) }} <span class="dim">{{ t('card.absences_note') }}</span></span></p>

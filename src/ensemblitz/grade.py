@@ -12,6 +12,7 @@ from ensemblitz import config as C
 from ensemblitz import contract as K
 from ensemblitz import contract_io
 from ensemblitz import ledger as L
+from ensemblitz import outcome_bands as OB
 from ensemblitz.data import load
 
 COMPONENTS = ["market", "elo", "kf", "lgbm", "lgbm_mkt", "ensemble", "ensemble_model_only"]
@@ -131,6 +132,11 @@ def grade_games(
         sp = g["market"]["spread_line"]
         if sp is not None and pm is not None and pm != sp and margin != sp:
             row["ats_win"] = int(((margin - sp) > 0) == (pm > sp))
+        bands = raw.get("outcome_bands") if isinstance(raw, dict) else None
+        if isinstance(bands, dict) and bands.get("top3"):
+            bid = OB.band_for_margin(int(round(margin)))
+            row["outcome_band"] = bid
+            row["outcome_band_rank"] = OB.rank_of(bid, list(bands["top3"]))
         out.append(row)
     return out
 
@@ -221,6 +227,25 @@ def summarize(rows: list[dict]) -> dict:
             h: {"n": len(x), "accuracy": float(x["headline_correct"].mean())}
             for h, x in d.groupby("headline")
         }
+    if "outcome_band_rank" in df:
+        d = df.dropna(subset=["outcome_band_rank"])
+        n = len(d)
+        if n:
+            ranks = d["outcome_band_rank"].map(lambda x: int(x) if str(x).isdigit() else 0)
+            n1 = int((ranks == 1).sum())
+            n2 = int((ranks == 2).sum())
+            n3 = int((ranks == 3).sum())
+            outside = n - n1 - n2 - n3
+            out["outcome_bands"] = {
+                "n": n,
+                "rank_1": n1,
+                "rank_2": n2,
+                "rank_3": n3,
+                "outside": outside,
+                "top1": n1 / n,
+                "top2": (n1 + n2) / n,
+                "top3": (n1 + n2 + n3) / n,
+            }
     out["weeks"] = sorted({f"{r['season']}-W{r['week']:02d}" for r in rows})
     return out
 
@@ -250,6 +275,22 @@ def summary_md(s: dict) -> str:
             )
     if "ats" in s:
         lines += ["", f"Against the spread (headline margin): {s['ats']['w']}-{s['ats']['l']}"]
+    ob = s.get("outcome_bands")
+    if ob:
+        lines += [
+            "",
+            "## Outcome bands",
+            "",
+            f"Graded games that stored a top 3: {ob['n']}. "
+            "Top 2 and top 3 are cumulative (the result landed in the first two, or in the three).",
+            "",
+            "| Where the result landed | N | Share |",
+            "|---|---|---|",
+            f"| Top 1 | {ob['rank_1']} | {ob['top1'] * 100:.1f}% |",
+            f"| Top 2 | {ob['rank_1'] + ob['rank_2']} | {ob['top2'] * 100:.1f}% |",
+            f"| Top 3 | {ob['rank_1'] + ob['rank_2'] + ob['rank_3']} | {ob['top3'] * 100:.1f}% |",
+            f"| Outside the top 3 | {ob['outside']} | {(ob['outside'] / ob['n']) * 100:.1f}% |",
+        ]
     return "\n".join(lines) + "\n"
 
 

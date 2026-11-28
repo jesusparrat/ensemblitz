@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, pbar, absences with context %}
+{% from "_macros.html" import icon, pbar, absences, bands with context %}
 {% set nav = 'game' %}
 {% block title %}{{ g.away }} {{ t('card.at') }} {{ g.home }}{% endblock %}
 {% block description %}{{ tx('game.description', away=g.away_name, home=g.home_name, fav=g.fav, p=pct(g.p_win)) }}{% endblock %}
@@ -38,6 +38,11 @@
 <tr><td>{{ t('game.row_total') }}</td><td>{{ n(g.total, 1) }}</td><td>{% if g.range %}{{ rng(g.range.total[0], g.range.total[1]) }}{% else %}{{ t('na') }}{% endif %}</td></tr>
 </tbody></table>
 <p class="small">{{ t('game.range_note') }} {{ t('game.example', away=g.away, a=g.example.away, home=g.home, h=g.example.home) }}</p>
+{% if g.bands %}
+<h2>{{ t('game.bands_h') }}</h2>
+{{ bands(g) }}
+<p class="small">{{ t('game.bands_note') }}</p>
+{% endif %}
 
 {% if g.explanation %}
 <h2>{{ t('game.matchups_h') }}</h2>

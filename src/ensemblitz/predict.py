@@ -14,6 +14,7 @@ from ensemblitz import contract as K
 from ensemblitz import explain as X
 from ensemblitz import ledger as L
 from ensemblitz import news as N
+from ensemblitz import outcome_bands as OB
 from ensemblitz import pipeline as P
 from ensemblitz.features.build import feature_columns
 from ensemblitz.models import gbm
@@ -443,6 +444,13 @@ def v1_game_record(
     }
     if hist is not None:
         distribution["histogram"] = hist
+    bands = None
+    if "mo_margin_draws" in sim:
+        bands = OB.from_margins(
+            sim["mo_margin_draws"][i],
+            int(sim.get("n_sims", 20000)),
+            int(sim.get("seed", 2026)),
+        )
     m, tot = float(r["nomkt_margin"]), float(r["nomkt_total"])
     return {
         "game_id": r["game_id"],
@@ -487,6 +495,7 @@ def v1_game_record(
             "away": (absences or {}).get(r["away_team"], []),
         },
         "news_adjustment": _news_v1(news_adj),
+        **({"outcome_bands": bands} if bands is not None else {}),
         **({"explanation": explanation} if explanation is not None else {}),
     }
 
