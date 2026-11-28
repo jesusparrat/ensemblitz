@@ -9,7 +9,13 @@ from jinja2 import Environment, FileSystemLoader
 
 from ensemblitz import contract as K
 from ensemblitz.grade import grade_games, summarize, summary_md
-from ensemblitz.outcome_bands import BAND_IDS, band_for_margin, from_margins
+from ensemblitz.outcome_bands import (
+    BAND_IDS,
+    LEGACY_BAND_IDS,
+    OPEN_TAILS,
+    band_for_margin,
+    from_margins,
+)
 from ensemblitz.sim.drive import simulate_games
 from ensemblitz.site.build import _bands_view
 from ensemblitz.site.i18n import Lang
@@ -18,19 +24,30 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_band_edges():
-    assert band_for_margin(-15) == "away_15"
-    assert band_for_margin(-40) == "away_15"
+    assert band_for_margin(-22) == "away_22p"
+    assert band_for_margin(-40) == "away_22p"
+    assert band_for_margin(-21) == "away_15_21"
+    assert band_for_margin(-15) == "away_15_21"
     assert band_for_margin(-14) == "away_8_14"
     assert band_for_margin(-8) == "away_8_14"
-    assert band_for_margin(-7) == "away_1_7"
-    assert band_for_margin(-1) == "away_1_7"
+    assert band_for_margin(-7) == "away_4_7"
+    assert band_for_margin(-4) == "away_4_7"
+    assert band_for_margin(-3) == "away_1_3"
+    assert band_for_margin(-1) == "away_1_3"
     assert band_for_margin(0) == "tie"
-    assert band_for_margin(1) == "home_1_7"
-    assert band_for_margin(7) == "home_1_7"
+    assert band_for_margin(1) == "home_1_3"
+    assert band_for_margin(3) == "home_1_3"
+    assert band_for_margin(4) == "home_4_7"
+    assert band_for_margin(7) == "home_4_7"
     assert band_for_margin(8) == "home_8_14"
     assert band_for_margin(14) == "home_8_14"
-    assert band_for_margin(15) == "home_15"
-    assert band_for_margin(30) == "home_15"
+    assert band_for_margin(15) == "home_15_21"
+    assert band_for_margin(21) == "home_15_21"
+    assert band_for_margin(22) == "home_22p"
+    assert band_for_margin(30) == "home_22p"
+    assert band_for_margin(20, LEGACY_BAND_IDS) == "home_15"
+    assert band_for_margin(-16, LEGACY_BAND_IDS) == "away_15"
+    assert band_for_margin(5, LEGACY_BAND_IDS) == "home_1_7"
 
 
 def test_probabilities_and_top3_order():
@@ -38,13 +55,13 @@ def test_probabilities_and_top3_order():
     got = from_margins(margins, 100, 2026)
     assert [b["id"] for b in got["bands"]] == list(BAND_IDS)
     by_id = {b["id"]: b["prob"] for b in got["bands"]}
-    assert by_id["home_1_7"] == 0.5
+    assert by_id["home_1_3"] == 0.5
     assert by_id["home_8_14"] == 0.3
-    assert by_id["away_1_7"] == 0.15
+    assert by_id["away_1_3"] == 0.15
     assert by_id["tie"] == 0.05
-    assert by_id["away_15"] == 0.0
+    assert by_id["away_22p"] == 0.0
     assert abs(sum(by_id.values()) - 1) < 1e-9
-    assert got["top3"] == ["home_1_7", "home_8_14", "away_1_7"]
+    assert got["top3"] == ["home_1_3", "home_8_14", "away_1_3"]
     assert got["n_sims"] == 100
     assert got["seed"] == 2026
 
@@ -53,8 +70,8 @@ def test_equal_rounded_probs_break_ties_by_canonical_order():
     # 10 and 10 of two bands: same probability, earlier band id ranks first.
     margins = np.array([3] * 10 + [20] * 10)
     got = from_margins(margins, 20, 1)
-    assert got["top3"][0] == "home_1_7"
-    assert got["top3"][1] == "home_15"
+    assert got["top3"][0] == "home_1_3"
+    assert got["top3"][1] == "home_15_21"
 
 
 def test_headline_simulation_is_deterministic():
@@ -97,13 +114,13 @@ def _sched(result):
 def test_grading_records_rank_or_outside():
     bands = from_margins(np.array([3] * 70 + [10] * 20 + [-4] * 10), 100, 2026)
     g = _flat(outcome_bands=bands)
-    top = grade_games([g], _sched(4.0))[0]
-    assert top["outcome_band"] == "home_1_7"
+    top = grade_games([g], _sched(3.0))[0]
+    assert top["outcome_band"] == "home_1_3"
     assert top["outcome_band_rank"] == 1
     second = grade_games([g], _sched(12.0))[0]
     assert second["outcome_band_rank"] == 2
-    outside = grade_games([g], _sched(-20.0))[0]
-    assert outside["outcome_band"] == "away_15"
+    outside = grade_games([g], _sched(-25.0))[0]
+    assert outside["outcome_band"] == "away_22p"
     assert outside["outcome_band_rank"] == "outside top 3"
     tie = grade_games([g], _sched(0.0))[0]
     assert tie["outcome_band"] == "tie"
@@ -133,7 +150,7 @@ def test_summary_counts_top3():
 
 def test_card_marks_the_band_that_happened():
     bands = from_margins(np.array([3] * 70 + [10] * 20 + [-4] * 10), 100, 2026)
-    view = _bands_view(bands, "HOU", "IND", {"margin": 4})
+    view = _bands_view(bands, "HOU", "IND", {"margin": 3})
     assert view["rows"][0]["hit"] is True
     assert view["outside"] is False
     missed = _bands_view(bands, "HOU", "IND", {"margin": -20})
@@ -143,7 +160,7 @@ def test_card_marks_the_band_that_happened():
     tmpl = env.from_string('{% from "_macros.html" import bands with context %}{{ bands(g) }}')
     es = Lang("es")
     html = tmpl.render(g={"bands": view}, t=es.t, pct=es.pct)
-    assert "HOU por 1 a 7" in html
+    assert "HOU por 1 a 3" in html
     assert "Esto pasó." in html
     outside_html = tmpl.render(g={"bands": missed}, t=es.t, pct=es.pct)
     assert "fuera de estos tres" in outside_html
@@ -162,8 +179,8 @@ def test_old_snapshots_without_the_field_stay_valid():
         if version != "1":
             continue
         assert K.validate_week(doc) == []
-        assert all("outcome_bands" not in g for g in doc["games"])
-        seen += 1
+        if all("outcome_bands" not in g for g in doc["games"]):
+            seen += 1
     assert seen >= 1
     v1 = None
     for path in (ROOT / "predictions").rglob("*.json"):
@@ -182,3 +199,56 @@ def test_old_snapshots_without_the_field_stay_valid():
     assert K.validate_week(v1) == []
     v1["games"][0]["outcome_bands"]["top3"] = ["tie", "tie", "tie"]
     assert any("top3" in e for e in K.validate_week(v1))
+
+
+def _legacy_bands() -> dict:
+    """A seven-band record in the shape written before this change."""
+    ids = list(LEGACY_BAND_IDS)
+    probs = [0.02, 0.08, 0.12, 0.04, 0.18, 0.16, 0.40]
+    bands = [{"id": i, "prob": p} for i, p in zip(ids, probs, strict=True)]
+    return {
+        "n_sims": 20000,
+        "seed": 2026,
+        "bands": bands,
+        "top3": ["home_15", "home_1_7", "home_8_14"],
+    }
+
+
+def test_legacy_seven_band_record_validates_renders_and_grades_on_its_own_edges():
+    """A margin of 20 is home_15 on the old set and home_15_21 on the new one."""
+    bands = _legacy_bands()
+    assert band_for_margin(20) == "home_15_21"
+    assert band_for_margin(20, [b["id"] for b in bands["bands"]]) == "home_15"
+    row = grade_games([_flat(outcome_bands=bands)], _sched(20.0))[0]
+    assert row["outcome_band"] == "home_15"
+    assert row["outcome_band_rank"] == 1
+    narrow = grade_games([_flat(outcome_bands=bands)], _sched(5.0))[0]
+    assert narrow["outcome_band"] == "home_1_7"
+    assert narrow["outcome_band_rank"] == 2
+    view = _bands_view(bands, "HOU", "IND", {"margin": 20})
+    assert view["rows"][0]["id"] == "home_15"
+    assert view["rows"][0]["hit"] is True
+    assert view["outside"] is False
+    env = Environment(loader=FileSystemLoader(ROOT / "src/ensemblitz/site/templates"))
+    tmpl = env.from_string('{% from "_macros.html" import bands with context %}{{ bands(g) }}')
+    html = tmpl.render(g={"bands": view}, t=Lang("es").t, pct=Lang("es").pct)
+    assert "HOU por 15 o más" in html
+    path = ROOT / "predictions/2026/week12/20261128T121758Z.json"
+    doc = json.loads(path.read_text())
+    assert K.validate_week(doc) == []
+    carried = [g for g in doc["games"] if g.get("outcome_bands")]
+    assert len(carried) == 11
+    for g in carried:
+        assert [b["id"] for b in g["outcome_bands"]["bands"]] == list(LEGACY_BAND_IDS)
+
+
+def test_typical_game_top1_is_not_the_open_tail():
+    """A game whose simulated margin sits near 7 must not rank the open blowout first."""
+    home_exp = np.array([27.0])
+    away_exp = np.array([20.0])
+    h, a = simulate_games(home_exp, away_exp, n_sims=20000, seed=2026)
+    margins = h[0] - a[0]
+    assert 5.0 <= float(margins.mean()) <= 9.0
+    got = from_margins(margins, 20000, 2026)
+    assert got["top3"][0] not in OPEN_TAILS
+    assert got["top3"][0] in {"home_4_7", "home_8_14", "home_1_3"}

@@ -422,7 +422,23 @@ def test_every_template_and_code_key_exists_in_both_languages():
         ("fact.venue_", ["dome", "open", "open_nowx"]),
         (
             "band.",
-            ["away_15", "away_8_14", "away_1_7", "tie", "home_1_7", "home_8_14", "home_15"],
+            [
+                "away_22p",
+                "away_15_21",
+                "away_15",
+                "away_8_14",
+                "away_4_7",
+                "away_1_7",
+                "away_1_3",
+                "tie",
+                "home_1_3",
+                "home_1_7",
+                "home_4_7",
+                "home_8_14",
+                "home_15_21",
+                "home_15",
+                "home_22p",
+            ],
         ),
     ):
         for k in keys:

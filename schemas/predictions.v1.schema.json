@@ -660,13 +660,21 @@
     },
     "band_id": {
       "enum": [
+        "away_22p",
+        "away_15_21",
         "away_15",
         "away_8_14",
+        "away_4_7",
         "away_1_7",
+        "away_1_3",
         "tie",
+        "home_1_3",
         "home_1_7",
+        "home_4_7",
         "home_8_14",
-        "home_15"
+        "home_15_21",
+        "home_15",
+        "home_22p"
       ]
     },
     "outcome_band": {
@@ -687,7 +695,7 @@
     },
     "outcome_bands": {
       "type": "object",
-      "description": "Optional. Seven final-margin bands from the headline simulation, plus the three highest probabilities. A tie is its own band. Absent on snapshots written before this field.",
+      "description": "Optional. Final-margin bands from the headline simulation, plus the three highest probabilities. New snapshots use eleven bands (1-3, 4-7, 8-14, 15-21, 22+ on each side, plus a tie). Snapshots already written with the seven-band set (1-7, 8-14, 15+ on each side, plus a tie) stay valid. A tie is its own band. Absent on snapshots written before this field.",
       "additionalProperties": false,
       "required": [
         "n_sims",
@@ -706,7 +714,7 @@
         "bands": {
           "type": "array",
           "minItems": 7,
-          "maxItems": 7,
+          "maxItems": 11,
           "items": {
             "$ref": "#/$defs/outcome_band"
           }

@@ -134,9 +134,11 @@ def grade_games(
             row["ats_win"] = int(((margin - sp) > 0) == (pm > sp))
         bands = raw.get("outcome_bands") if isinstance(raw, dict) else None
         if isinstance(bands, dict) and bands.get("top3"):
-            bid = OB.band_for_margin(int(round(margin)))
-            row["outcome_band"] = bid
-            row["outcome_band_rank"] = OB.rank_of(bid, list(bands["top3"]))
+            stored = [b["id"] for b in bands.get("bands") or []]
+            if OB.spec_for_ids(stored) is not None:
+                bid = OB.band_for_margin(int(round(margin)), stored)
+                row["outcome_band"] = bid
+                row["outcome_band_rank"] = OB.rank_of(bid, list(bands["top3"]))
         out.append(row)
     return out
 
